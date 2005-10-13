@@ -77,7 +77,7 @@ function (xold, yold = NULL, use.neatversion = TRUE, distance.function = corr,
                 distance.function(x, y, ...)
             })
         })
-        return(out)
+        return(as.matrix(out))
     }
     else {
         n <- nrow(xold)
@@ -91,7 +91,7 @@ function (xold, yold = NULL, use.neatversion = TRUE, distance.function = corr,
         }
         colnames(A) <- rownames(xold)
         rownames(A) <- rownames(yold)
-        return(A)
+        return(as.matrix(A))
     }
 }
 "estimator" <-
@@ -389,17 +389,23 @@ function (val, scales.start, d, use.like = TRUE, give.answers = FALSE,
     ...) 
 {
     if (use.like) {
+      initial.value <-
+        scales.likelihood(scales=exp(scales.start),xold=val,d=d)
+      
         objective.fun <- function(scales, val, d) {
             -scales.likelihood(scales = exp(scales), xold = val, 
-                d = d)
+                d = d)/(initial.value)
         }
     }
     else {
-        objective.fun <- function(scales, val, d) {
+        jj <- function(scales, val, d) {
             A <- corr.matrix(val, scales = exp(scales))
             error <- abs(d - estimator(val, A, d, scales = exp(scales)))
             return(sum(error^2))
         }
+        initial.value <- jj(scales=scales.start, val=val, d=d)
+        objective.fun <- function(scales,val,d){jj(scales,val,d)/initial.value}
+        
     }
     jj <- optim(par = log(scales.start), objective.fun, val = val, 
         d = d, ...)
@@ -527,6 +533,42 @@ function (number.of.runs, expert.estimates, gaussian = TRUE,
         lh.real <- t(apply(lh.normalized, 1, unnormalize))
     }
     return(lh.real)
+}
+"sample.n.fit" <-
+  function(n=10 , scales.generate=100 , scales.fit =
+           100, func=NULL, ...
+           )
+{
+  
+  if(is.null(func)){
+    func <-
+      function(x){out <- c(1,x)
+                  names(out)[1] <- "const"
+                  return(out)
+                }
+  }   
+  toy <- as.matrix(seq(from=0,to=1,len=n))
+  colnames(toy) <- "a"
+  rownames(toy) <- paste("obs",1:nrow(toy),sep=".")
+  
+  x <- seq(from=-1,to=2,len=200)
+  A <- corr.matrix(toy,scales=scales.fit, power=2)
+  Ainv <- solve(A)
+  
+  d.noisy <- as.vector(rmvnorm(n=1 , mean=toy*0 ,
+                               sigma=corr.matrix(toy,scales=scales.generate)
+                               ))
+  
+  jj <- interpolant.quick(as.matrix(x), d.noisy, toy, scales=scales.fit,
+                          func=func, 
+                          Ainv=Ainv,g=TRUE)
+  
+  plot(x,jj$mstar.star,xlim=range(x),type="l",col="black",lwd=3, ...)
+  lines(x,jj$prior,col="green",type="l")
+  lines(x,jj$mstar.star+jj$Z,type="l",col="red",lty=2)
+  lines(x,jj$mstar.star-jj$Z,type="l",col="red",lty=2)
+  points(toy,d.noisy,pch=16,cex=2)
+  legend("topright",lty=c(1:2,0),col=c("black","red","green","black"),pch=c(NA,NA,NA,16),legend=c("best estimate","+/- 1sd","prior","training set"))
 }
 "scales.likelihood" <-
 function (pos.def.matrix = NULL, scales = NULL, power = 2, xold,

@@ -121,7 +121,7 @@ xdash <- rbind(xdash,xdash[6,])
 colnames(xdash) <- colnames(val)
 
      # And just for fun, we insert a useless seventh simulation design point
-     # (which is useless because it is a copy of the sixth).  We do this 
+     # (it is useless because it is a copy of the sixth).  We do this 
      # in order to test the coding:
 rownames(xdash) <- c("alpha","beta","gamma","delta","epsilon","zeta","zeta.copy")
 

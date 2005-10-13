@@ -1,8 +1,4 @@
 Package: emulator
-Title: Bayesian emulation of computer programs
-Version: 1.1-1
-Author: Robin K. S. Hankin
-Depends: R (>= 2.0.0), mvtnorm
 Description:  
  This package allows one to estimate the output of a computer program,
  as a function of the input parameters, without actually running it.
@@ -18,6 +14,4 @@ Description:
  from previous runs and a user-specified prior linear model.  A 
  working example is given in the help page for function `interpolant',
  which should be the users's first point of reference.
-Maintainer: Robin K. S. Hankin <r.hankin@noc.soton.ac.uk>
-License: GPL
-
+Title: Bayesian emulation of computer programs

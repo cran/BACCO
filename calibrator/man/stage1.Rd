@@ -10,12 +10,16 @@ the hyperparameters and \code{stage3()} finds the optimal values for
 the three parameters.
 }
 \usage{
-stage1(D1, y, H1,  maxit,  method="Nelder-Mead", directory = ".", do.filewrite=FALSE, do.print=TRUE, phi.fun, lognormally.distributed=FALSE, include.prior=TRUE, phi)
-stage2(D1, D2, H1, H2, y, z, maxit, method = "Nelder-Mead", directory = ".", do.filewrite=FALSE, do.print=TRUE,  extractor, phi.fun, E.theta, Edash.theta, lognormally.distributed = FALSE, use.standin = FALSE, phi) 
-stage3(D1, D2, H1, H2, d, maxit, method="Nelder-Mead", directory = ".", do.filewrite=FALSE, do.print=TRUE, include.prior=FALSE, lognormally.distributed=FALSE, theta.start=NULL, phi) 
+stage1(D1, y, H1,  maxit,  trace=100, method="Nelder-Mead", directory = ".", do.filewrite=FALSE, do.print=TRUE, phi.fun, lognormally.distributed=FALSE, include.prior=TRUE, phi)
+stage2(D1, D2, H1, H2, y, z, maxit, trace=100, method = "Nelder-Mead", directory =
+".", do.filewrite=FALSE, do.print=TRUE,  extractor, phi.fun, E.theta,
+Edash.theta, lognormally.distributed = FALSE, include.prior = TRUE, use.standin = FALSE, phi) 
+stage3(D1, D2, H1, H2, d, maxit, trace=100, method="Nelder-Mead", directory = ".",
+do.filewrite=FALSE, do.print=TRUE, include.prior = TRUE, lognormally.distributed=FALSE, theta.start=NULL, phi) 
 }
 \arguments{
-  \item{maxit}{Maximum number of iterations as passed to \code{optim}}
+  \item{maxit}{Maximum number of iterations as passed to \code{optim()}}
+  \item{trace}{Amount of information displayed, as passed to \code{optim()}}
   \item{D1}{Matrix whose rows are points at which code output is known}
   \item{D2}{Matrix whose rows are points at which observations were made}
   \item{H1}{Regressor basis functions for \code{D1}}
@@ -31,10 +35,12 @@ stage3(D1, D2, H1, H2, d, maxit, method="Nelder-Mead", directory = ".", do.filew
     \code{stage1()} and \code{stage2()}) to \code{phi.change()}.  Toy
     version is \code{phi.fun.toy()}.}
   \item{method}{Method argument passed to \code{optim()}; qv}
-  \item{include.prior}{Boolean variable passed to \code{p.eqn8.supp()},
-    with default value of \code{TRUE}
-    meaning to include the prior PDF for \eqn{\theta}{theta}.  If
-    \code{FALSE}, return the likelihood.}
+  \item{include.prior}{Boolean variable with default \code{TRUE} meaning
+    to include the prior distribution in the optimization process and
+    \code{FALSE} meaning to use an uniformative prior (effectively
+    uniform support).  This variable is passed to \code{p.eqn4.supp()}
+    for \code{stage1()}, \code{p.page4()} for \code{stage2()}, and
+    \code{p.eqn8.supp()}  for \code{stage3()}.} 
   \item{lognormally.distributed}{Boolean with \code{TRUE} meaning to use
     a lognormal distn.  See \code{prob.theta} for details.}
   \item{do.filewrite}{Boolean, with \code{TRUE} meaning to

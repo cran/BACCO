@@ -66,7 +66,7 @@ The function was not reviewed by the Journal of Statistical Software
 \dontrun{
 # Not run because it takes R CMD check too long.
 data(toys)
-EK.eqn10.supp(X.dist=X.dist.toy, D1=D1.toy, D2=D2.toy, H1=H1.toy, H2=H2.toy, d=d.toy, hbar.fun=hbar.fun.toy, lower.theta=c(-3,-3,-3,), upper.theta=c(3,3,3),extractor=extractor.toy, phi=phi.toy)
+EK.eqn10.supp(X.dist=X.dist.toy, D1=D1.toy, D2=D2.toy, H1=H1.toy, H2=H2.toy, d=d.toy, hbar.fun=hbar.fun.toy, lower.theta=c(-3,-3,-3), upper.theta=c(3,3,3),extractor=extractor.toy, phi=phi.toy)
 
 
 }

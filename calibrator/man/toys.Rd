@@ -67,31 +67,30 @@
   \code{X.dist.toy} is a toy example of a distribution of \code{X} for
   use in calibrated uncertainty analysis, section 4.2.
   
-  \strong{Brief description of functions fully documented under their own manpage}
+  \strong{Brief description of toy functions fully documented under their own manpage}
   
-  \code{create.new.toy.datasets()} is a function to create new toy
-  datasets with any number of observations and code runs.
+  Function \code{create.new.toy.datasets()} creates new toy datasets
+  with any number of observations and code runs.
 
-  \code{E.theta.toy()} is a function that returns expectation of
-  \code{H(D)} with respect to \eqn{\theta}{theta};
-  \code{Edash.theta.toy()} returns expectation with  respect to \eqn{E'}{Edash}.
-  \code{extractor.toy()} is a function that extracts \code{x.star.toy}
+  Function \code{E.theta.toy()} returns expectation of \code{H(D)} with
+  respect to \eqn{\theta}{theta}; \code{Edash.theta.toy()} returns
+  expectation with respect to \eqn{E'}{Edash}.
+  
+  Function \code{extractor.toy()}  extracts \code{x.star.toy}
   and \code{t.vec.toy} from \code{D2}; toy example needed because the
   extraction differs from case to case.
 
-  \code{H1.toy()} is a function that applies basis functions to rows of
-  \code{D1} and \code{D2}
+  Function \code{H1.toy()} applies basis functions to rows of \code{D1}
+  and \code{D2}
 
-  \code{phi.fun.toy()} is a function to create or modify
-  (\code{phi.change.toy()}) hyperparameters \eqn{\phi}{phi}
-  in a form suitable for passing to the other functions in the library.
+  Function \code{phi.fun.toy()} creates a hyperparameter object such as
+  \code{phi.toy} in a form suitable for passing to the other functions
+  in the library.
 
-  \code{pdm.maker.toy()} is a function that makes a positive definite
-  matrix out of hyperparameters \eqn{\psi_1}{psi1} and
-  \eqn{\psi_2}{psi2}.  Used by \code{phi.fun.toy()}.
+  Function \code{phi.change.toy()} modifies the hyperparameter object.
 
-  \code{stage1()} is a function that performs the first of O'Hagan's
-  three stage optimization on the toy dataset.
+  \strong{See the helpfiles listed in the \dQuote{see also} section
+  below}
   
 }
 \details{
@@ -132,6 +131,7 @@ extractor.toy(D1.toy)
 D2.fun(theta=theta.toy , D2=D2.toy)
 D2.fun(theta=theta.toy,D2=D2.toy[1,,drop=FALSE])
 
+library("emulator")
 corr.matrix(D1.toy,scales=rep(1,5))
 corr.matrix(D1.toy, pos.def.matrix=diag(5))
 

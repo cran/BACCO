@@ -848,7 +848,7 @@ function (rho, lambda, psi1, psi1.apriori, psi2, psi2.apriori,
         return(list(omega_x = jj.omega_x, omega_t = jj.omega_t, 
             sigma1squared = sigma1squared))
     }
-    "pdm.maker.psi2" <- function(psi1) {
+    "pdm.maker.psi2" <- function(psi2) {
         jj.omegastar_x <- diag(psi2[1:2])
         sigma2squared <- psi2[3]
         return(list(omegastar_x = jj.omegastar_x, sigma2squared = sigma2squared))
@@ -994,7 +994,7 @@ function (n = 1, phi)
     return(out)
 }
 "stage1" <-
-function (D1, y, H1, maxit, method = "Nelder-Mead", directory = ".",
+function (D1, y, H1, maxit, trace=100, method = "Nelder-Mead", directory = ".",
           do.filewrite=FALSE, do.print=TRUE,
     phi.fun, lognormally.distributed = FALSE, include.prior = TRUE, 
     phi) 
@@ -1027,15 +1027,15 @@ function (D1, y, H1, maxit, method = "Nelder-Mead", directory = ".",
   }
    psi1.start <- log(phi$psi1)
     e <- optim(psi1.start, f, method = method, control = list(fnscale = -1, 
-        maxit = maxit, trace = 100))
+        maxit = maxit, trace = trace))
     phi.out <- phi.change(phi.fun = phi.fun, old.phi = phi, psi1 = exp(e$par))
     return(invisible(phi.out))
 }
 "stage2" <-
-function (D1, D2, H1, H2, y, z, maxit, method = "Nelder-Mead",
+function (D1, D2, H1, H2, y, z, maxit, trace=100, method = "Nelder-Mead",
     directory = ".", do.filewrite=FALSE, do.print=TRUE,
     extractor, phi.fun, E.theta, Edash.theta, 
-    lognormally.distributed = FALSE, use.standin = FALSE, phi) 
+    lognormally.distributed = FALSE, include.prior = TRUE, use.standin = FALSE, phi) 
 {
       if(do.filewrite & !isTRUE(file.info(directory)$isdir)){
       stop("do.filewrite = TRUE; directory name supplied does not exist")
@@ -1053,7 +1053,7 @@ function (D1, D2, H1, H2, y, z, maxit, method = "Nelder-Mead",
                 phi = phi.temp)
         }
         f.out <- drop(p.page4(D1 = D1, D2 = D2, H1 = H1, H2 = H2, 
-            V = V.temp, z = z, y = y, E.theta = E.theta, Edash.theta=Edash.theta,extractor=extractor,include.prior = FALSE, 
+            V = V.temp, z = z, y = y, E.theta = E.theta, Edash.theta=Edash.theta,extractor=extractor,include.prior = include.prior, 
             lognormally.distributed = lognormally.distributed, 
             return.log = TRUE, phi = phi.temp))
         if (do.print) {
@@ -1073,16 +1073,16 @@ function (D1, D2, H1, H2, y, z, maxit, method = "Nelder-Mead",
      }
     rho.lambda.psi2.start <- log(c(phi$rho, phi$lambda, phi$psi2))
     e <- optim(rho.lambda.psi2.start, f, method = method, control = list(fnscale = -1, 
-        trace = 100, maxit = maxit))
+        trace = trace, maxit = maxit))
     jj <- exp(e$par)
     phi.out <- phi.change(phi.fun = phi.fun, old.phi = phi, rho = jj[1], 
         lambda = jj[2], psi2 = jj[3:5])
     return(invisible(phi.out))
 }
 "stage3" <-
-function (D1, D2, H1, H2, d, maxit, method = "Nelder-Mead", directory
+function (D1, D2, H1, H2, d, maxit, trace=100, method = "Nelder-Mead", directory
         = ".", do.filewrite=FALSE, do.print=TRUE,
-    include.prior = FALSE, lognormally.distributed = FALSE, theta.start = NULL, 
+    include.prior = TRUE, lognormally.distributed = FALSE, theta.start = NULL, 
     phi) 
 {
 
@@ -1111,7 +1111,7 @@ function (D1, D2, H1, H2, d, maxit, method = "Nelder-Mead", directory
         theta.start <- phi$theta.apriori$mean
     }
     e <- optim(theta.start, f, method = method, control = list(fnscale = -1, 
-        maxit = maxit, trace = 100))
+        maxit = maxit, trace = trace))
     optimal.theta <- e$par
     names(optimal.theta) <- names(phi$theta.apriori$mean)
     return(optimal.theta)

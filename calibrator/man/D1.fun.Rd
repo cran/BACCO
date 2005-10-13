@@ -1,9 +1,9 @@
 \name{D1.fun}
 \alias{D1.fun}
-\title{Function to join x.star to t.vec to give matrix D2}
+\title{Function to join x.star to t.vec to give matrix D1}
 \description{
- Function to join \code{x.star} to \code{t.vec} to give matrix \code{D2} with correct row-
-    and column- names
+ Function to join \code{x.star} to \code{t.vec} to give matrix \code{D1} with correct row-
+    and column- names. 
 }
 \usage{
 D1.fun(x.star, t.vec)
@@ -12,7 +12,10 @@ D1.fun(x.star, t.vec)
   \item{x.star}{Matrix of code run points}
   \item{t.vec}{Matrix of parameter theta values}
 }
-
+\details{
+Note that the matrix returned is a D1 matrix: it is a design matrix for
+code observations as it contains both x and theta
+  }
 \references{
   M. C. Kennedy and A. O'Hagan 2001. \dQuote{Bayesian
     calibration of computer models}.  Journal of the Royal Statistical

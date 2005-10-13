@@ -63,8 +63,8 @@ corr.matrix(xold, yold=NULL, method=1, distance.function=corr, ...)
   }    
   \item{distance.function}{Function to be used to calculate distances.
     Defaults to \code{corr()}.}
-  \item{xold}{data frame each row of which is an evaluated point}
-  \item{yold}{(optional) data frame each row of which is an evaluated
+  \item{xold}{Matrix, each row of which is an evaluated point}
+  \item{yold}{(optional) matrix, each row of which is an evaluated
     point.  If missing, use \code{xold}}
   \item{spherical.distance.function}{In \code{corr}, a function to
     determine the distance between two points; used if
@@ -97,6 +97,27 @@ Returns the correlation function
     Bayesian analysis of computer code output}, Journal of Statistical
   Software, 14(16)
 }
+\note{
+  It is worth reemphasising that supplying \code{scales} makes
+  matrix \eqn{B} diagonal.
+  
+  Thus, if \code{scales} is supplied, \code{B=diag(scales)} and
+  \deqn{c(x,x')=\exp\left[-(x-x')^TB(x-x')\right]=\exp\left[\Sigma_i
+    s_i(x_i-{x'}_i)^2\right]}{ommitted: see pdf}
+
+  Thus if \eqn{x} has units \eqn{[X]},the units of \code{scales} are
+  \eqn{[X^{-2}]}{X^(-2)}.
+
+  So if \code{scales[i]} is big, even small displacements in \code{x[i]}
+  (that is, moving a small distance in parameter space, in the
+  \eqn{i}-th dimension) will result in small correlations.  If
+  \code{scales[i]} is small, even large displacements in \code{x[1]}
+  will have large correlations.
+  
+}
+
+  
+  
 \author{Robin K. S. Hankin}
 \examples{
 corr(1:10,10:1,scales=rep(1,10), power=2)

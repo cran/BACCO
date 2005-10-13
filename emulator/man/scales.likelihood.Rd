@@ -64,7 +64,7 @@ Returns the likelihood.
 }
 
 \author{Robin K. S. Hankin}
-\seealso{\code{\link{optimize}}}
+\seealso{\code{\link{optimal.scales}}}
 \examples{
  data(toy)
  val <- toy
@@ -72,7 +72,7 @@ Returns the likelihood.
  #define a real relation
  real.relation <- function(x){sum( (0:6)*x )}
 
- #some scales:
+ #Some scales:
  fish <- rep(1,6)
  fish[6] <- 4
  A <- corr.matrix(val,scales=fish, power=2)
@@ -88,18 +88,18 @@ Returns the likelihood.
  scales.likelihood(scales=fish    ,xold=toy,d=d.noisy, power=2)
 
 
- # verify that use.Ainv does not affect the numerical result:
-uT <- scales.likelihood(scales=rep(1,6),xold=toy,d=d.noisy, power=2,
+ # Verify that use.Ainv does not affect the numerical result:
+u.true <- scales.likelihood(scales=rep(1,6),xold=toy,d=d.noisy, power=2,
 use.Ainv=TRUE)
-uF <- scales.likelihood(scales=rep(1,6),xold=toy,d=d.noisy, power=2,
+u.false <- scales.likelihood(scales=rep(1,6),xold=toy,d=d.noisy, power=2,
 use.Ainv=FALSE)
-print(uT/uF-1)
+print(c(u.true, u.false))  # should be identical up to numerical accuracy
 
 
  # Now use optim():
  f <- function(fish){scales.likelihood(scales=exp(fish), xold=toy, d=d.noisy, power=2)}
  e <-
-optim(log(fish),f,method="Nelder-Mead",control=list(trace=0,maxit=1190,fnscale=
+optim(log(fish),f,method="Nelder-Mead",control=list(trace=0,maxit=10,fnscale=
 -1))
 best.scales <- exp(e$par)
 

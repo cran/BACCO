@@ -9,7 +9,7 @@
 
 # First, a Boolean specifying whether or not to do the hyperparamter
 # optimization (which takes a long time):
-do.hyper.opt <- FALSE
+do.hyper.opt <- TRUE
 
 
 #Load the libraries:
@@ -40,7 +40,7 @@ source("data_maker_1d.R")
 # thing estimated by betahat.fun.koh is c(beta1,beta2):
 betahat.fun.koh(theta=theta.TRUE, d=d.1d, D1=D1.1d, D2=D2.1d, H1=H1.1d, H2=H2.1d, phi=phi.true)
 
-# OK, not too bad; the true answer is (0,1,1,1,1), so there is an
+# Ok, not too bad; the true answer is (0,1,1,1,1), so there is an
 # error of about 2%
 
 
@@ -77,6 +77,42 @@ plot(x,g(x),type= "b",
      )
 abline(v=0.5)
 
+
+
+
+
+
+
+
+
+# Now use Metropolis-Hastings.  We need a wrapper to give the PDF for theta:
+
+
+pi.1d <- function(x){p.eqn8.supp(theta=x, D1=D1.1d, D2=D2.1d, H1=H1.1d,
+                             H2=H2.1d, d=d.1d,
+                             phi=phi.true,return.log=FALSE)}
+
+
+#So to sample from the posterior for theta we need MH() with a suitable kernel:
+
+theta.sample.1d <- MH(n=10, start=0.5,sigma=diag(1)*0.1 ,pi=pi.1d)
+
+# Is it Gaussian?
+if(max(theta.sample.1d)>min(theta.sample.1d)){
+  shapiro.test(theta.sample.1d)
+} else {
+  print("shapiro test not applicable because MH() returned a sample of identical values")
+}
+
+Ez.eqn9.supp(x=0.1,  theta=theta.sample.1d,  d=d.1d, D1=D1.1d,  D2=D2.1d, H1=H1.1d, H2=H2.1d, phi=phi.1d)
+
+
+
+
+
+
+
+
 # Now, all the above was conditional on the hyperparameters being
 # correct.  The next few lines will try to estimate the
 # hyperparameters.  Bear in mind that this is hard.
@@ -100,7 +136,6 @@ phi.stage1$omega_t
 
 
 
-
 # OK, now stage 2.  Because this is hard, we can extract a subset of
 # the observations and use them.  
 
@@ -109,7 +144,7 @@ phi.stage1$omega_t
   phi.stage2 <- stage2(D1=D1.1d[use1,,drop=FALSE], D2=D2.1d[use2,,drop=FALSE], H1=H1.1d, H2=H2.1d,
       y=y.1d[use1], z=z.1d[use2], extractor=extractor.1d,
      phi.fun=phi.fun.1d, E.theta=E.theta.1d, Edash.theta=Edash.theta.1d,
-     maxit=4, method="SANN", phi=phi.stage1)
+     maxit=2, method="SANN", phi=phi.stage1)
 
 
 # This will change psi2, _and_ rho _and_ lambda:
@@ -117,7 +152,6 @@ phi.stage2$rho
 phi.stage2$lambda
 phi.stage2$sigma2squared
 phi.stage2$psi2
-
 
 
  # Right, now calibrated prediction.  First, we need to specify a
@@ -155,3 +189,8 @@ EK.eqn10.supp(X.dist=X.dist.1d, D1=D1.1d, D2=D2.1d,
 } else {
    print("optimization not performed because variable do.hyper.opt set to FALSE.  To do the optimization, set variable do.hyper.opt to TRUE, near the beginning of this file, and source() it again")
 }
+
+
+
+
+

@@ -26,7 +26,7 @@ export.truth = FALSE)
     a complex computer code when fast approximations are available}
   Biometrika, 87(1): pp1-13
   }
-\author{Robin K. S. Hankin (\code{subsets.fun()}); Peter Dalgaard (via R-help)}
+\author{Robin K. S. Hankin}
 \examples{
 data(toyapps)
 generate.toy.observations(D1=D1.toy, subsets=subsets.toy, basis.fun=basis.toy)

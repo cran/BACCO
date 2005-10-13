@@ -15,9 +15,9 @@ optimal.scale(val, d, use.like = TRUE,  give.answers =
 FALSE, func=regressor.basis, ...)
 }
 \arguments{
-  \item{val}{Dataframe with rows corresponding to points at which the
+  \item{val}{Matrix with rows corresponding to points at which the
           function is known}
-  \item{scales.start}{Initial guess for logs of the scales (plural).  See details
+  \item{scales.start}{Initial guess for the scales (plural).  See details
     section for explanation}
   \item{d}{vector of observations, one for each row of \code{val}}
   \item{use.like}{Boolean, with default \code{TRUE} meaning to use
@@ -51,6 +51,10 @@ FALSE, func=regressor.basis, ...)
   This function is slow to evaluate because it needs to
   calculate and invert \code{A} each time it is called, because the
   scales change from call to call.
+
+  In this package, \dQuote{scales} means the diagonal elements of the
+  \eqn{B} matrix.  See the help page for \code{corr} for more
+  discussion of this topic.
 }
 \references{J. Oakley 2004. \dQuote{Estimating percentiles of uncertain
     computer code outputs}.  Applied Statistics, 53(1), pp89-93.
@@ -59,7 +63,7 @@ FALSE, func=regressor.basis, ...)
     computer codes}, PhD thesis, University of Sheffield.
   }
 \author{Robin K. S. Hankin}
-\seealso{\code{\link{interpolant}}}
+\seealso{\code{\link{interpolant}},\code{\link{corr}}}
 \examples{
 
 ##First, define some scales:

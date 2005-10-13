@@ -3,7 +3,6 @@ function (xold, Ainv, d, give.variance = FALSE, func = regressor.basis)
 {
     H <- regressor.multi(xold, func = func)
     H <- as.matrix(H)
-    colnames(H)[1] <- "constant"
     out <- solve(quad.form(Ainv, H), crossprod(crossprod(Ainv, 
         H), d))
     out <- as.vector(out)
@@ -350,9 +349,7 @@ function (n, d, normalize = FALSE)
             (sample(1:n) - 0.5)/n
         }
     }
-    out <- sapply(1:d, f)
-    colnames(out) <- letters[1:d]
-    return(out)
+    return(sapply(1:d, f))
 }
 
 "makeinputfiles" <-
@@ -455,7 +452,7 @@ function (val, scales.start, d, use.like = TRUE, give.answers = FALSE, func=regr
 {
     if (use.like) {
       initial.value <-
-        scales.likelihood(scales=exp(scales.start), xold=val, d=d, func=func)
+        scales.likelihood(scales=scales.start, xold=val, d=d, func=func)
       
         objective.fun <- function(scales, val, d) {
             -scales.likelihood(scales = exp(scales), xold = val, 
@@ -578,6 +575,19 @@ function(M,left,right)
   crossprod(crossprod(M,left),right)
 }  
 
+"quad.tform" <-
+function(M,x)
+{  
+  tcrossprod(tcrossprod(x,M),x)
+}
+
+"tr" <-
+function (a) 
+{
+    i <- 1:nrow(a)
+    return(sum(a[cbind(i, i)]))
+}
+
 "regressor.basis" <-
 function (x) 
 {
@@ -694,28 +704,33 @@ function (pos.def.matrix = NULL, scales = NULL, power = 2, xold,
         pos.def.matrix <- diag(scales,nrow=length(scales))
     }
     H <- regressor.multi(xold, func = func)
-    q <- ncol(H) - 1
+    q <- ncol(H) 
     n <- nrow(H)
     A <- corr.matrix(xold=xold, pos.def.matrix = pos.def.matrix, power =
                      power)
-    bit2 <- 1/sqrt(det(A))
+
+    ## Define a function that returns log(1/sqrt(det(x)))
+    f <- function(M){(-0.5) * sum(log(eigen(M,TRUE,TRUE)$values))}
+    ## Also note that f() traps any nonpositive eigenvalue [ie non-positive definite M]
+    
+    bit2 <- f(A)
 
     if(use.Ainv){
       Ainv <- solve(A)
-      bit1 <- sigmahatsquared(H, Ainv, d)^(-(n - q)/2)
-      bit3 <- 1/sqrt(det(quad.form(Ainv, H)))
+      bit1 <- log(sigmahatsquared(H, Ainv, d)) * (-(n - q)/2)
+      bit3 <- f(quad.form(Ainv, H))
     } else {
-      bit1 <- sigmahatsquared.A(H, A, d)^(-(n - q)/2)
-      bit3 <- 1/sqrt(det(quad.form.inv(A, H)))
+      bit1 <- log(sigmahatsquared.A(H, A, d))  * (-(n - q)/2)
+      bit3 <- f(quad.form.inv(A, H))
     }
-    return(drop(bit1 * bit2 * bit3))
+    return(drop(exp(bit1 + bit2 + bit3)))
 }
 
 "sigmahatsquared" <-
 function (H, Ainv, d) 
 {
     n <- nrow(Ainv)
-    q <- ncol(H) - 1
+    q <- ncol(H) 
     H <- as.matrix(H)
     out <- quad.form(Ainv - quad.form.inv(quad.form(Ainv, H), 
         crossprod(H, Ainv)), d)/(n - q - 2)
@@ -725,7 +740,7 @@ function (H, Ainv, d)
 function (H, A, d) 
 {
     n <- nrow(A)
-    q <- ncol(H) - 1
+    q <- ncol(H)
     (quad.form.inv(A, d) - quad.form(quad.form.inv(quad.form.inv(A, 
         H), t(solve(A, H))), d))/(n - q - 2)
 }

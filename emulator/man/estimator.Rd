@@ -16,7 +16,7 @@ estimator(val, A, d, scales=NULL, pos.def.matrix=NULL,
 func=regressor.basis, power=2)
 }
 \arguments{
-  \item{val}{Design matrix: a data frame with rows corresponding to points at which the
+  \item{val}{Design matrix with rows corresponding to points at which the
     function is known}
   \item{A}{Correlation matrix (note that this is \strong{not} the
     inverse of the correlation matrix)}
@@ -33,7 +33,7 @@ func=regressor.basis, power=2)
   \item{power}{Exponent in exponential}
   }
 \details{
-Given  a dataframe of observation points and a vector of observations,
+Given a matrix of observation points and a vector of observations,
 \code{estimator()} returns a vector of predictions.  Each prediction is
 made in a three step process.  For each index \eqn{i}{i}:
 \itemize{

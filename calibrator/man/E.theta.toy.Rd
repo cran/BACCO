@@ -4,10 +4,10 @@
 \title{Expectation and variance with respect to theta}
 \description{
   Function 
-  \code{E.theta.toy} returns expectation of \code{H(D)} with respect to
+  \code{E.theta.toy} returns expectation of \code{H_1(D)} with respect to
   \eqn{\theta}{theta}; \code{Edash.theta.toy} returns expectation with
   respect to \eqn{E'}{Edash}.  Function \code{E.theta.toy} also returns
-  information about nonlinear behaviour of\code{h1(x,theta)}.
+  information about nonlinear behaviour of \code{h1(x,theta)}.
 }
 \usage{
 E.theta.toy(D2=NULL,  H1=NULL, x1=NULL, x2=NULL, phi, give.mean=TRUE)
@@ -31,7 +31,7 @@ phi=NULL)
     \code{TRUE}: 
     \eqn{\left(V_\theta^{-1}+2\Omega_t\right)^{-1}V_\theta^{-1}m_\theta}{(V_theta^{-1}+2Omega_t)^{-1}V_theta^{-1}m_theta}.
     Specifying \code{a} in advance saves execution time.}
-  \item{b}{Linear term , needed if \code{fast.but.opaque} is \code{TRUE}:
+  \item{b}{Linear term, needed if \code{fast.but.opaque} is \code{TRUE}:
     \eqn{2\left(V_\theta^{-1}+2\Omega_t\right)^{-1}\Omega_t}{2(V_theta^{-1}+2Omega_t)^{-1}Omega_t}
     (multiplied by \code{t[k,]} in \code{Edash.theta.toy()}).}
   \item{x1}{In \code{E.theta.toy(g=F,...)}, the value of \code{x} in
@@ -55,6 +55,10 @@ phi=NULL)
   Software, 14(16)
 }
 \note{
+  A terse discussion follows; see the \code{calex.pdf} vignette and the
+  1D case study in directory \code{inst/doc/one/dim/} for more details
+  and examples.
+  
   Function \code{E.theta.toy(give.mean=FALSE,...)} does \strong{not}
   return the variance! It returns the thing that must be added to
   \code{crossprod(E_theta(h1(x,theta)),t(E_theta(h1(x,theta))))} to give
@@ -81,6 +85,14 @@ phi=NULL)
   \eqn{E_\theta(M)=h1(x,\overline{\theta})h1(x,\overline{\theta})^T +
   \mbox{variance terms}}{E_theta(M)=h1(x,thetabar)h1(x,thetabar)^T +
   variance terms}.
+
+\deqn{
+  E_\theta\left(
+  \begin{array}{cc}
+      1 & x\theta\\
+      x\theta & x^2\theta^2
+      \end{array}\right)
+      }{ommitted: see dvi}
 
   All three functions here are intimately connected to the form of
   \code{h1.toy()} and changing it (or indeed \code{H1.toy()}) will

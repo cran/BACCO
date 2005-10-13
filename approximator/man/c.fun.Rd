@@ -1,13 +1,14 @@
 \name{c.fun}
+\alias{c_fun}
 \alias{c.fun}
 \alias{cdash.fun}
 \title{Correlations between points in parameter space}
 \description{
 Correlation matrices between (sets of) points in parameter space, both
-prior (\code{c.fun()}) and posterior (\code{cdash.fun()}).
+prior (\code{c_fun()}) and posterior (\code{cdash.fun()}).
 }
 \usage{
-c.fun(x, xdash=x, subsets, hpa)
+c_fun(x, xdash=x, subsets, hpa)
 cdash.fun(x, xdash=x, V=NULL, Vinv=NULL, D1, subsets, basis, hpa, method=2)
 }
 \arguments{
@@ -37,7 +38,7 @@ Returns a matrix of covariances
 \author{Robin K. S. Hankin}
 \note{
 
-  Do not confuse function \code{c.fun()}, which computes \eqn{c(x,x')}
+  Do not confuse function \code{c_fun()}, which computes \eqn{c(x,x')}
   defined just below equation 7 on page 4 with \eqn{c_t(x,x')} defined
   in equation 3 on page 3.
 

@@ -83,9 +83,18 @@ and {\tt H1.int()}) and field observations (here {\tt h2.int()} and
 \item Two functions to return expectation under different
 distributions, here {\tt E.theta.int()} and {\tt Edash.theta.int()}
 \item Data, here {\tt y.int} for the code observations and {\tt z.int}
-for the field observations, and {\tt z.int} for both together
+for the field observations, and {\tt d.int} for both together
 \end{itemize}
 
+
+Objects (data and functions) in the package follow a consistent
+nomenclature: anything that ends in ``{\tt .toy}'' is specific to the
+toy datasets, and a replacement needs to be supplied by the user (in
+this vignette, the ending ``{\tt .int}'' is used).  Anything that does
+not end with ``{\tt .toy}'' is generic, in the sense that it will work
+for any application and does not need be supplied by the user, and
+should not be altered.  For example, {\tt hh.fun()} is generic because
+it does not end with {\tt .toy}.
 
 \section{Design matrices}
 \label{design.matrices}
@@ -102,20 +111,20 @@ Data is generated in section~\ref{datasection}.
 First, define the number of code observations ({\tt n1}) and the
 number of field observations ({\tt n2}):
 
-<<echo=FALSE,print=FALSE>>=
+<<LoadLibrary, echo=FALSE,print=FALSE>>=
 <<results=hide>>=
 library(calibrator)
 library(emulator)
 @ 
 
-<<>>=
+<<size_of_datasets>>=
 n1 <- 20
 n2 <- 21
 @ 
 
 These can be varied at will.  Now create the D1 matrix, of code
 observation points.  This will consist of
-<<>>=
+<<make_D1>>=
 D1.int <- latin.hypercube(n1,4)
 rownames(D1.int) <- paste("coderun",1:nrow(D1.int),sep=".")
 colnames(D1.int) <- c("x", "y", "A", "B")
@@ -135,7 +144,7 @@ cost of slower run times.
 
 Now the field observation points.  This is a two-column matrix, with
 an x column and a y column.
-<<>>=
+<<make_D2>>=
 D2.int <- latin.hypercube(n2,2)
 rownames(D2.int) <- paste("obs",1:nrow(D2.int),sep=".")
 colnames(D2.int) <- c("x", "y")
@@ -154,7 +163,7 @@ of code runs (n2) as an additional safety check.
 Now we need a function to extract the variable part and the parameter
 part.  Working by analogy to {\tt extractor.toy()}:
 
-<<>>=
+<<Make_extractor.int>>=
 extractor.int <- function(D1){
 return(list(x.star = D1[, 1:2, drop = FALSE], t.vec = D1[, 3:4, drop = FALSE]))
 }
@@ -243,7 +252,7 @@ parameters to consider).
 \subsection{Defining regressor functions}
 
 We need an {\tt h1.int()}:
-<<>>=
+<<make_h1.int>>=
 h1.int <- function(xin){
 out <- c(1,xin[1],xin[3],xin[1]*xin[3], xin[2]^2*xin[4])
 names(out) <- c("const" , "x", "A", "Ax" , "By.sq")
@@ -259,7 +268,7 @@ basis functions $(1,x,A,Ax,By^2)^T$, as per equation~\ref{h1.basis}.
 
 Now we need a vectorized version:
 
-<<>>=
+<<make_H1.int>>=
 H1.int <- function(D1){
 
     if (is.vector(D1)) {
@@ -282,7 +291,7 @@ necessary but strongly recommended
 \end{itemize}
 
 Similarly for the model inadequacy function:
-<<>>=
+<<make_h2.int>>=
 h2.int <- function(x){
 out <- c(x[1],x[1]*x[2])
 names(out) <- c("h2.x" ,"h2.xy")
@@ -316,7 +325,7 @@ internal functions {\tt pdm.maker.psi1()} and
 positive-definite matrices $\bOm_x$ and $\bOm_t$ that are used to
 determine $c_1\left((x,t),(x',t')\right)$.  These are defined by:
 
-<<>>=
+<<make_pdm.maker.psi1>>=
     pdm.maker.psi1 <- function(psi1) {
         jj.omega_x <- diag(psi1[1:2])
         rownames(jj.omega_x) <- names(psi1[1:2])
@@ -348,8 +357,7 @@ Notes
     which may be a complicated function of {\tt psi1}.
 \end{itemize}
 
-
-<<echo=FALSE>>=
+<<phi.fun.int, echo=FALSE>>=
  phi.fun.int <- 
 function (rho, lambda, psi1, psi1.apriori, psi2, psi2.apriori, 
     theta.apriori, power) 
@@ -412,7 +420,7 @@ need to write another version.  The best way to call
 {\tt phi.change()} is to define intermediate variables that begin
 with {\tt jj}:
 
-<<>>=
+<<make_jj.psi1>>=
 jj.psi1 <- 1:5
 names(jj.psi1) <- c("x", "y", "A","B", "s1sq")
 
@@ -440,7 +448,7 @@ colnames(jj.sigma.th) <- names(jj.mean.th)
 @ 
 
 These variables may be passed directly to {\tt phi.fun.int()}:
-<<>>=
+<<make_phi.int>>=
 phi.int <-
      phi.fun.int(rho=1,
      lambda=1,
@@ -473,7 +481,7 @@ distributions are over psi1 or psi2, not just the roughness lengths.
 So now we have a working hyperparameter object {\tt phi.int}, we can
 modify it with generic function {\tt phi.change()}:
 
-<<>>=
+<<call_phi.change>>=
 phi.int2 <- phi.change(old.phi=phi.int, phi.fun=phi.fun.int, rho=3)
 print(phi.int2$rho)
 @ 
@@ -504,9 +512,21 @@ $\left(1,(\overline{A}^2+\sigma_A^2)x\right)^T$.  }
 
 The first step is to examine function {\tt E.theta.toy()}:
 
-<<>>=
+<<examine_E.theta.toy>>=
 E.theta.toy
 @ 
+
+The function is in two bits: one if {\tt give.mean} is {\tt TRUE}, and
+one for it being {\tt FALSE}.  If {\tt TRUE}, it returns {\tt H1()}
+using the input value of {\tt D2} and $\overline{\theta}$ (as
+determined from the {\em a priori} distribution).  If {\tt FALSE}, it
+needs to return the matrix described in the help file\footnote{
+$E_\theta(h\cdot h^T)-E_\theta(h)\cdot E_\theta(h)^T$} which in this
+case is independent of {\tt x1} and {\tt x2}.  This matrix is 6-by-6
+because it is the same size as the variance matrix, and that is 6-by-6
+because $h(x)=\mbox{\tt c(1,x)}$ [recall that here {\tt x} is a single
+row of a dataframe like {\tt D1.toy}---actually, it uses the output
+of {\tt D1.fun()}---and this has five columns].
 
 That was straightforward because the toy case included only linear
 basis functions.  In the intermediate case presented here, the basis
@@ -514,19 +534,19 @@ functions are nonlinear so expectation will not commute past
 {\tt h1.int()}.  Recall that function {\tt h1.int()} includes
 a product:
 
-<<>>=
+<<examine_h1.int>>=
 h1.int
 @ 
 
 (the fourth element of the output, viz {\tt xin[1]*xin[3]}, is
 nonlinear).  
 
-The fact that~$E(X^2)\neq\left(E(X)\right)^2$  complicates the matrix
+The fact that~$E(X^2)\neq\left(E(X)\right)^2$ complicates the matrix
 returned by function {\tt E.theta.int()} (see {\tt ?E.theta.int} for
 details of this matrix).  But we may copy from function {\tt
 E.theta.toy()} and modify as necesary:
 
-<<>>=
+<<make_E.theta.int>>=
 E.theta.int <- function(D2 = NULL, H1 = NULL, x1 = NULL, x2 = NULL, phi, give.mean = TRUE)
 {
     if (give.mean) {
@@ -587,7 +607,9 @@ x & x^2 & \oa x & \oa x^2 & \ob xy^2\\
 \right)
 \]
 
-and so the object to return (when {\tt give.mean} is {\tt FALSE}) is
+where an overline denotes expectation with respect to $\theta$, and
+$\sigma^2_A$ denotes variance (with respect to $\theta$) of~$A$.
+So the object to return (when {\tt give.mean} is {\tt FALSE}) is
 this, minus
 $E_\theta\left(h_1(x,\theta)\right)E_\theta\left(h_1(x,\theta)\right)^T$
 as documented.  This would be
@@ -670,7 +692,7 @@ $h_1(x,\theta)$ with respect to the normal distribution
 \right)
 \end{equation}
 
-Fortunately, $E_\theta(h\cdot h^T)$ is not required.
+Fortunately, ${E'}_\theta(h\cdot h^T)$ is not required.
 
 As the basis functions used are linear in theta\footnote{Returning to
 our nonlinear example, footnotes passim, viz
@@ -686,7 +708,7 @@ scales matrix~$\bOm_t$ are diagonal)}, expectation WRT the dashed
 distribution commutes past the regressor function~$h_1(\cdot,\cdot)$.
 So we can just use the toy function:
 
-<<>>=
+<<make_Edash.theta.toy>>=
 Edash.theta.int <- Edash.theta.toy
 @ 
 
@@ -717,20 +739,20 @@ and we have discussed the mean in section~\ref{basis.functions}.  The
 variance matrix is given by function {\tt corr.matrix()} of package
 {\tt emulator}.  We know, {\em ex cathedra,} that $A=B=1$:
 
-<<>>=
+<<make_theta.TRUE>>=
 theta.TRUE <- c(1,1)
 @ 
 
 and we can specify beta1 and psi1:
 
-<<>>=
+<<make_beta1.TRUE>>=
 beta1.TRUE <- c(0,0,0,1,1)
 psi1.TRUE <- c(4,4,4,4,0.5)
 @ 
 
 Now we need to create a design matrix:
 
-<<>>=
+<<make_two.designs>>=
 two.designs <- rbind(D1.int,D1.fun(x.star=D2.int,t.vec=theta.TRUE))
 @ 
 
@@ -740,7 +762,7 @@ Here, {\tt two.designs} is a design matrix of {\tt n1+n2} rows; the first
 parameter value added.
 
 Just have a look at the first three and last three lines:
-<<>>=
+<<examine_two.designs>>=
 two.designs[c(1:3,(n1+n2):(n1+n2-2)),]
 @ 
 
@@ -748,7 +770,7 @@ See how the block of {\tt 1.0}s in the lower right corner corresponds
 to appending the true value of~$\theta$ to the design matrix.
 
 The next step is to sample from the appropriate multivariate Gaussian distribution:
-<<>>=
+<<make_y.int>>=
 jj.mean <- H1.int(two.designs)  %*%  beta1.TRUE
 jj.sigma <- psi1.TRUE[5]*corr.matrix(two.designs, scales = psi1.TRUE[1:4])
 code.and.obs <- as.vector(rmvnorm(n=1,mean=jj.mean,sigma=jj.sigma))
@@ -782,13 +804,13 @@ using the true but unknown parameter values.
 We now have to  add the model inadequacy term to {\tt z.int}.
 First, specify the parameters and hyperparameters of the model inadequacy:
 
-<<>>=
+<<make_beta2.TRIE>>=
 beta2.TRUE <- c(1,1)
 psi2.TRUE <- c(3,3,0.6)
 @ 
 
 Which give the true values.  Now create model inadequacy:
-<<>>=
+<<make_model.inadequacy>>=
 jj.mean <-  drop(H2.int(D2.int) %*% beta2.TRUE)
 jj.sigma <- corr.matrix(D2.int, scales=psi2.TRUE[1:2])*psi2.TRUE[3]
 model.inadequacy <- rmvnorm(n=1, mean=jj.mean,sigma=jj.sigma)
@@ -812,7 +834,7 @@ particular is not a function of~$\theta$.
 \end{itemize}
 
 Now add observational error:
-<<>>=
+<<add_error>>=
 lambda.TRUE <- 0.00
 jj.obs.error <-  rnorm(n2)*lambda.TRUE
 z.int <- z.int + jj.obs.error
@@ -828,7 +850,7 @@ Notes
 
 And finally we need to create a full data vector {\tt d.int}
 
-<<>>=
+<<make_d.int>>=
 d.int <- c(y.int , z.int)
 @ 
 
@@ -840,14 +862,14 @@ Note that the numbers given above will vary from instantiation to
 instantiation.    
 
 OK, so let's change the hyperparameter object to contain the true values:%'
-<<>>=
+<<make_psi1>>=
 phi.true <- phi.change(phi.fun=phi.fun.int, old.phi=phi.int,
 psi1=psi1.TRUE, psi2=psi2.TRUE,lambda=0.1,rho=1)
 @ 
 
 and then use these hyperparameters to estimate the coefficients:
 
-<<>>=
+<<call_betahat.fun.koh>>=
 betahat.fun.koh(theta=theta.TRUE, d=d.int, D1=D1.int, D2=D2.int, H1=H1.int, H2=H2.int, phi=phi.true)
 @ 
 (note the last argument to {\tt betahat.fun.koh()}).
@@ -865,7 +887,7 @@ parameters' true value is not known).
 
 %'
 
-<<>>=
+<<call_betahat.fun.koh_otherparams>>=
 betahat.fun.koh(theta=c(-5,5), d=d.int, D1=D1.int, D2=D2.int, H1=H1.int, H2=H2.int, phi=phi.true)
 @ 
 
@@ -882,13 +904,13 @@ the correct hyperparameters psi, so we will use {\tt phi.true}.
 
 
 
-<<>>=                  
+<<call_p.eqn8.supp>>=                  
 p.eqn8.supp(theta=c(1,1), D1=D1.int, D2=D2.int, H1=H1.int, H2=H2.int, d=d.int, phi=phi.true)
 @ 
-(recall that this function gives a number {\em proportional} to the
+(Recall that this function gives a number {\em proportional} to the
 true probability).  Now try a different value for theta:
 
-<<>>=                  
+<<call_p.eqn8.supp_difftheta>>=                  
 p.eqn8.supp(theta=c(5,-6), D1=D1.int, D2=D2.int, H1=H1.int, H2=H2.int, d=d.int, phi=phi.true)
 @ 
 
@@ -925,7 +947,7 @@ used just the code output data {\tt y} to estimate {\tt psi1}.  In
 the {\tt 
 calibrator} bundle, this is accomplished by {\tt stage1()}:
 
-<<>>=
+<<call_phi.stage1>>=
 phi.stage1 <- stage1(D1=D1.int, y=y.int, H1=H1.int, maxit=10,
  method="SANN", trace=0, do.print=FALSE, phi.fun=phi.fun.int,
  phi=phi.int)
@@ -945,7 +967,7 @@ makes a difference.
 
 We can examine the output of {\tt stage1()} directly:
 
-<<>>=
+<<examine_stage1>>=
 phi.stage1$psi1
 @ 
 
@@ -961,7 +983,7 @@ functions of {\tt psi1}.
 
 In this case we have
 
-<<>>=
+<<examine_stage1_cont>>=
 phi.stage1$sigma1squared
 phi.stage1$omega_x
 phi.stage1$omega_t
@@ -978,7 +1000,7 @@ is accomplished by function {\tt stage()}.
 
 OK, use {\tt stage2()}:
 
-<<>>=
+<<call_stage2>>=
   use1 <- 1:10
   use2 <- 1:11
   phi.stage2 <- stage2(D1=D1.int[use1,], D2=D2.int[use2,], H1=H1.int, H2=H2.int,
@@ -1004,7 +1026,7 @@ sigma2squared, and the lengthscales for $c_2(\cdot,\cdot)$.
 
 The modified hyperparameters are
 
-<<>>=
+<<examine_stage2>>=
 phi.stage2$rho
 phi.stage2$lambda
 phi.stage2$sigma2squared
@@ -1041,7 +1063,7 @@ For {\tt X.dist}, we need to define an uncertainty distribution on
 the independent variables.  Working from {\tt X.dist.toy}, we may
 copy it directly:
 
-<<>>=
+<<make_Xdist>>=
 jj.xdist.mean <- rep(0.5,2)
 names(jj.xdist.mean) <- c("x","y")
 jj.xdist.var <- 0.05+diag(c(0.1,0.1))
@@ -1090,7 +1112,7 @@ variables' uncertainty distribution to reduce this to %'
 
 OK, using the toy example as a guide, we can define a working {\tt hbar.fun.int()}:
 
-<<>>=
+<<make_hbar.fun.int>>=
 hbar.fun.int <- 
 function (theta, X.dist, phi) 
 {
@@ -1120,26 +1142,65 @@ random variables in {\tt X.dist.int} have zero correlation.
 
 Now we can conduct a calibrated prediction:
 
-<<>>=
+<<call_EK.eqn10.theta>>=
   jj <- EK.eqn10.supp(X.dist=X.dist.int, D1=D1.int, D2=D2.int,
   H1=H1.int, H2=H2.int, d=d.int, hbar.fun=hbar.fun.int,
   lower.theta=c(-3,-3), upper.theta=c(3,3),extractor=extractor.int,
-  phi=phi.stage2,minpts=5,maxpts=51)
+  phi=phi.stage2,eps=0.8)
 jj
 @ 
 
 Notes
 \begin{itemize}
-\item We use the optimized value for {\tt phi}, that is {\tt phi.stage2}.
-\item I have set {\tt maxpts} to 10, as {\tt adapt()} is  very slow
-with the default settings.   We could also fiddle with the limits of
-integration, viz {\tt theta.lower} and {\tt theta.upper}.
-\item The above call generates an error, given by {\tt adapt()}
-complaining that the {\tt minpts} argument has to be changed.  Ignore
-this but note that the warning is well-founded: there are not enough
-function evaluations to make for an accurate integration.
+\item We use the optimized value for {\tt phi}, that is {\tt
+phi.stage2} (not the true value).
+\item I have set {\tt eps} to 0.8, as {\tt adapt()} is very slow
+with the default settings.   
 \end{itemize}
 
+\section{Metropolis-Hastings}
+
+The Metropolis-Hastings method allows one to sample from a PDF that is
+only specified up to a constant.  It is useful for posterior PDFs of
+the type given by equation 8 of the supplent ({\tt p.eqn8.supp()} in
+the package: only a likelihood is given.
+
+See the manpage for {\tt MH.Rd} for examples of the
+Metropolis-Hastings method in use.
+
+For ease of use, we will define a wrapper:
+
+<<defineMHwrapper>>=
+p <- function(theta){
+p.eqn8.supp(theta=theta, D1=D1.int, D2=D2.int, H1=H1.int, H2=H2.int, d=d.int, phi=phi.true)
+}
+p(c(1,1))
+p(c(10,10))
+@ 
+
+
+So, let's sample from it:
+
+<<sample.from.MH>>=
+ss <- MH(n=10,start=c(1,1),sigma=diag(2),pi=p)
+@ 
+
+Figure~\ref{scatterplot} shows a sample of size 10 from the posterior.
+
+
+\begin{figure}[htbp]
+  \begin{center}
+<<scatterplot,fig=TRUE>>=
+plot(jitter(ss),xlab="A",ylab="B",main="Sample from posterior: try with more points")
+@
+\caption{Sample from the posterior\label{scatterplot} distribution of
+  theta, made using the Metropolis-Hastings method}
+  \end{center}
+\end{figure}
+
+
+
+\newpage
 \bibliography{/Users/rksh/unix/bib/uncertainty}
 
   \noindent

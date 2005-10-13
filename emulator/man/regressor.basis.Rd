@@ -11,17 +11,24 @@ regressor.multi(x.df,func)
 }   
 \arguments{
   \item{x}{vector of coordinates}
-  \item{x.df}{data frame whose rows are coordinates of points}
+  \item{x.df}{Matrix whose rows are coordinates of points}
   \item{func}{Regressor basis function to use; defaults to \code{regressor.basis}}
 }
 \details{ 
-The simplest regressor basis is just the addition of a constant, which
-is conventionally placed in the first position.
-\code{regressor.multi()} is just a wrapper for dataframes.
+  The regressor basis specified by \code{regressor.basis()} is just the
+  addition of a constant, which is conventionally placed in the first
+  position.  This is a very common choice for a set of bases, although
+  it is important to investigate both simpler and more sophisticated
+  alternatives.  Tony would recommend simpler functions (perhaps as
+  simple as \code{function(x){1}}, that is, nothing but a constant), and
+  Jonty would recommend more complicated bespoke functions that reflect
+  prior beliefs.
 
-Note that the user is free to define and use functions other than this
-one when using, for example, \code{corr()}.
+  Function \code{regressor.multi()} is just a wrapper for
+  \code{regressor.basis()} that works for matrices.
 
+  Note that the user is free to define and use functions other than this
+  one when using, for example, \code{corr()}.
 }
 \value{
   Returns simple regressor basis for vectors or matrices.

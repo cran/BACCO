@@ -2,6 +2,7 @@
 \alias{quad.form}
 \alias{quad.form.inv}
 \alias{quad.3form}
+\alias{quad.tform}
 \title{Evaluate a quadratic form efficiently}
 \description{
   Given a square matrix \code{M} of size \eqn{n\times n}{n*n}, and a matrix
@@ -11,15 +12,22 @@
 
   Function \code{quad.form.inv()} returns \eqn{x^TM^{-1}x}{t(x) \%*\%
     solve(M) \%*\% x} using an efficient method that avoids inverting
-    \eqn{M}.
-
+  \eqn{M}.
+  
   Function \code{quad.3form()} returns \eqn{l^TMr}{t(l) \%*'\% M \%*\%
-  r} using nested calls to \code{crossprod()}.  It's no faster than
+    r} using nested calls to \code{crossprod()}.  It's no faster than
   calling \code{crossprod()} directly, but makes code neater (IMHO)
+
+  Function \code{quad.tform()} returns \eqn{xMx^T}{x \%*\% A \%*\%
+    t(x)} using \code{tcrossprod()} in such a way as to not take a
+  transpose. 
+
+
 }
 \usage{
 quad.form(M, x, chol=FALSE)
 quad.form.inv(M, x)
+quad.tform(M, x)
 quad.3form(M,left,right)
 }
 \arguments{
@@ -51,6 +59,11 @@ quad.3form(M,left,right)
 \note{These functions are used extensively in the emulator and
   calibrator packages' R code in the interests
   of speed.  They are not really intended for the end user.
+
+  I have not yet figured out how to calculate \eqn{xA^{-1}x^T}{x \%*\%
+  solve(A) \%*\% t(X)} efficiently (the function would be called
+  \code{quad.tform.inv()}, if it existed).
+  
 }
 \seealso{\code{\link{optimize}}}
 \examples{
@@ -69,5 +82,8 @@ print(jj.3)
 
 ## Now consider accuracy:
 quad.form(solve(M),x) - quad.form.inv(M,x)  # should be zero
+
+quad.form(M,x) - quad.tform(M,t(x)) # Should be zero
+
 }
 \keyword{array}

@@ -21,10 +21,10 @@ int.qq(x, d, xold, Ainv, pos.def.matrix, func=regressor.basis)
 }
 \arguments{
   \item{x}{Point(s)  at which estimation is desired.  For
-    \code{interpolant.quick()}, argument \code{x} is a data frame
+    \code{interpolant.quick()}, argument \code{x} is a matrix
     and an expectation is given for each row.}
   \item{d}{vector of observations, one for each row of \code{xold}}
-  \item{xold}{Data frame with rows corresponding to points at which the
+  \item{xold}{Matrix with rows corresponding to points at which the
     function is known}
   \item{A}{Correlation matrix \code{A}.  If not given, it is calculated.}
   \item{Ainv}{Inverse of correlation matrix \code{A}.  Required by

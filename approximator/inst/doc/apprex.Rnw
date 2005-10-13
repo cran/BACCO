@@ -71,9 +71,12 @@ functions used for fitting the prior
 evaluating the various levels of code at the points given by the
 design matrix and the subsets object.
 \item A hyperparameter object, here {\tt hpa.vig}.  This object holds
-correlation scales, the rhos, and the sigmas.
+correlation scales, the rhos, and the sigmas.   One convenient way to
+do this is to define a function that creates a hyperparameter object
+from a vector; an example is given in the appendix ({\tt
+hpa.fun.vig()}) but this is not strictly necessary.
 \end{itemize}
-Each of these is discussed in a separate subsection below.
+Each of these is discussed in a separate subsection below.  
 
 But the first thing we need to do is install the library:
 <<echo=FALSE,print=FALSE>>=
@@ -125,13 +128,15 @@ Notes
 \begin{itemize}
 \item This is a list of 4 elements (ie the number of levels)
 \item each element is a subset of those above it
+\item Use functions {\tt is.nested()} and {\tt is.strict()} to verify
+that the subsets are consistent.
 \end{itemize}
 
 \subsection{Basis functions: USER TO SUPPLY}
 Now we need to choose a basis function.  Do this by copying {\tt
 basis.toy()} but fiddling with it:
 
-<<>>=
+<<basis.vig.function.def>>=
 basis.vig <- 
 function (x) 
 {
@@ -155,8 +160,18 @@ that I've changed the basis to be {\tt c(1,a,b,ab)}.
 \item Also note the rather strange way this function deals with
 vectors and matrices.  Vectors via the first bit, and matrices via
 that strange {\tt apply()} bit at the end.
+\item The line that reads {\tt  stopifnot(length(x) == 2)} is there to
+ensure that only vectors of length~2, or matrices with two columns,
+are processed. 
 \end{itemize}
 
+Here is an example of {\tt basis.vig()} in action:
+
+<<basis.vig.in.action>>=
+head(basis.vig(D1.vig))
+@ 
+
+See how the columns become the basis functions (that is, {\tt c(1, x , x[1]*x[2])}).
 
 
 <<datagen_generate_vig_fun, echo=false, results=hide>>=
@@ -233,7 +248,7 @@ function (x)
     }
     sigma_squareds <- x[1:4]
     names(sigma_squareds) <- paste("level", 1:4, sep = "")
-    B <- NULL
+    B <- list()
     B[[1]] <- pdm.maker(x[05:06])
     B[[2]] <- pdm.maker(x[07:08])
     B[[3]] <- pdm.maker(x[09:10])
@@ -438,15 +453,20 @@ vectors in a consistent way
 \end{itemize}
 
 
-Now we need a function that creates a hyperparameter object:
+Now we need a function
+that creates a hyperparameter object:
+
+<<>>=
+hpa.fun.vig
+@ 
 
 
-Notes
+Notes:
 \begin{itemize}
 \item This is a modification of {\tt hpa.fun.toy()} but with a smaller
 number of params
 \item This function isn't strictly necessary, but the alternative
-(defining a hyperparameter object {\em ab initio} is fiddly and error-prone.
+(defining a hyperparameter object {\em ab initio}) is fiddly and error-prone.
 \end{itemize}
 
 

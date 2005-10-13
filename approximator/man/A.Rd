@@ -24,7 +24,7 @@ A(level, Di, Dj, hpa)
   Biometrika, 87(1): pp1-13
 }
 \author{Robin K. S. Hankin}
-\seealso{\code{\link[emulator]{corr.matrix}},\code{\link{c.fun}}}
+\seealso{\code{\link[emulator]{corr.matrix}},\code{\link{c_fun}}}
 \examples{
 data(toyapps)
 D2 <-  D1.toy[subsets.toy[[2]],]

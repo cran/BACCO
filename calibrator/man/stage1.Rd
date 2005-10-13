@@ -13,7 +13,7 @@ the three parameters.
 stage1(D1, y, H1,  maxit,  trace=100, method="Nelder-Mead", directory = ".", do.filewrite=FALSE, do.print=TRUE, phi.fun, lognormally.distributed=FALSE, include.prior=TRUE, phi)
 stage2(D1, D2, H1, H2, y, z, maxit, trace=100, method = "Nelder-Mead", directory =
 ".", do.filewrite=FALSE, do.print=TRUE,  extractor, phi.fun, E.theta,
-Edash.theta, lognormally.distributed = FALSE, include.prior = TRUE, use.standin = FALSE, phi) 
+Edash.theta, isotropic=FALSE, lognormally.distributed = FALSE, include.prior = TRUE, use.standin = FALSE, phi) 
 stage3(D1, D2, H1, H2, d, maxit, trace=100, method="Nelder-Mead", directory = ".",
 do.filewrite=FALSE, do.print=TRUE, include.prior = TRUE, lognormally.distributed=FALSE, theta.start=NULL, phi) 
 }
@@ -48,7 +48,11 @@ do.filewrite=FALSE, do.print=TRUE, include.prior = TRUE, lognormally.distributed
     and the corresponding optimand to \code{directory} at each evalution
     of the optimizer.  If \code{FALSE}, don't write the files.}
     \item{directory}{The directory to write files to; only matters if
-    \code{do.filewrite} is \code{TRUE}}
+      \code{do.filewrite} is \code{TRUE}}
+    \item{isotropic}{In function \code{stage2()}, Boolean with default
+      \code{FALSE} meaning to carry out a full optimization, and
+      \code{TRUE} meaning to restrict the scope to isotroic roughness
+      matrices.  See details section below.}
   \item{do.print}{Boolean, with default \code{TRUE} meaning to print
     interim values of \code{phi} at each evaluation.}
   \item{use.standin}{In \code{stage2()}, a Boolean argument, with
@@ -73,6 +77,14 @@ do.filewrite=FALSE, do.print=TRUE, include.prior = TRUE, lognormally.distributed
   \code{stage1()} carries out stage 1 of KOH2001 which is used to
   estimate \eqn{\psi_1}{psi1} using optimization.
 
+  In function \code{stage2()}, setting argument \code{isotropic} to
+  \code{TRUE} will force \code{phi$omegastar_x} to be a function of a
+  length one scalar.  The value of \code{phi$omegastar_x} used will
+  depend on \code{pdm.maker.psi2()} (an internal function appearing in
+  \code{hpa.fun.toy()}).  In \code{stage2()}, several kludges are made.
+  The initial conditions are provided by argument \code{phi}.  The
+  relevant part of this is \code{phi$psi2}.  
+  
   \code{stage2()} estimates the other hyperparameters (viz:
   \eqn{\rho}{rho}, \eqn{\lambda}{lambda}, and \eqn{\psi_2}{psi2}) using
   optimization.  Note that \eqn{\psi_2}{psi2} includes
@@ -84,6 +96,10 @@ do.filewrite=FALSE, do.print=TRUE, include.prior = TRUE, lognormally.distributed
   \code{stage3()} attempts to find the maximum likelihood estimate of
   \eqn{\theta}{theta}, given hyperparameters and observations, using
   optimization.
+
+
+
+  
 }
 \references{
   M. C. Kennedy and A. O'Hagan 2001. \dQuote{Bayesian

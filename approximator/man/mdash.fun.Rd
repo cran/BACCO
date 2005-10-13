@@ -27,7 +27,7 @@ mdash.fun(x, D1, subsets, hpa, Vinv = NULL, use.Vinv = TRUE, z, basis)
     a complex computer code when fast approximations are available}
   Biometrika, 87(1): pp1-13
   }
-\author{Robin K. S. Hankin (\code{subsets.fun()}); Peter Dalgaard (via R-help)}
+\author{Robin K. S. Hankin}
 \examples{
 data(toyapps)
 mdash.fun(x=1:3,D1=D1.toy,subsets=subsets.toy,hpa=hpa.toy,z=z.toy,basis=basis.toy)

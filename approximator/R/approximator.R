@@ -1,3 +1,5 @@
+require(emulator)
+
 "A" <-
 function (level, Di, Dj, hpa) 
 {
@@ -17,12 +19,12 @@ function (D1, subsets, basis, hpa)
        }
     L <- as.sublist(D1, subsets)
     X <- p.matrix(hpa$rhos)
-    f <- function(j, mat, L) {
+    f <- function(j) {
         out <- kronecker(X[j, , drop = FALSE], basis(L[[j]]))
         rownames(out) <- rownames(L[[j]])
         return(out)
     }
-    tmp <- sapply(1:length(L), f, mat = X, L = L)
+    tmp <- sapply(1:length(L), f)
     out <- do.call("rbind", tmp)
     jj <- paste("level", rep(1:length(L), each = ncol(basis(L[[1]]))), 
         sep = "")
@@ -92,6 +94,8 @@ function (x)
         return(t(apply(x, 1, match.fun(sys.call()[[1]]))))
     }
 }
+
+
 
 "betahat.app" <-
 function(D1, subsets, basis, hpa, z, use.Vinv=TRUE)
@@ -214,7 +218,7 @@ function (x)
     }
     sigma_squareds <- x[1:4]
     names(sigma_squareds) <- paste("level", 1:4, sep = "")
-    B <- NULL
+    B <- list()
     B[[1]] <- pdm.maker(x[5:7])
     B[[2]] <- pdm.maker(x[8:10])
     B[[3]] <- pdm.maker(x[11:13])
@@ -276,9 +280,9 @@ function(level,D,z,basis,subsets,hpa)
   rhos <- hpa$rhos
   sigma_squared <- hpa$sigma_squareds
   if(FALSE){
-    bit1 <- log(det(A(level=level,Di=D[subsets[[level]],],Dj=NULL,hpa=hpa)))
+    bit1 <- log(det(A(level=level,Di=D[subsets[[level]],,drop=FALSE],Dj=NULL,hpa=hpa)))
   }
-  jj <- A(level=level,Di=D[subsets[[level]],],Dj=NULL,hpa=hpa)
+  jj <- A(level=level,Di=D[subsets[[level]],,drop=FALSE],Dj=NULL,hpa=hpa)
   
   bit1 <- sum(log(abs(eigen(jj,TRUE,TRUE)$values)))
 
@@ -296,7 +300,7 @@ function(level,D,z,basis,subsets,hpa)
   u <- length(jj)/length(z)
   betahat <- jj[ (1+(level-1)*u):(level*u)]
   mismatch <- d -  basis(D[subsets[[level]],]) %*% betahat
-  mat <- solve(sigma_squared[[level]]*A(level=level,Di=D[subsets[[level]],],Dj=NULL,hpa=hpa))
+  mat <- solve(sigma_squared[[level]]*A(level=level,Di=D[subsets[[level]],,drop=FALSE],Dj=NULL,hpa=hpa))
   bit3 <-  quad.form(mat,mismatch)
   return(bit1 + bit2 + bit3)
 }
@@ -333,7 +337,7 @@ function (x, D1, subsets, hpa)
     sigma_squareds <- hpa$sigma_squareds
     x <- t(x)
     t.old <- prod(rhos) * sigma_squareds[1] * as.vector(A(level = 1, 
-        Di = x, Dj = D1[subsets[[1]], ], hpa = hpa))
+        Di = x, Dj = D1[subsets[[1]],,drop=FALSE ], hpa = hpa))
     out <- t.old
     s <- length(subsets)
     stopifnot(s > 1)
@@ -354,7 +358,7 @@ function(D, z, basis, subsets, hpa.start, give.answers=FALSE, ...)
   {
     f <- function(candidate){
       hpa.temp <- hpa.start
-      hpa.temp$B[[1]] <- diag(exp(rep(candidate[1],ncol(D))))
+      hpa.temp$B[[1]] <- diag(exp(candidate[1]),nrow=ncol(D))
       hpa.temp$sigma_squareds[1] <- exp(candidate[2])
 
       jj <- object(level=1,
@@ -386,7 +390,7 @@ function(level, D, z, basis, subsets, hpa.start, give.answers=FALSE,
   
   f <- function(candidate){
     hpa.temp <- hpa.start
-    hpa.temp$B[[level]] <- diag(exp(rep(candidate[1], ncol(D))))
+    hpa.temp$B[[level]] <- diag(exp(candidate[1]), nrow=ncol(D))
     hpa.temp$sigma_squareds[level] <- exp(candidate[2])
     hpa.temp$rhos[level-1] <- exp(candidate[3])
     object(level=level,
@@ -406,7 +410,7 @@ function(level, D, z, basis, subsets, hpa.start, give.answers=FALSE,
   }
 }
 
-"c.fun" <- function(x,xdash=x,subsets,hpa)
+"c_fun" <- function(x,xdash=x,subsets,hpa)
 {
   s <- length(subsets)
   out <- 0
@@ -431,7 +435,7 @@ function(level, D, z, basis, subsets, hpa.start, give.answers=FALSE,
   hxdash <- hdash.fun(x=xdash,hpa=hpa,basis=basis)
   H <- H.fun.app(D1=D1,subsets=subsets,basis=basis,hpa=hpa)
 
-  cxx <- c.fun(x=x,xdash=xdash,subsets=subsets,hpa=hpa) 
+  cxx <- c_fun(x=x,xdash=xdash,subsets=subsets,hpa=hpa) 
 
   if(method == 1){
     if(is.null(Vinv)){

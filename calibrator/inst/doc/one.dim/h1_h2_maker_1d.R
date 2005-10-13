@@ -3,7 +3,7 @@
 
 h1.1d <- function(x){
 out <- c(1,x)
-names(out) <- c("const" , "x", "prod")
+names(out) <- c("const" , "x", "A")
 return(out)
 }
 
@@ -13,13 +13,14 @@ H1.1d <- function(D1){
         D1 <- t(D1)
     }
     out <- t(apply(D1, 1, h1.1d))
-    colnames(out) <- c("const" , "x", "A")
+    colnames(out) <- names(h1.1d(D1[1,,drop=TRUE]))
     return(out)
 }
 
 h2.1d <- function(x){
+out <- c(sin(x[1]*4),x[1]^3)
 out <- c(x[1],x[1]^3)
-names(out) <- c("x","x.cubed")
+names(out) <- c("sinx","x.cubed")
 return(out)
 }
 

@@ -128,25 +128,67 @@ function (x, theta, d, D1, D2, H1, H2, phi)
     rownames(out) <- rownames(x)
     return(out)
 }
+
+"h.fun" <-
+function(x, theta, H1, H2, phi) {
+    rho <- phi$rho
+    t(cbind(rho * H1(D1.fun(x.star = x, t.vec = theta)), 
+            H2(x)))
+  }
+
 "Ez.eqn9.supp.vector" <-
 function (x, theta, d, D1, D2, H1, H2, phi) 
 {
-    "h.fun" <- function(x, theta, H1, H2) {
-        rho <- phi$rho
-        t(cbind(rho * H1(D1.fun(x.star = x, t.vec = theta)), 
-            H2(x)))
-    }
     bhat <- betahat.fun.koh(theta = theta, d = d, D1 = D1, D2 = D2, 
         H1 = H1, H2 = H2, phi = phi)
-    h.x.th <- h.fun(x, theta = theta, H1 = H1, H2 = H2)
+    h.x.th <- h.fun(x, theta = theta, H1 = H1, H2 = H2,phi=phi)
     H.th <- H.fun(theta = theta, D1 = D1, D2 = D2, H1 = H1, H2 = H2, 
         phi = phi)
     t.x.th <- tee(x, theta = theta, D1 = D1, D2 = D2, phi = phi)
     Vd.th <- Vd(theta = theta, D1 = D1, D2 = D2, phi = phi)
     out <- crossprod(h.x.th, bhat) + crossprod(t.x.th, solve(Vd.th, 
         d - H.th %*% bhat))
-    return(out)
+      return(out)
 }
+
+"Cov.eqn9.supp" <-
+function (x, xdash=NULL, theta, d, D1, D2, H1, H2, phi) 
+{
+  if(is.null(xdash)){xdash <- x}
+  bit1 <- V1(D1.fun(x,theta),D1.fun(xdash,theta), phi=phi)* phi$rho^2
+  bit2 <- V2(x,xdash,phi=phi)
+  
+  t.x.th <-     tee(x=x    , theta=theta,D1=D1,D2=D2,phi=phi)
+  t.xdash.th <- tee(x=xdash, theta=theta,D1=D1,D2=D2,phi=phi)
+    
+  Vd.inv <- solve(Vd(D1=D1,D2=D2,theta=theta,phi=phi))
+  
+  jj.fun <- function(x){
+    h.fun(x=x,theta=theta,H1=H1,H2=H2,phi=phi) -
+      quad.3form(
+                 M     = Vd.inv,
+                 left  = H.fun(theta=theta, D1=D1, D2=D2, H1=H1, H2=H2, phi=phi),
+                 right = tee(x=x,theta=theta, D1=D1, D2=D2, phi=phi)
+                 )
+  }
+ 
+  bit3 <-
+    quad.3form(
+               M     = Vd.inv,
+               left  = t.x.th,
+               right = t.xdash.th
+               )
+
+  bit4 <-
+    quad.3form(
+               M = W(D1=D1, D2=D2, H1=H1, H2=H2, theta=theta, det=FALSE, phi=phi),
+               left  = jj.fun(x),
+               right = jj.fun(xdash)
+               )
+  return(bit1 + bit2 - bit3 + bit4) 
+}
+
+
 "H.fun" <-
 function (theta, D1, D2, H1, H2, phi) 
 {
@@ -319,7 +361,7 @@ function (D1, H1, det = FALSE, phi)
 "W2" <-
 function (D2, H2, V, det = FALSE) 
 {
-    out <- quad.form(solve(V), H2(D2))
+    out <- as.matrix(quad.form(solve(V), H2(D2)))
     if (det) {
         return(1/det(out))
     }
@@ -443,33 +485,23 @@ function (X, params = NULL, set.seed.to.zero = TRUE,
     return(out)
 }
 "cov.p5.supp" <-
-function (x, xdash, theta, d, D1, D2, H1, H2, phi) 
+function (x, xdash=NULL, theta, d, D1, D2, H1, H2, phi) 
 {
-    "h.fun" <- function(x, theta, H1, H2) {
-        rho <- phi$rho
-        t(cbind(rho * H1(D1.fun(x.star = x, t.vec = theta)), 
-            H2(x)))
-    }
-    bit1 <- phi$rho^2 * V1(D1 = D1.fun(x.star = x, t.vec = theta), 
-        other = D1.fun(x.star = xdash, t.vec = theta), phi = phi)
-    bit2 <- V2(x = x, other = xdash, phi = phi)
-    Vd.theta <- Vd(theta = theta, D1 = D1, D2 = D2, phi = phi)
-    t.x.theta <- tee(x = x, theta = theta, D1 = D1, D2 = D2, 
-        phi = phi)
-    t.xdash.theta <- tee(x = xdash, theta = theta, D1 = D1, D2 = D2, 
-        phi = phi)
-    h.x.theta <- h.fun(x = x, theta = theta, H1 = H1, H2 = H2)
-    h.xdash.theta <- h.fun(x = xdash, theta = theta, H1 = H1, 
-        H2 = H2)
-    W.theta <- W(theta = theta, D1 = D1, D2 = D2, H1 = H1, H2 = H2, 
-        phi = phi)
-    H.theta <- H.fun(theta = theta, D1 = D1, D2 = D2, H1 = H1, 
-        H2 = H2, phi = phi)
-    bit3 <- crossprod(t.x.theta, solve(Vd.theta, t.xdash.theta))
-    bit4 <- crossprod(h.x.theta - crossprod(H.theta, solve(Vd.theta, 
-        t.x.theta)), W.theta) %*% (h.xdash.theta - crossprod(H.theta, 
-        solve(Vd.theta, t.xdash.theta)))
-    return(bit1 + bit2 - bit3 + bit4)
+  if(!is.vector(x)){stop("x should be a vector; consider Cov.eqn9.supp() for vector x and xdash with a single value for theta")}
+  x <- t(x)
+  if(is.null(xdash)){xdash <- x}
+  f <- function(theta){Cov.eqn9.supp(
+                                     x=x,
+                                     xdash=xdash,
+                                     theta=theta,
+                                     d=d,
+                                     D1=D1,
+                                     D2=D2,
+                                     H1=H1,
+                                     H2=H2,
+                                     phi=phi
+                                     )}
+  apply(theta,1,f)
 }
 "create.new.toy.datasets" <-
 function (D1,D2,export=FALSE)
@@ -547,11 +579,15 @@ function (a, b = NULL, A = NULL, A.lower = NULL, test.for.symmetry = TRUE)
 "etahat" <-
 function (D1, D2, H1, y, E.theta, extractor, phi) 
 {
-    jj.hfun <- E.theta(D2=D2, H1=H1, phi=phi, give.mean=TRUE)
+    if(is.function(E.theta)){
+      jj.hfun <- E.theta(D2=D2, H1=H1, phi=phi, give.mean=TRUE)
+    } else {
+      jj.hfun <- H1(D1.fun(x.star=D2, t.vec=E.theta))
+    }
     jj.beta <- beta1hat.fun(D1=D1,H1=H1,y=y,phi=phi)
     bit1 <- drop(jj.hfun %*% jj.beta)
 
-    b <- beta1hat.fun(D1=D1,H1=H1,y=y, phi=phi)
+    b <- beta1hat.fun(D1=D1, H1=H1, y=y, phi=phi)
     f <- function(x){ t.fun(x, D1=D1, extractor=extractor, phi=phi) }
 
     jj.tfun <- apply(D2,1,f)
@@ -1040,19 +1076,29 @@ function (D1, y, H1, maxit, trace=100, method = "Nelder-Mead", directory = ".",
     phi.out <- phi.change(phi.fun = phi.fun, old.phi = phi, psi1 = exp(e$par))
     return(invisible(phi.out))
 }
+
 "stage2" <-
-function (D1, D2, H1, H2, y, z, maxit, trace=100, method = "Nelder-Mead",
-    directory = ".", do.filewrite=FALSE, do.print=TRUE,
-    extractor, phi.fun, E.theta, Edash.theta, 
-    lognormally.distributed = FALSE, include.prior = TRUE, use.standin = FALSE, phi) 
+  function (D1, D2, H1, H2, y, z, maxit, trace=100, method = "Nelder-Mead",
+            directory = ".", do.filewrite=FALSE, do.print=TRUE,
+            extractor, phi.fun, E.theta, Edash.theta,
+            isotropic = FALSE,
+            lognormally.distributed = FALSE, include.prior = TRUE, use.standin = FALSE, phi) 
 {
       if(do.filewrite & !isTRUE(file.info(directory)$isdir)){
       stop("do.filewrite = TRUE; directory name supplied does not exist")
     }
     f <- function(candidate) {
+      if(isotropic){
         phi.temp <- phi.change(phi.fun = phi.fun, old.phi = phi, 
-            rho = exp(candidate[1]), lambda = exp(candidate[2]), 
-            psi2 = exp(candidate[-c(1,2)]))
+                               rho = exp(candidate[1]), lambda = exp(candidate[2]), 
+                               psi2 = c(rep(exp(candidate[3]),nrow(phi$omegastar_x)),candidate[4])
+                               )
+      } else {
+        phi.temp <- phi.change(phi.fun = phi.fun, old.phi = phi, 
+                               rho = exp(candidate[1]), lambda = exp(candidate[2]), 
+                               psi2 = exp(candidate[-c(1,2)])
+                               )
+      }
         if (use.standin) {
             V.temp <- 1 + diag(3, nrow = nrow(D2))
         }
@@ -1079,15 +1125,29 @@ function (D1, D2, H1, H2, y, z, maxit, trace=100, method = "Nelder-Mead",
                )
         }
         return(f.out)
-     }
-    rho.lambda.psi2.start <- log(c(phi$rho, phi$lambda, phi$psi2))
-    e <- optim(rho.lambda.psi2.start, f, method = method, control = list(fnscale = -1, 
-        trace = trace, maxit = maxit))
-    jj <- exp(e$par)
-    phi.out <- phi.change(phi.fun = phi.fun, old.phi = phi, rho = jj[1], 
-        lambda = jj[2], psi2 = jj[-c(1,2)])
-    return(invisible(phi.out))
+    }
+      if(isotropic){
+        rho.lambda.psi2.start <- log(c(phi$rho, phi$lambda,  phi$psi2[1], phi$sigma2squared))
+      } else {
+        rho.lambda.psi2.start <- log(c(phi$rho, phi$lambda, phi$psi2))
+      }
+      e <- optim(rho.lambda.psi2.start, f, method = method, control = list(fnscale = -1, 
+                                                            trace = trace, maxit = maxit))
+      jj <- exp(e$par)
+      if(isotropic){
+        phi.out <- phi.change(phi.fun = phi.fun, old.phi = phi, rho = jj[1], 
+                              lambda = jj[2], psi2 = c(rep(jj[3],nrow(phi$omegastar_x)),jj[4])
+                              )
+      } else {
+        phi.out <- phi.change(phi.fun = phi.fun, old.phi = phi, rho = jj[1], 
+                              lambda = jj[2], psi2 = jj[-c(1,2)]
+                              )
+      }
+        return(invisible(phi.out))
 }
+
+
+
 "stage3" <-
 function (D1, D2, H1, H2, d, maxit, trace=100, method = "Nelder-Mead", directory
         = ".", do.filewrite=FALSE, do.print=TRUE,
@@ -1173,12 +1233,8 @@ function (x, theta, D1, D2, phi)
     out <- t(cbind(bit1, bit2a + bit2b))
     return(out)
 }
-"tr" <-
-function (a) 
-{
-    i <- 1:nrow(a)
-    return(sum(a[cbind(i, i)]))
-}
+
+
 "tt.fun" <-
 function (D1, extractor, x.i, x.j, test.for.symmetry = FALSE, 
     method = 1, phi) 
@@ -1343,4 +1399,28 @@ function (D1, extractor, x.i, x.j, test.for.symmetry = FALSE,
   } else {
     return(out)
   }    
+}
+
+"MH" <- function(n, start, sigma, pi){
+  out <- matrix(NA,n,length(start))
+  out[1,] <- start
+  
+  for(i in 2:n){  
+    proposed <- drop(out[i-1,] + rmvnorm(n=1,sigma=sigma))
+    num <- pi(proposed)
+    den <- pi(out[i-1,])
+
+    if( (num==0) & (den==0)){
+      print("this cannot happen")
+      alpha <- 0
+    } else {
+      alpha <- min(1, num/den)
+    }
+    if(runif(1)<alpha){
+      out[i,] <- proposed
+    } else {
+      out[i,] <- out[i-1,]
+    }
+  }
+  return(out)
 }

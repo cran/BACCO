@@ -75,14 +75,12 @@ betahat.fun.koh(theta=jj.theta, d=d.toy, D1=D1.toy, D2=D2.toy, H1=H1.toy, H2=H2.
 phi.true <- phi.true.toy(phi=phi.toy)
 
 ## And magically create the REAL parameters:
-theta.REAL <- reality(export.true.hyperparameters=TRUE)$REAL.PARAMS
+theta.REAL <- create.new.toy.datasets(export=TRUE)$REAL.PARAMS
 jj.theta <- rbind(jj.theta, theta.REAL)
 
 ## Generate some data:
-jj <- create.new.toy.datasets(N=10,n=11)
+jj <- create.new.toy.datasets(D1.toy , D2.toy)
 d.toy <- jj$d.toy
-D1.toy <- jj$D1.toy
-D2.toy <- jj$D2.toy
 
 
 ## And finally, observe that the estimated values for beta are pretty

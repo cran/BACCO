@@ -111,8 +111,11 @@ stage1(D1=D1.toy,y=y.toy,H1=H1.toy, maxit=5, phi.fun=phi.fun.toy, phi=phi.toy)
 ##Examples below take a few minutes to run:
 
 set.seed(0)
-jj <- create.new.toy.datasets(N=9,n=8)
-D1.toy <- jj$D1.toy ; y.toy <- jj$y.toy ; D2.toy <- jj$D2.toy ; z.toy <- jj$z.toy ; d.toy <- jj$d.toy
+data(toys)
+jj <- create.new.toy.datasets(D1.toy , D2.toy)
+y.toy <- jj$y.toy
+z.toy <- jj$z.toy
+d.toy <- jj$d.toy
 
 phi.toy.stage1 <- stage1(D1=D1.toy, y=y.toy, H1=H1.toy, maxit=10, phi.fun=phi.fun.toy, phi=phi.toy)
 

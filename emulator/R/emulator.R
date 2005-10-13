@@ -65,33 +65,69 @@ function (x1, x2, scales = NULL, pos.def.matrix = NULL, power = 2,
     return(corrscale(quad.form(pos.def.matrix, m)))
 }
 "corr.matrix" <-
-function (xold, yold = NULL, use.neatversion = TRUE, distance.function = corr, 
+function (xold, yold = NULL, method = 1, distance.function = corr, 
     ...) 
 {
     if (is.null(yold)) {
+      nully <- TRUE
         yold <- xold
+    } else {
+      nully <- FALSE
     }
-    if (use.neatversion) {
-        out <- apply(xold, 1, function(y) {
-            apply(yold, 1, function(x) {
-                distance.function(x, y, ...)
-            })
+    if (identical(method,1)) {
+      a <- list(...)
+      scales <- a$scales
+      pos.def.matrix <- a$pos.def.matrix
+      if (is.null(scales) & is.null(pos.def.matrix)) {
+        stop("need either scales or a pos.definite.matrix")
+      }
+      if (!is.null(scales) & !is.null(pos.def.matrix)) {
+        stop("scales *and* pos.def.matrix supplied.  corr() needs one only.")
+      }
+      if (is.null(pos.def.matrix)) {
+        pos.def.matrix <- diag(scales, nrow = length(scales))
+      }
+      jj <- function(x){as.matrix(diag(as.matrix(x)))}
+      if(nully){
+        R <- quad.form(pos.def.matrix, t(xold))
+        S <- kronecker(jj(R),t(rep(1,nrow(xold))))
+        return(exp(2*R-S-t(S)))
+      }
+      txold <- t(xold)
+      tyold <- t(yold)
+      R1 <- quad.form(pos.def.matrix,txold)
+      R2 <- quad.form(pos.def.matrix,tyold)
+      
+
+      S1 <- kronecker(t(jj(R1)),rep(1,nrow(yold)))
+      S2 <- kronecker(jj(R2),t(rep(1,nrow(xold))))
+
+      a1 <- crossprod(txold, pos.def.matrix) %*% tyold
+      a2 <- crossprod(tyold, pos.def.matrix) %*% txold
+      return(exp(t(a1)+a2-S1-S2))
+    } else if (identical(method,2)){
+      out <- apply(xold, 1, function(y) {
+        apply(yold, 1, function(x) {
+          distance.function(x, y, ...)
         })
-        return(as.matrix(out))
+      })
+      return(as.matrix(out))
     }
-    else {
-        n <- nrow(xold)
-        m <- nrow(yold)
-        A <- matrix(NA, m, n)
-        for (i in 1:n) {
-            for (j in 1:m) {
-                A[j, i] <- distance.function(xold[i, ], yold[j, 
-                  ], ...)
-            }
+    else if (identical(method,3)){
+      n <- nrow(xold)
+      m <- nrow(yold)
+      A <- matrix(NA, m, n)
+      for (i in 1:n) {
+        for (j in 1:m) {
+          A[j, i] <- distance.function(xold[i, ], yold[j, 
+                                                       ], ...)
         }
-        colnames(A) <- rownames(xold)
-        rownames(A) <- rownames(yold)
-        return(as.matrix(A))
+      }
+      colnames(A) <- rownames(xold)
+      rownames(A) <- rownames(yold)
+      return(as.matrix(A))
+    } else {
+      stop("method must be 1, 2, or 3")
     }
 }
 "estimator" <-
@@ -113,8 +149,8 @@ function (val, A, d, scales = NULL, pos.def.matrix = NULL, power = 2)
 }
 "interpolant" <-
 function (x, d, xold, Ainv = NULL, A = NULL, use.Ainv = TRUE, 
-    scales = NULL, pos.def.matrix = NULL, func = regressor.basis, 
-    power = 2, give.full.list = FALSE) 
+          scales = NULL, pos.def.matrix = NULL, func = regressor.basis,
+          give.full.list = FALSE, distance.function=corr, ...) 
 {
     if (is.null(scales) & is.null(pos.def.matrix)) {
         stop("need either scales or a pos.definite.matrix (used to calculate tx)")
@@ -126,14 +162,16 @@ function (x, d, xold, Ainv = NULL, A = NULL, use.Ainv = TRUE,
         pos.def.matrix <- diag(scales,nrow=length(scales))
     }
     if (is.null(A)) {
-        A <- corr.matrix(xold, pos.def.matrix = pos.def.matrix, 
-            power = power)
+        A <- corr.matrix(xold=xold, pos.def.matrix = pos.def.matrix,
+                         distance.function=distance.function, ...)
     }
     if (is.null(Ainv) & use.Ainv) {
         Ainv <- solve(A)
     }
-    tx <- apply(xold, 1, corr, x2 = x, pos.def.matrix = pos.def.matrix, 
-        power = power)
+#    tx <- apply(xold, 1, distance.function, x2 = x, pos.def.matrix = pos.def.matrix, ...)
+    tx <- drop(corr.matrix(xold=xold, yold=t(x),
+                      distance.function=distance.function,
+                      pos.def.matrix = pos.def.matrix, ...))
     hx <- unlist(func(x))
     H <- regressor.multi(xold, func = func)
     if (use.Ainv) {
@@ -147,8 +185,7 @@ function (x, d, xold, Ainv = NULL, A = NULL, use.Ainv = TRUE,
         prior <- crossprod(hx,betahat)
         mstar.star <- prior + crossprod(crossprod(Ainv, 
             tx), d - H %*% betahat)
-        cstar.x.x <- corr(x, x, pos.def.matrix = pos.def.matrix, 
-            power = power) - quad.form(Ainv, tx)
+        cstar.x.x <- corr(x, x, pos.def.matrix = pos.def.matrix, ...) - quad.form(Ainv, tx)
         cstar.star <- cstar.x.x + quad.form.inv(quad.form(Ainv, 
             H), hx - crossprod(H, crossprod(Ainv, tx)))
     }
@@ -164,7 +201,7 @@ function (x, d, xold, Ainv = NULL, A = NULL, use.Ainv = TRUE,
         mstar.star <- drop(prior + crossprod(solve(A, 
             tx), d - H %*% betahat))
         cstar.x.x <- corr(x, x, pos.def.matrix = pos.def.matrix, 
-            power = power) - quad.form.inv(A, tx)
+            ...) - quad.form.inv(A, tx)
         cstar.star <- cstar.x.x + quad.form.inv(quad.form.inv(A, 
             H), hx - crossprod(H, solve(A, tx)))
     }
@@ -179,9 +216,18 @@ function (x, d, xold, Ainv = NULL, A = NULL, use.Ainv = TRUE,
         return(as.vector(mstar.star))
     }
 }
+"int.qq" <- function(x, d, xold, Ainv, func=regressor.basis){
+  bhat <- betahat.fun(xold,Ainv,d)
+  out <- 
+    crossprod(apply(x,1,func),bhat) + 
+      crossprod(
+                crossprod(Ainv,corr.matrix(x,xold,scales=fish)),
+                d-crossprod(apply(xold,1,func), bhat))
+return(as.vector(out))
+}
 "interpolant.quick" <-
 function (x, d, xold, Ainv, scales = NULL, pos.def.matrix = NULL, 
-    func = regressor.basis, give.Z = FALSE, power = 2) 
+    func = regressor.basis, give.Z = FALSE, distance.function=corr, ...) 
 {
     if (is.null(scales) & is.null(pos.def.matrix)) {
         stop("need either scales or a pos.definite.matrix")
@@ -203,9 +249,16 @@ function (x, d, xold, Ainv, scales = NULL, pos.def.matrix = NULL,
     }
     for (i in 1:nrow(x)) {
         hx <- func(x[i, ])
-        tx <- apply(xold, 1, corr, x2 = x[i, ], pos.def.matrix = pos.def.matrix, 
-            power = power)
+        tx <- as.vector(corr.matrix(yold=xold,
+                                    xold = x[i,,drop=FALSE],
+                                    method=1,
+                                    pos.def.matrix = pos.def.matrix, 
+                                    distance.function=distance.function,
+                                    ...
+                                    )
+                        )
         prior[i] <- crossprod(hx,betahat)
+
         mstar.star[i] <- prior[i] + crossprod(crossprod(Ainv, 
             tx), (d - H %*% betahat))
         if (give.Z) {
@@ -225,7 +278,7 @@ function (x, d, xold, Ainv, scales = NULL, pos.def.matrix = NULL,
 
 "var.conditional" <-
 function (x, xold, d, A, Ainv, scales = NULL, pos.def.matrix = NULL, 
-    func = regressor.basis, power = 2) {
+    func = regressor.basis, distance.function=corr, ...) {
     if (is.null(scales) & is.null(pos.def.matrix)) {
       stop("need either scales or a pos.definite.matrix")
     }
@@ -238,13 +291,18 @@ function (x, xold, d, A, Ainv, scales = NULL, pos.def.matrix = NULL,
     
     H <- regressor.multi(xold, func = func)
     hx <- regressor.multi(x,func=func)
-    txvec <- 
-      apply(x,1,function(y){apply(xold,1,function(x){corr(x,y,pos.def.matrix=pos.def.matrix, power=power)})})
+#    txvec <- 
+#      apply(x,1,function(y){apply(xold,1,function(x){distance.function(x,y,pos.def.matrix=pos.def.matrix, ...)})})
+
+    txvec <-
+    corr.matrix(xold=x,yold=xold,distance.function=distance.function,
+    pos.def.matrix=pos.def.matrix, ...)
     bit1 <- quad.form(Ainv,txvec)
     jj <- hx - crossprod(txvec,Ainv) %*% H
     bit2 <- quad.form.inv(quad.form(Ainv,H),t(jj))
     
-    cstar <- corr.matrix(xold=x,pos.def.matrix=pos.def.matrix) - bit1 + bit2
+    cstar <- corr.matrix(xold=x,pos.def.matrix=pos.def.matrix,
+    distance.function=distance.function, ...) - bit1 + bit2
     cstar <- as.matrix(cstar) 
     
     rownames(cstar) <- rownames(x)
@@ -258,14 +316,14 @@ function (x, xold, d, A, Ainv, scales = NULL, pos.def.matrix = NULL,
 }
 
 "cond.sample" <- function (n=1, x, xold, d, A, Ainv, scales = NULL, pos.def.matrix = NULL, 
-    func = regressor.basis, power = 2) {
+    func = regressor.basis, ...) {
   mstar <- 
     interpolant.quick(x=x, d=d, xold=xold, Ainv=Ainv, scales=scales,
                       pos.def.matrix=pos.def.matrix,func=func,
                       give.Z=FALSE)
 
 jj.sigma <- var.conditional(x, xold, d, A, Ainv, scales = scales, pos.def.matrix = pos.def.matrix, 
-               func = func, power = power)
+               func = func, ...)
 
   random.bit <- 
     rmvt(n=n,sigma=jj.sigma, df=length(d))
@@ -399,7 +457,7 @@ function (val, scales.start, d, use.like = TRUE, give.answers = FALSE,
     }
     else {
         jj <- function(scales, val, d) {
-            A <- corr.matrix(val, scales = exp(scales))
+            A <- corr.matrix(xold=val, scales = exp(scales))
             error <- abs(d - estimator(val, A, d, scales = exp(scales)))
             return(sum(error^2))
         }
@@ -473,6 +531,13 @@ function (M, x)
 {
     drop(crossprod(x, solve(M, x)))
 }
+
+"quad.3form" <-
+function(M,left,right)
+{
+  crossprod(crossprod(M,left),right)
+}  
+
 "regressor.basis" <-
 function (x) 
 {
@@ -552,11 +617,11 @@ function (number.of.runs, expert.estimates, gaussian = TRUE,
   rownames(toy) <- paste("obs",1:nrow(toy),sep=".")
   
   x <- seq(from=-1,to=2,len=200)
-  A <- corr.matrix(toy,scales=scales.fit, power=2)
+  A <- corr.matrix(xold=toy,scales=scales.fit)
   Ainv <- solve(A)
   
   d.noisy <- as.vector(rmvnorm(n=1 , mean=toy*0 ,
-                               sigma=corr.matrix(toy,scales=scales.generate)
+                               sigma=corr.matrix(xold=toy,scales=scales.generate)
                                ))
   
   jj <- interpolant.quick(as.matrix(x), d.noisy, toy, scales=scales.fit,
@@ -586,7 +651,7 @@ function (pos.def.matrix = NULL, scales = NULL, power = 2, xold,
     H <- regressor.multi(xold, func = func)
     q <- ncol(H) - 1
     n <- nrow(H)
-    A <- corr.matrix(xold, pos.def.matrix = pos.def.matrix, power =
+    A <- corr.matrix(xold=xold, pos.def.matrix = pos.def.matrix, power =
                      power)
     bit2 <- 1/sqrt(det(A))
 

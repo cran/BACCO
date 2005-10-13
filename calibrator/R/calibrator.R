@@ -208,26 +208,26 @@ function (D1, D2, H1, H2, extractor, E.theta, Edash.theta, give.answers = FALSE,
         }
         for (j in j.vector) {
             line1[i, j] <- V1(D1 = D1.fun(x.star = D2[i, ], t.vec = tvec.arbitrary), 
-                other = D1.fun(x.star = D2[j, ], t.vec = tvec.arbitrary), 
+                other = D1.fun(x.star = D2[j,,drop=TRUE], t.vec = tvec.arbitrary), 
                 phi = phi)
-            jj.tt <- tt.fun(D1 = D1, extractor = extractor, x.i = D2[i, 
-                ], x.j = D2[j, ], phi = phi)
+            jj.tt <- tt.fun(D1 = D1, extractor = extractor, x.i =
+                            D2[i,,drop=TRUE], x.j = D2[j,,drop=TRUE], phi = phi)
             line2[i, j] <- tr(crossprod(v1.d1.inv, jj.tt))
-            jj.hh <- hh.fun(x.i = D2[i, ], x.j = D2[j, ], E.theta = E.theta, 
+            jj.hh <- hh.fun(x.i = D2[i,,drop=TRUE], x.j = D2[j,,drop=TRUE], E.theta = E.theta, 
                 H1 = H1, phi = phi)
             line3[i, j] <- tr(crossprod(w1.d1, jj.hh))
-            jj.th <- ht.fun(x.i = D2[j, ], x.j = D2[i, ], D1 = D1, 
+            jj.th <- ht.fun(x.i = D2[j,,drop=TRUE], x.j = D2[i,,drop=TRUE], D1 = D1, 
                 extractor = extractor, Edash.theta = Edash.theta, 
                 H1 = H1, fast.but.opaque = TRUE, x.star = x.star, 
                 t.vec = t.vec, phi = phi)
             line4[i, j] <- tr(w1.blah %*% jj.th)
-            jj.ht <- ht.fun(x.i = D2[i, ], x.j = D2[j, ], D1 = D1, 
+            jj.ht <- ht.fun(x.i = D2[i,,drop=TRUE], x.j = D2[j,,drop=TRUE], D1 = D1, 
                 extractor = extractor, Edash.theta = Edash.theta, 
                 H1 = H1, fast.but.opaque = TRUE, x.star = x.star, 
                 t.vec = t.vec, phi = phi)
             line5[i, j] <- tr(crossprod(v1.blah, jj.ht))
             line6[i, j] <- tr(crossprod(jj.tt, v1.blah.di.blah))
-        }
+        } 
     }
     C.m <- +line1 - line2 + line3 - line4 - line5 + line6
     if (test.for.symmetry == FALSE) {
@@ -468,32 +468,41 @@ function (x, xdash, theta, d, D1, D2, H1, H2, phi)
     return(bit1 + bit2 - bit3 + bit4)
 }
 "create.new.toy.datasets" <-
-function (N = 8, n = 5, num.of.var.params = 2, num.of.code.params = 3, 
-    set.seed.to.zero = FALSE, normalize = FALSE) 
+function (D1,D2,export=FALSE)
 {
-    if (set.seed.to.zero) {
-        set.seed(0)
-    }
-    x.star.toy <- latin.hypercube(N, num.of.var.params, normalize = normalize)
-    colnames(x.star.toy) <- paste("x", 1:num.of.var.params, sep = "")
-    rownames(x.star.toy) <- paste("run", 1:nrow(x.star.toy), 
-        sep = ".")
-    comment(x.star.toy) <- "lat and long of code runs (one pair for each of N code runs)"
-    t.vec.toy <- latin.hypercube(N, num.of.code.params, normalize = normalize)
-    colnames(t.vec.toy) <- LETTERS[1:num.of.code.params]
-    rownames(t.vec.toy) <- paste("run", 1:N, sep = ".")
-    D1.toy <- cbind(x.star.toy, t.vec.toy)
-    D2.toy <- latin.hypercube(n, num.of.var.params, normalize = normalize)
-    colnames(D2.toy) <- paste("x", 1:num.of.var.params, sep = "")
-    rownames(D2.toy) <- paste("obs", 1:nrow(D2.toy), sep = ".")
-    comment(D2.toy) <- "x and y values at which observations are made"
-    y.toy <- computer.model(D1.toy, set.seed.to.zero = set.seed.to.zero)
-    z.toy <- reality(D2.toy)
+
+    REAL.PARAMS <- c(A = 0.9, B = 0.1, C = 0.3)
+    REAL.RHO <- 1
+    REAL.LAMBDA <- 0.5
+
+        if(export){
+          return(list(
+                      REAL.PARAMS = REAL.PARAMS,
+                      REAH.RHO = REAL.RHO,
+                      REAL.LAMBDA = REAL.LAMBDA
+                      ))
+        }
+      
+    N <- nrow(D1)
+    n <- nrow(D2)
+
+    
+    D1.total <- rbind(D1,
+                      cbind(D2,kronecker(rep(1,n),t(REAL.PARAMS)) )
+    )
+
+    jj <- computer.model(D1.total)
+    
+    y.toy <- jj[1:N]
+
+    i <- (N+1):(N+n)
+
+    error.term <- rnorm(n=n, mean=0,sd=REAL.LAMBDA)
+    
+    z.toy <- jj[i]*REAL.RHO + model.inadequacy(X=D1.total[i,1:2]) + error.term
     d.toy <- c(y.toy, z.toy)
-    return(list(x.star.toy = x.star.toy, t.vec.toy = t.vec.toy, 
-        y.toy = y.toy, z.toy = z.toy, d.toy = d.toy, D1.toy = D1.toy, 
-        D2.toy = D2.toy))
-}
+    return(list(y.toy = y.toy, z.toy = z.toy, d.toy = d.toy))
+  }
 "dists.2frames" <-
 function (a, b = NULL, A = NULL, A.lower = NULL, test.for.symmetry = TRUE) 
 {
@@ -888,7 +897,7 @@ function (rho, lambda, psi1, psi1.apriori, psi2, psi2.apriori,
 "phi.true.toy" <-
 function (phi) 
 {
-    re <- reality(export.true.hyperparameters = TRUE)
+    re <- model.inadequacy(export.true.hyperparameters = TRUE)
     co <- computer.model(export.true.hyperparameters = TRUE)
     phi.change(old.phi = phi, phi.fun = phi.fun.toy, rho = re$REAL.RHO, 
         lambda = re$REAL.LAMBDA, psi1 = c(co$REAL.SCALES, co$REAL.SIGMA1SQUARED), 
@@ -939,7 +948,7 @@ function (theta, phi, lognormally.distributed = FALSE)
             sigma = phi$theta.aprior$sigma))
     }
 }
-"reality" <-
+"model.inadequacy" <-
 function (X, set.seed.to.zero = TRUE, draw.from.prior=FALSE,
     export.true.hyperparameters = FALSE, phi=NULL) 
 {
@@ -953,38 +962,34 @@ function (X, set.seed.to.zero = TRUE, draw.from.prior=FALSE,
         jj.psi2 <- rmvnorm(n=1, mean=phi$psi2.apriori$mean ,
                            sigma=phi$psi2.apriori$sigma)
         
-        REAL.PARAMS <- c(A=jj.params[1],B=jj.params[2],C=jj.params[3])
         REAL.BETA2 <- c(int.re.coeff = 0.4, tt = -0.8,fish=1)
         REAL.SIGMA2SQUARED <- c(sigma2squared=jj.psi2[5])
         REAL.ROUGHNESS <- c(x=jj.psi2[3],y=jj.psi2[4])
-        REAL.LAMBDA <- c(rho = jj.psi2[2])
-        REAL.RHO <- c(rho = jj.psi2[1])
       } else {
-        REAL.PARAMS <- c(A = 0.9, B = 0.1, C = 0.3)
         REAL.BETA2 <- c(int.re.coeff = 0.4, tt = -0.8,fish=1)
         REAL.SIGMA2SQUARED <- c(sigma2squared = 0.13)
         REAL.ROUGHNESS <- c(x = 2, y = 3)
-        REAL.LAMBDA <- c(lambda = 0.2)
-        REAL.RHO <- c(rho = 1)
       }
     
     if (export.true.hyperparameters) {
         warning("Only omniscient statisticians should access the true hyperparameters")
-        return(list(REAL.PARAMS = REAL.PARAMS, REAL.BETA2 = REAL.BETA2, 
-            REAL.SIGMA2SQUARED = REAL.SIGMA2SQUARED, REAL.ROUGHNESS = REAL.ROUGHNESS, 
-            REAL.LAMBDA = REAL.LAMBDA, REAL.RHO = REAL.RHO))
+        return(list(
+                    REAL.BETA2 = REAL.BETA2, 
+                    REAL.SIGMA2SQUARED = REAL.SIGMA2SQUARED,
+                    REAL.ROUGHNESS = REAL.ROUGHNESS
+                    ))
+
     }
     if (is.vector(X)) {
         X <- t(X)
     }
-    eta <- computer.model(X, REAL.PARAMS,
-        draw.from.prior=draw.from.prior,set.seed.to.zero =
-        set.seed.to.zero, phi=phi)
-    e_i <- rnorm(nrow(X), mean = 0, sd = REAL.LAMBDA)
-    error.term <- as.vector(rmvnorm(n = 1, mean = as.vector(H2.toy(X) %*% 
-        REAL.BETA2), sigma = REAL.SIGMA2SQUARED * as.matrix(corr.matrix(X, 
-        scales = REAL.ROUGHNESS, power = 2))))
-    return(eta * REAL.RHO + e_i + error.term)
+      out <- as.vector(rmvnorm(    n = 1,
+                                mean = as.vector(H2.toy(X) %*% REAL.BETA2),
+                               sigma = REAL.SIGMA2SQUARED * as.matrix(corr.matrix(X, 
+                                 scales = REAL.ROUGHNESS, power = 2))
+                               )
+                       )
+      return(out)
 }
 "sample.theta" <-
 function (n = 1, phi) 
@@ -1043,7 +1048,7 @@ function (D1, D2, H1, H2, y, z, maxit, trace=100, method = "Nelder-Mead",
     f <- function(candidate) {
         phi.temp <- phi.change(phi.fun = phi.fun, old.phi = phi, 
             rho = exp(candidate[1]), lambda = exp(candidate[2]), 
-            psi2 = exp(candidate[3:5]))
+            psi2 = exp(candidate[-c(1,2)]))
         if (use.standin) {
             V.temp <- 1 + diag(3, nrow = nrow(D2))
         }
@@ -1076,7 +1081,7 @@ function (D1, D2, H1, H2, y, z, maxit, trace=100, method = "Nelder-Mead",
         trace = trace, maxit = maxit))
     jj <- exp(e$par)
     phi.out <- phi.change(phi.fun = phi.fun, old.phi = phi, rho = jj[1], 
-        lambda = jj[2], psi2 = jj[3:5])
+        lambda = jj[2], psi2 = jj[-c(1,2)])
     return(invisible(phi.out))
 }
 "stage3" <-
@@ -1229,12 +1234,12 @@ function (D1, extractor, x.i, x.j, test.for.symmetry = FALSE,
 }
 
 "EK.eqn10.supp" <- function(X.dist, D1, D2, H1, H2, d, hbar.fun,
-  lower.theta,upper.theta, extractor, phi, ...){
+  lower.theta, upper.theta, extractor, give.info=FALSE, phi, ...){
   scalar.1 <-
     phi$rho*phi$sigma1squared/sqrt(det(diag(nrow=nrow(phi$omega_x)) +
                                        2*X.dist$var %*% phi$omega_x))
   scalar.2 <-
-    phi$rho*phi$sigma2squared/sqrt(det(diag(nrow=nrow(phi$omegastar_x)) +
+    phi$sigma2squared/sqrt(det(diag(nrow=nrow(phi$omegastar_x)) +
                                    2*X.dist$var %*% phi$omegastar_x))
   
   matrix.1 <- solve(2*X.dist$var + solve(phi$omega_x))
@@ -1242,10 +1247,10 @@ function (D1, extractor, x.i, x.j, test.for.symmetry = FALSE,
   
   "t1bar" <- function(theta, D1, D2, X.dist){
     f1 <- function(i){
-      as.vector(quad.form(phi$omega_t, theta - t.vec[i]))
+      as.vector(quad.form(phi$omega_t, theta - t.vec[i,]))
     }
     f2 <- function(i){
-      as.vector(quad.form(matrix.1, X.dist$mean - x.star[i]))
+      as.vector(quad.form(matrix.1, X.dist$mean - x.star[i,]))
     }
     out <- sapply(1:nrow(t.vec), function(i) { exp(-f1(i) - f2(i)) })
     return(scalar.1*out)
@@ -1264,13 +1269,12 @@ function (D1, extractor, x.i, x.j, test.for.symmetry = FALSE,
     
     return(scalar.1*out1 + scalar.2*out2)
   }
-
   
   "tbar.fun" <- function(theta, D1, D2, X.dist, phi){
-    c(t1bar(theta=theta, D1=D1, D2=D2, X.dist=X.dist) , t2bar(D1=D1, D2=D2, X.dist=X.dist))
+    c(t1bar(theta=theta, D1=D1, D2=D2, X.dist=X.dist),
+      t2bar(D1=D1, D2=D2, X.dist=X.dist))
   }
-
-
+  
   "integrand.numerator" <- function(theta){
     bhat <- betahat.fun.koh(D1=D1, D2=D2, H1=H1, H2=H2,
                             theta=theta,d=d,phi=phi)
@@ -1286,7 +1290,6 @@ function (D1, extractor, x.i, x.j, test.for.symmetry = FALSE,
                            d=d, include.prior = FALSE,
                            lognormally.distributed = FALSE,
                            return.log = FALSE, phi=phi)
-    
     return(out)
   }
 
@@ -1296,21 +1299,44 @@ function (D1, extractor, x.i, x.j, test.for.symmetry = FALSE,
                 lognormally.distributed = FALSE,
                 return.log = FALSE, phi=phi)
   }
-
-
+  
   t.vec <- extractor(D1)$t.vec
   x.star <- extractor(D1)$x.star
 
-  numerator <-
-    adapt(length(phi.toy$theta.apriori$mean),
+  multi.dimensional <- length(phi$theta.apriori$mean)>1
+  print(multi.dimensional)
+  if(multi.dimensional){ # multi dimensional case
+    numerator <-
+      adapt(length(phi$theta.apriori$mean),
+            lower = lower.theta, upper = upper.theta,
+            functn = integrand.numerator, ...)
+    
+    denominator <-
+      adapt(length(phi$theta.apriori$mean),
           lower = lower.theta, upper = upper.theta,
-          functn = integrand.numerator)
-
-  denominator <-
-    adapt(length(phi.toy$theta.apriori$mean),
-          lower = lower.theta, upper = upper.theta,
-          functn = integrand.denominator)
-
-  return(numerator$value/denominator$value)
- 
+            functn = integrand.denominator, ...)
+    
+  } else { # one dimensional case
+    integrand.numerator.vectorized <- function(theta.vec){
+      sapply(theta.vec,integrand.numerator)
+    }
+    numerator <-
+      integrate(f=integrand.numerator.vectorized,
+                lower=lower.theta, upper=upper.theta, ...)
+  
+    
+    integrand.denominator.vectorized <- function(theta.vec){
+      sapply(theta.vec,integrand.denominator)
+    }
+    denominator <-
+      integrate(f=integrand.denominator.vectorized,
+                lower=lower.theta, upper=upper.theta, ...)
+  }
+  
+  out <- numerator$value/denominator$value
+  if(give.info){
+    return(list(answer=out, numerator=numerator, denominator=denominator))
+  } else {
+    return(out)
+  }    
 }

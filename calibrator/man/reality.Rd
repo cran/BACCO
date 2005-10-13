@@ -1,6 +1,7 @@
 \name{reality}
 \alias{reality}
 \alias{computer.model}
+\alias{model.inadequacy}
 \alias{phi.true.toy}
 \alias{phi.true}
 \title{Reality}
@@ -11,7 +12,7 @@
   case the climate.
 }
 \usage{
-reality(X, set.seed.to.zero=TRUE, draw.from.prior=FALSE, export.true.hyperparameters=FALSE,phi=NULL)
+model.inadequacy(X, set.seed.to.zero=TRUE, draw.from.prior=FALSE, export.true.hyperparameters=FALSE,phi=NULL)
 computer.model(X, params=NULL, set.seed.to.zero=TRUE,
 draw.from.prior=FALSE, export.true.hyperparameters=FALSE,phi=NULL)
 phi.true.toy(phi)
@@ -104,27 +105,8 @@ phi.true.toy(phi)
    V1(D1.toy,phi=phi.fix)
 
 
-  \dontrun{
-     #  following lines not run because
-     #  is.omniscient(user) implies  user != rksh
-
-     computer.model(export=TRUE)
-     reality(export=TRUE)
-  }
 
 
-
-# What is reality at the field observation points?
-reality(D2.toy)
-
-# What is reality at the code evaluation points?
-reality(extractor.toy(D1.toy)$x.star)
-
-# What is reality at x.toy?
-reality(x.toy)
-
-# Does reality correspond to our model?
-reality(x.toy) - computer.model(X=x.toy, params=theta.toy)
 
 # What are the hyperparameters that were used to create reality?
 phi.true.toy(phi=phi.toy)
@@ -132,14 +114,6 @@ phi.true.toy(phi=phi.toy)
 # 
  computer.model(X=D2.toy,params=theta.toy,draw.from.prior=TRUE,phi=phi.toy)
 
-# What is the nature of reality?
-reality
-
-## Open questions:
-
-# What is the reality of nature?
-# What is the nature of nature?
-# What is the reality of reality?
 
 }
 \keyword{array}

@@ -1,0 +1,19 @@
+# This file is intented to be called by calex_1d.R.  It specifies the
+# true values for the parameters with the intent that we can try and
+# estimate them from the generated dataset.
+
+theta.TRUE <- 0.5
+
+
+beta1.TRUE <- c(0,1,1)
+names(beta1.TRUE) <- c("const" , "x", "A")
+
+psi1.TRUE <- c(5,4,0.001)
+names(psi1.TRUE) <- c("x","A","sigma1squared")
+
+beta2.TRUE <- c(1,1)
+names(beta2.TRUE) <- c("const","x.cubed")
+
+psi2.TRUE <- c(3,3,0.001)
+
+lambda.TRUE <- 0.001

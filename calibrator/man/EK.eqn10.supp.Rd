@@ -6,7 +6,8 @@
   section 4.2}
 }
 \usage{
-EK.eqn10.supp(X.dist, D1, D2, H1, H2, d, hbar.fun, lower.theta,upper.theta, extractor, phi, ...)
+EK.eqn10.supp(X.dist, D1, D2, H1, H2, d, hbar.fun,
+lower.theta,upper.theta, extractor, give.info, phi, ...)
 }
 \arguments{
   \item{X.dist}{Probability distribution of \code{X}, in the form of a
@@ -26,20 +27,34 @@ EK.eqn10.supp(X.dist, D1, D2, H1, H2, d, hbar.fun, lower.theta,upper.theta, extr
     vector)}
   \item{extractor}{Extractor function; see \code{extractor.toy()} for
     an example}
+  \item{give.info}{Boolean, with default \code{FALSE} meaning to return
+    just the answer and \code{TRUE} to return the answer along with all
+    output from both integrations as performed by \code{adapt()}.}
   \item{phi}{Hyperparameters}
-  \item{...}{Extra arguments passed to the multidimensional integration
-    function \code{adapt()}}
+  \item{...}{Extra arguments passed to the integration
+    function.  If multidimensional (ie \code{length(theta)>1}), then the
+    arguments are passed to \code{adapt()}; if one dimensional, they
+    are passed to \code{integrate()}.}
 }
 \details{
 This function evaluates a numerical approximation to equation 10 of
-section 4.2 of the supplement.  It uses the multidimensional integration
-function \code{adapt()}.
+section 4.2 of the supplement.
 
-The function is slow to evaluate, as multidimensional integration is
-hard.
+Equation 10 integrates over the prior distribution of \code{theta}.  If
+\code{theta} is a vector, multidimensional integration is necessary.
 
-Note that equation 10 is conditional on data \strong{and}
-hyperparameters.
+In the case of multidimensional integration, the eponymous
+\code{adapt()} is used.  Note that, as of version 1.0-3, this is
+restricted to less than 20 dimensions---which is not checked for.
+Evaluation is slow, as multidimensional integration is hard (spot the
+understatement).
+
+In the case of one dimensional integration---theta being a
+scalar---function \code{integrate()} of the stats package is used.
+
+Note that equation 10 is conditional on the observed data \strong{and}
+the hyperparameters.
+
 }
 \value{
   Returns a scalar

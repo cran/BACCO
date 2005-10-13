@@ -12,9 +12,9 @@ multivariate t distribution.
 }
 \usage{
 cond.sample(n = 1, x, xold, d, A, Ainv, scales = NULL, pos.def.matrix =
-NULL, func = regressor.basis, power = 2)
+NULL, func = regressor.basis, ...)
 var.conditional(x, xold, d, A, Ainv, scales = NULL, pos.def.matrix = NULL, 
-    func = regressor.basis, power = 2)
+    func = regressor.basis, distance.function = corr, ...)
 }
 \arguments{
   \item{n}{In function \code{cond.sample()}, the number of observations
@@ -27,7 +27,8 @@ var.conditional(x, xold, d, A, Ainv, scales = NULL, pos.def.matrix = NULL,
   \item{scales}{Roughness lengths}
   \item{pos.def.matrix}{Positive definite matrix of correlations}
   \item{func}{Function to calculate \eqn{H}}
-  \item{power}{Exponent in calculation of \eqn{A}, defaulting to 2}
+  \item{distance.function}{Distance function (defaulting to \code{corr()})}
+  \item{...}{Further arguments passed to the distance function, usually \code{corr()}}
 }
 \details{
 

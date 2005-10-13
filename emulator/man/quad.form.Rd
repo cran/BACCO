@@ -1,6 +1,7 @@
 \name{quad.form}
 \alias{quad.form}
 \alias{quad.form.inv}
+\alias{quad.3form}
 \title{Evaluate a quadratic form efficiently}
 \description{
   Given a square matrix \code{M} of size \eqn{n\times n}{n*n}, and a matrix
@@ -11,21 +12,27 @@
   Function \code{quad.form.inv()} returns \eqn{x^TM^{-1}x}{t(x) \%*\%
     solve(M) \%*\% x} using an efficient method that avoids inverting
     \eqn{M}.
-  
+
+  Function \code{quad.3form()} returns \eqn{l^TMr}{t(l) \%*'\% M \%*\%
+  r} using nested calls to \code{crossprod()}.  It's no faster than
+  calling \code{crossprod()} directly, but makes code neater (IMHO)
 }
 \usage{
 quad.form(M, x, chol=FALSE)
 quad.form.inv(M, x)
+quad.3form(M,left,right)
 }
 \arguments{
   \item{M}{Square matrix of size \eqn{n\times n}{n*n}}
-  \item{x}{Matrix of size \eqn{n\times p}{n*p}, or vector of length \eqn{n}{n}}
+  \item{x}{Matrix of size \eqn{n\times p}{n*p}, or vector of length \eqn{n}}
   \item{chol}{Boolean, with \code{TRUE} meaning to interpret
     argument \code{M} as the lower triangular Cholesky decomposition
     of the quadratic form.  Remember that 
     \code{M.lower \%*\% M.upper == M},  and \code{chol()} returns the
     upper triangular matrix, so one needs to use the transpose
     \code{t(chol(M))}. }
+  \item{left,right}{In function \code{quad.3form()}, matrices with
+    \eqn{n} rows and arbitrary number of columns}
 }
 \details{
   The \dQuote{meat} of \code{quad.form()} for \code{chol=FALSE} is just
@@ -38,7 +45,7 @@ quad.form.inv(M, x)
   using \code{M} directly.  The time saving is negligible for matrices
   smaller than about \eqn{50\times 50}{50*50}, even if the overhead of
   computing \code{M.upper} is ignored.
-    
+
 }
 \author{Robin K. S. Hankin}
 \note{These functions are used extensively in the emulator and

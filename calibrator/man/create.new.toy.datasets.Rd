@@ -8,40 +8,25 @@
   required for a Gaussian process.
 }
 
-\usage{create.new.toy.datasets(N=8,n=5,num.of.var.params=2,
-num.of.code.params=3, set.seed.to.zero=FALSE,normalize=FALSE)}
+\usage{create.new.toy.datasets(D1,D2,export=FALSE)}
 \arguments{
-  \item{N}{Number of code runs}
-  \item{n}{number of observation points}
-  \item{num.of.var.params}{number of parameters}
-  \item{num.of.code.params}{number of code parameters}
-  \item{set.seed.to.zero}{Boolean, with \code{TRUE} meaning to set the
-    seed to zero}
-  \item{normalize}{Boolean, with \code{TRUE} meaning to return columns
-    whose min is zero and max is one.  See \code{latin.hypercube} in
-    \code{library(emulator)} for details.}
+  \item{export}{Boolean, with default \code{FALSE} meaning to return toy
+    datasets and \code{TRUE} meaning to return, instead, a list of the
+    true values of the parameters}
+  \item{D1}{D1; set of code run points}
+  \item{D2}{D2; set of field observation points}
   }
 \value{
-    Returns a list of seven elements:
-    \item{x.star.toy}{}
-    \item{t.vec.toy}{}
+    Returns a list of three elements:
     \item{y.toy}{}
     \item{z.toy}{}
     \item{d.toy}{}
-    \item{D1.toy}{}
-    \item{D2.toy}{}
-
-    these being the toy datasets that are needed for the examples.
-    Datasets created with \code{create.new.toy.datasets()} will work
-    with the examples whatever the value of \code{n} and \code{N}
-    (although \code{num.of.var.params} and \code{num.of.code.params}
-    must take their default values).    
 }
 \note{
   Because function \code{create.new.toy.datasets()} calls
-    \code{computer.model()} and \code{reality()}, the datasets returned
-    are drawn from a multivariate Gaussian distribution which \strong{is} a
-    Gaussian process.
+    \code{computer.model()} and \code{model.inadequacy()}, the datasets
+    returned are drawn from a multivariate Gaussian distribution which
+    \strong{is} a Gaussian process.
   }
   \references{
   M. C. Kennedy and A. O'Hagan 2001. \dQuote{Bayesian
@@ -57,10 +42,11 @@ num.of.code.params=3, set.seed.to.zero=FALSE,normalize=FALSE)}
   Software, 14(16)
 }
 \seealso{
-  \code{\link{toys}}, \code{\link{reality}}, \code{\link{latin.hypercube}}
+  \code{\link{toys}}, \code{\link{reality}}, \code{\link[emulator]{latin.hypercube}}
 }
 \examples{
-create.new.toy.datasets()
-create.new.toy.datasets(N=40)
+data(toys)
+create.new.toy.datasets(D1=D1.toy , D2=D2.toy)
+
 }
 \keyword{datasets}

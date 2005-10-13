@@ -1,19 +1,23 @@
 \name{interpolant}
 \alias{interpolant}
 \alias{interpolant.quick}
+\alias{int.qq}
 \title{Interpolates between known points using Bayesian estimation}
 \description{Calculates the a postiori distribution of results at a
   point using the techniques outlined by Oakley.  This function is the
   primary function of the package.  Function \code{interpolant.quick()}
   gives the expectation of the emulator at a set of points, and function
   \code{interpolant()} gives the expectation and other information (such
-  as the variance) at a single point.  
+  as the variance) at a single point.  Function \code{int.qq()} gives a
+  quick-quick vectorized interpolant using certain timesaving assumptions.
 }
 \usage{
 interpolant(x, d, xold, Ainv=NULL, A=NULL, use.Ainv=TRUE, scales=NULL, pos.def.matrix=NULL,
-func=regressor.basis,  power=2, give.full.list = FALSE)
+func=regressor.basis, give.full.list = FALSE, distance.function=corr, ...)
 interpolant.quick(x, d, xold, Ainv, scales=NULL,
-pos.def.matrix=NULL, func=regressor.basis, give.Z = FALSE, power=2)
+pos.def.matrix=NULL, func=regressor.basis, give.Z = FALSE,
+distance.function=corr, ...)
+int.qq(x, d, xold, Ainv, func=regressor.basis)
 }
 \arguments{
   \item{x}{Point(s)  at which estimation is desired.  For
@@ -24,7 +28,7 @@ pos.def.matrix=NULL, func=regressor.basis, give.Z = FALSE, power=2)
     function is known}
   \item{A}{Correlation matrix \code{A}.  If not given, it is calculated.}
   \item{Ainv}{Inverse of correlation matrix \code{A}.  Required by
-    \code{interpolant.quick()}.  In \code{interpolant()},
+    \code{interpolant.quick()} and \code{int.qq()}.  In \code{interpolant()},
     using the default value of \code{NULL} results in \code{Ainv} being
     calculated explicitly (which may be slow: see next argument for more
     details).}
@@ -67,13 +71,13 @@ pos.def.matrix=NULL, func=regressor.basis, give.Z = FALSE, power=2)
   \item{give.Z}{In function \code{interpolant.quick()}, Boolean variable
     with \code{TRUE} meaning to return the best estimate and the error,
     and default \code{FALSE} meaning to return just the best estimate.}
-  \item{power}{The power to use in the correlation function.  Default of
-    2 corresponds to Oakley's equation 2.12 (see \code{?corr} for more
-    details).   Note that if \code{Ainv} is supplied, then the
-    \code{power} used to calculate \code{Ainv} must match the power used
-    in \code{interpolant()}
-  }
-  }
+  \item{distance.function}{Function to compute distances between
+    points, defaulting to \code{corr()}.  See \code{corr.Rd} for
+    details. Note that \code{method=2} or \code{method=3} is required
+    if a non-standard distance function is used.}
+  \item{...}{Further arguments passed to the distance function, usually \code{corr()}}
+}
+  
 \value{
   If \code{give.full.list} is TRUE, a list is return with components
   \item{betahat}{Standard MLE of the (linear) fit, given the
@@ -142,9 +146,12 @@ bayes.unknown <- interpolant(x.unknown, d.noisy, val, scales=fish, Ainv=Ainv,g=T
 ## [   compare with the "true" value of sum(0.5*0:6) = 10.5   ]
 
 
+
+# Just a quickie for int.qq():
+int.qq(x=rbind(x.unknown,x.unknown+0.1),d.noisy,val,Ainv)
+
+
 ## (To find the best correlation lengths, use optimal.scales())
-
-
 
  # Now we use the SAME dataset but a different set of basis functions.
  # Here, we use the functional dependence of
@@ -190,7 +197,7 @@ real.relation2(val[1,])
 Z <- function(o) {
     x <- x.known 
     x[1] <- x[1]+ o
-    interpolant(x, d.noisy, val, Ainv=Ainv, scales=fish, g=TRUE)$Z.oak
+    interpolant(x, d.noisy, val, Ainv=Ainv, scales=fish, g=TRUE)$Z
   } 
 
 Z(0)       #should be zero because we know the answer (this is just Z at x.known)
@@ -236,7 +243,7 @@ val <- jj
        ## Answer is the 19th (or 20th or ... or 26th)
 d  <- results.table[wanted.row ,  output.col]
 
-A <- corr.matrix(val,scales=rep(1,ncol(val)), power=1.5)
+A <- corr.matrix(val,scales=rep(1,ncol(val)), method=2, power=1.5)
 Ainv <-  solve(A)
 
 
@@ -246,7 +253,7 @@ scales.optim <- c( -2.917, -4.954, -3.354, 2.377, -2.457, -1.934, -3.395,
 print("and plot points used in optimization:")
 d.observed <- results.table[ , output.col]
 
-A <- corr.matrix(val,scales=scales.optim, power=1.5)
+A <- corr.matrix(val,scales=scales.optim, method=2, power=1.5)
 Ainv <- solve(A)
 
 print("now plot all points:")

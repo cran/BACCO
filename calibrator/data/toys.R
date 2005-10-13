@@ -1,4 +1,5 @@
 require(calibrator, quietly=TRUE, save=FALSE)
+require(emulator, quietly=TRUE, save=FALSE)
 
 "D1.toy" <- 
 structure(c(
@@ -28,17 +29,15 @@ structure(c(0.72, 0.82), .Names = c("x", "y"))
 "x.vec" <-
 structure(c(0.5, 3, 0.5, 0.6, 3, 0.6), .Dim = c(3, 2), .Dimnames = list(c("point.1", "point.2", "point.3"), c("x", "y")))
 
-"y.toy" <- computer.model(D1.toy)
 
 
-"z.toy" <- reality(D2.toy)
-
+jj <- create.new.toy.datasets(D1.toy,D2.toy)
+"y.toy" <- jj$y.toy
+"z.toy" <- jj$z.toy
+"d.toy" <- jj$d.toy
 
 "theta.toy" <- 
 structure(as.integer(c(1, 2, 3)), .Names = c("A", "B", "C"))
-
-"d.toy" <- 
-  c(y.toy,z.toy)
 
 
 ## Now define some jj* variables that go into phi.toy():

@@ -60,9 +60,10 @@ d=d.toy, phi=phi.toy)
 
 ## Now try using the true hyperparameters, and data directly drawn from
 ## the appropriate multivariate distn:
+
 phi.true <- phi.true.toy(phi=phi.toy)
-jj <- create.new.toy.datasets(N=10,n=9)
-D1.toy <- jj$D1.toy; D2.toy <- jj$D2.toy; d.toy <- jj$d.toy
+jj <- create.new.toy.datasets(D1.toy , D2.toy)
+d.toy <- jj$d.toy
 p.eqn8.supp(theta=theta.toy, D1=D1.toy, D2=D2.toy, H1=H1.toy, H2=H2.toy, d=d.toy, phi=phi.true)
 
 

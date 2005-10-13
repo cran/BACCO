@@ -30,6 +30,7 @@ beta1hat.fun(D1, H1, y, phi)
 \seealso{\code{\link{beta2hat.fun}}}
 \examples{
 data(toys)
+y.toy <- create.new.toy.datasets(D1=D1.toy , D2=D2.toy)$y.toy
 beta1hat.fun(D1=D1.toy, H1=H1.toy, y=y.toy, phi=phi.toy)
 
       # now cheat: force the hyperparameters to have the correct psi1:
@@ -38,15 +39,17 @@ beta1hat.fun(D1=D1.toy, H1=H1.toy, y=y.toy, phi=phi.toy)
       # code for computer.model(); see ?phi.change 
 
 
-      # Create a new toy dataset with 50 observations:
-jj <- create.new.toy.datasets(N=50,n=5)
+      # Create a new toy dataset with 40 observations:
+D1.big <- latin.hypercube(40,5)
+
+jj <- create.new.toy.datasets(D1=D1.big , D2=D2.toy)
 
       # We know that the real coefficients are 4:9 because we
       # we can cheat and look at the source code for computer.model()
 
       # Now estimate the coefficients without cheating:
 
-beta1hat.fun(D1=jj$D1.toy,H1=H1.toy, jj$y,phi=phi.toy)
+beta1hat.fun(D1=D1.big, H1=H1.toy, jj$y, phi=phi.toy)
 
      # Not bad!
 
@@ -54,11 +57,10 @@ beta1hat.fun(D1=jj$D1.toy,H1=H1.toy, jj$y,phi=phi.toy)
 
      # We can do slightly better by cheating and using the
      # correct value for the hyperparameters:
-beta1hat.fun(D1=jj$D1.toy,H1=H1.toy, jj$y,phi=phi.fix)
+
+beta1hat.fun(D1=D1.big, H1=H1.toy, jj$y,phi=phi.true.toy(phi=phi.toy))
 
      #marginally worse.
-
-
 
 
 }

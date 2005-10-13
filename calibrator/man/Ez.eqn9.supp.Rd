@@ -29,6 +29,22 @@ Ez.eqn9.supp.vector(x, theta, d, D1, D2, H1, H2,  phi)
 
   Note that \code{Ez.eqn9.supp.vector()} is vectorized in \code{x} but
   not \eqn{\theta}{theta}.
+
+  Note that function \code{Ez.eqn9.supp()} determines whether there are
+  multiple values of \eqn{\theta}{theta} by \code{is.vector(theta)}.  If
+  this returns \code{TRUE}, it is assumed that \eqn{\theta}{theta} is a
+  single point in multidimensional parameter space; if \code{FALSE}, it
+  is assumed to be a matrix whose rows correspond to points in parameter
+  space.
+
+  So if \eqn{\theta}{theta} is one dimensional, calling
+  \code{Ez.eqn9.supp()} with a vector-valued \eqn{\theta}{theta} will
+  fail because the function will assume that \eqn{\theta}{theta} is a
+  single, multidimensional, point.  To get round this, use
+  \code{as.matrix(theta)}, which is not a vector; the rows are the (1D)
+  parameter values.
+  
+  
   }
 \references{
   M. C. Kennedy and A. O'Hagan 2001. \dQuote{Bayesian

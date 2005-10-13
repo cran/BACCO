@@ -9,7 +9,7 @@ space, thus determining the correlation matrix A.
 \usage{
 corr(x1, x2, scales=NULL , pos.def.matrix=NULL,
 power=2,coords="cartesian", spherical.distance.function=NULL)
-corr.matrix(xold, yold, use.neatversion=TRUE, distance.function=corr, ...)
+corr.matrix(xold, yold=NULL, method=1, distance.function=corr, ...)
 }
 \arguments{
   \item{x1}{First point}
@@ -23,7 +23,8 @@ corr.matrix(xold, yold, use.neatversion=TRUE, distance.function=corr, ...)
      \code{pos.definite.matrix} in the general case.  Note that
     neither \code{corr()} nor \code{corr.matrix()} test for positive
     definiteness.}
-  \item{power}{The power to use in the exponent of the exponential.  In
+  \item{power}{In function \code{corr()}, the power to use in the
+    exponent of the exponential.  In
     the case of a diagonal \code{pos.def.matrix} (or,
     equivalently, using \code{scales}), the default value of 2 gives the
     standard metric, viz \eqn{e^{-(x-x')^2}}{exp(-(x-x')^2)}.
@@ -43,14 +44,28 @@ corr.matrix(xold, yold, use.neatversion=TRUE, distance.function=corr, ...)
     Spherical geometry is then used to calculate the geotetic (great
     circle) distance between point \code{x1} and \code{x2}, with
     function \code{gcd()}.}
+  \item{method}{An integer with values 1, 2, or 3.  If 1, then use a
+    fast matrix calculation that returns
+ \eqn{e^{-(x-x')^TB(x-x')}}{exp(-(x-x')^T B (x-x'))}.  If 2 or 3, return
+    the appropriate output from \code{corr()}, noting that ellipsis
+    arguments are passed to \code{corr()} (for example, \code{power} and
+    \code{scales}).  The difference between 2 and 3 is a marginal
+    difference in numerical efficiency.
+
+    \strong{Warning}: if \code{method=1}, arguments like \code{power} are given
+    to \code{corr.matrix()} are ignored silently.
+
+    \strong{Warning:} The code for \code{method=2} (formerly the
+    default), has a bug.  If \code{yold} has only one row, then
+    \code{corr.matrix(xold,yold,scales,method=2)} returns the transpose
+    of what one would expect.  Methods 1 and 3 return the correct
+    matrix.
+  }    
   \item{distance.function}{Function to be used to calculate distances.
     Defaults to \code{corr()}.}
   \item{xold}{data frame each row of which is an evaluated point}
   \item{yold}{(optional) data frame each row of which is an evaluated
     point.  If missing, use \code{xold}}
-  \item{use.neatversion}{Boolean variable passed to \code{corr.matrix()} with
-    \code{TRUE} meaning to use the iterated \code{apply()} method
-    and \code{FALSE} meaning to use two nested loops.}
   \item{spherical.distance.function}{In \code{corr}, a function to
     determine the distance between two points; used if
     \code{coords}=\dQuote{spherical}. A good one to choose is
@@ -119,9 +134,11 @@ f <- function(x,y,theta){
   }
 }
 
-corr.matrix(xold=x, distance.function=f , theta=4)
+corr.matrix(xold=x, distance.function=f , method=2, theta=4)
  # Note the first row and first column is a single 1 and 3 zeroes
  # (because the first point, viz x[1,], is "far" from the other ponts).
+ # Also note the method=2 argument here; method=1 is the fast slick
+ # matrix method suggested by Doug and Jeremy.
 
 
 

@@ -1,0 +1,12 @@
+Package: calibrator
+Title: Bayesian calibration of computer models
+Version: 1.0-2
+Author: Robin K. S. Hankin
+Description: Performs Bayesian calibration of computer models as per
+ Kennedy and O'Hagan 2001.  The package includes
+ routines to find the hyperparameters and parameters; see
+ the help page for stage1 for a worked example using the toy dataset.
+Maintainer: Robin K. S. Hankin <r.hankin@noc.soton.ac.uk>
+Depends: R (>= 2.0.0), emulator, adapt
+License: GPL
+

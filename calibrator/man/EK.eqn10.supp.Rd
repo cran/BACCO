@@ -1,0 +1,74 @@
+\name{EK.eqn10.supp}
+\alias{EK.eqn10.supp}
+\title{Posterior mean of K}
+\description{
+  Estimates the posterior mean of K as per equation 10 of KOH2001S,
+  section 4.2}
+}
+\usage{
+EK.eqn10.supp(X.dist, D1, D2, H1, H2, d, hbar.fun, lower.theta,upper.theta, extractor, phi, ...)
+}
+\arguments{
+  \item{X.dist}{Probability distribution of \code{X}, in the form of a
+    two-element list.  The first element is the mean (which should have
+    name \dQuote{\code{mean}}), and the second element is the variance
+    matrix, which should  be a positive definite matrix of the correct
+    size, and have name \dQuote{var}}
+  \item{D1}{Matrix whose rows are the code run points}
+  \item{D2}{Matrix whose rows are field observation points}
+  \item{H1}{Regression function for \code{D1}}
+  \item{H2}{Regression function for \code{D2}}
+  \item{d}{Vector of code outputs and field observations}
+  \item{hbar.fun}{Function that gives expectation (with respect to \code{X})
+    of \code{h1(x,theta)} and \code{h2(x)} as per section 4.2}
+  \item{lower.theta}{Lower integration limit for \code{theta} (NB: a vector)}
+  \item{upper.theta}{Lower integration limit for \code{theta} (NB: a
+    vector)}
+  \item{extractor}{Extractor function; see \code{extractor.toy()} for
+    an example}
+  \item{phi}{Hyperparameters}
+  \item{...}{Extra arguments passed to the multidimensional integration
+    function \code{adapt()}}
+}
+\details{
+This function evaluates a numerical approximation to equation 10 of
+section 4.2 of the supplement.  It uses the multidimensional integration
+function \code{adapt()}.
+
+The function is slow to evaluate, as multidimensional integration is
+hard.
+
+Note that equation 10 is conditional on data \strong{and}
+hyperparameters.
+}
+\value{
+  Returns a scalar
+}
+\references{
+  M. C. Kennedy and A. O'Hagan 2001. \dQuote{Bayesian
+    calibration of computer models}.  Journal of the Royal Statistical
+  Society B, 63(3) pp425-464
+  
+  M. C. Kennedy and A. O'Hagan 2001.  \dQuote{Supplementary details on
+    Bayesian calibration of computer models}, Internal report, University
+  of Sheffield.  Available at \url{http://www.shef.ac.uk/~st1ao/ps/calsup.ps}
+  
+  R. K. S. Hankin 2005. \dQuote{Introducing BACCO, an R bundle for
+    Bayesian analysis of computer code output}, Journal of Statistical
+  Software, 14(16)
+}
+\author{Robin K. S. Hankin}
+\note{
+The function was not reviewed by the Journal of Statistical Software
+}
+\examples{
+1+1
+\dontrun{
+# Not run because it takes R CMD check too long.
+data(toys)
+EK.eqn10.supp(X.dist=X.dist.toy, D1=D1.toy, D2=D2.toy, H1=H1.toy, H2=H2.toy, d=d.toy, hbar.fun=hbar.fun.toy, lower.theta=c(-3,-3,-3,), upper.theta=c(3,3,3),extractor=extractor.toy, phi=phi.toy)
+
+
+}
+}
+\keyword{array}

@@ -1,0 +1,35 @@
+\name{Vd}
+\alias{Vd}
+\title{Variance matrix for d}
+\description{
+Variance matrix for d, as per the bottom of page 1 of the supplement
+}
+\usage{
+Vd(D1, D2, theta, phi)
+}
+\arguments{
+  \item{D1}{matrix of code run points}
+  \item{D2}{matrix of observation points}
+  \item{theta}{Parameters}
+  \item{phi}{hyperparameters}
+}
+\references{
+  M. C. Kennedy and A. O'Hagan 2001. \dQuote{Bayesian
+    calibration of computer models}.  Journal of the Royal Statistical
+  Society B, 63(3) pp425-464
+  
+  M. C. Kennedy and A. O'Hagan 2001.  \dQuote{Supplementary details on
+    Bayesian calibration of computer models}, Internal report, University
+  of Sheffield.  Available at \url{http://www.shef.ac.uk/~st1ao/ps/calsup.ps}
+  
+  R. K. S. Hankin 2005. \dQuote{Introducing BACCO, an R bundle for
+    Bayesian analysis of computer code output}, Journal of Statistical
+  Software, 14(16)
+}
+\author{Robin K. S. Hankin}
+\seealso{\code{\link{H.fun}},\code{\link{V1}},\code{\link{V2}},\code{\link{C1}}}
+\examples{
+data(toys)
+Vd(D1=D1.toy, D2=D2.toy, theta=theta.toy, phi=phi.toy)
+}
+\keyword{array}

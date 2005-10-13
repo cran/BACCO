@@ -1,0 +1,41 @@
+\name{D1.fun}
+\alias{D1.fun}
+\title{Function to join x.star to t.vec to give matrix D2}
+\description{
+ Function to join \code{x.star} to \code{t.vec} to give matrix \code{D2} with correct row-
+    and column- names
+}
+\usage{
+D1.fun(x.star, t.vec)
+}
+\arguments{
+  \item{x.star}{Matrix of code run points}
+  \item{t.vec}{Matrix of parameter theta values}
+}
+
+\references{
+  M. C. Kennedy and A. O'Hagan 2001. \dQuote{Bayesian
+    calibration of computer models}.  Journal of the Royal Statistical
+  Society B, 63(3) pp425-464
+  
+  M. C. Kennedy and A. O'Hagan 2001.  \dQuote{Supplementary details on
+    Bayesian calibration of computer models}, Internal report, University
+  of Sheffield.  Available at \url{http://www.shef.ac.uk/~st1ao/ps/calsup.ps}
+  
+  R. K. S. Hankin 2005. \dQuote{Introducing BACCO, an R bundle for
+    Bayesian analysis of computer code output}, Journal of Statistical
+  Software, 14(16)
+}
+\author{Robin K. S. Hankin}
+\seealso{\code{\link{toys}}}
+\examples{
+data(toys)
+jj <- extractor.toy(D1.toy)
+x.star.toy <- jj$x.star
+t.vec.toy  <- jj$t.vec
+D1.fun(x.star.toy , t.vec.toy)  # both dataframes
+D1.fun(x.star.toy , theta.toy)  # one dataframe, one vector
+D1.fun(x.toy , t.vec.toy)       # one vector, one dataframe
+D1.fun(x.toy,theta.toy)         # two vectors
+}
+\keyword{array}

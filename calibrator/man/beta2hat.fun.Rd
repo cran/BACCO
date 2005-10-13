@@ -1,0 +1,65 @@
+\name{beta2hat.fun}
+\alias{beta2hat.fun}
+\title{estimator for beta2}
+\description{
+estimates beta2 as per the equation of page 4 of the supplement.  Used
+by \code{p.page4()}
+}
+\usage{
+beta2hat.fun(D1, D2, H1, H2, V, z, etahat.d2, extractor, E.theta,
+Edash.theta, phi)
+}
+\arguments{
+  \item{D1}{Matrix of code run points}
+  \item{D2}{Matrix of observation points}
+  \item{H1}{regression basis functions}
+  \item{H2}{regression basis functions}
+  \item{V}{overall covariance matrix}
+  \item{z}{vector of observations}
+  \item{etahat.d2}{expectation as per \code{etahat.vector}}
+  \item{extractor}{extractor function}
+  \item{E.theta}{Expectation}
+  \item{Edash.theta}{Expectation wrt thetadash}  
+  \item{phi}{hyperparameters}
+}
+\references{
+  M. C. Kennedy and A. O'Hagan 2001. \dQuote{Bayesian
+    calibration of computer models}.  Journal of the Royal Statistical
+  Society B, 63(3) pp425-464
+  
+  M. C. Kennedy and A. O'Hagan 2001.  \dQuote{Supplementary details on
+    Bayesian calibration of computer models}, Internal report, University
+  of Sheffield.  Available at \url{http://www.shef.ac.uk/~st1ao/ps/calsup.ps}
+  
+  R. K. S. Hankin 2005. \dQuote{Introducing BACCO, an R bundle for
+    Bayesian analysis of computer code output}, Journal of Statistical
+  Software, 14(16)
+}
+\author{Robin K. S. Hankin}
+\seealso{\code{\link{W2}}}
+\examples{
+data(toys)
+
+etahat.d2 <- etahat(D1=D1.toy, D2=D2.toy, H1=H1.toy, y=y.toy,
+E.theta=E.theta.toy, extractor=extractor.toy, phi=phi.toy)
+
+beta2hat.fun(D1=D1.toy, D2=D2.toy, H1=H1.toy, H2=H2.toy, V=NULL,
+z=z.toy, etahat.d2=etahat.d2, extractor=extractor.toy,
+E.theta=E.theta.toy, Edash.theta=Edash.theta.toy, phi=phi.toy)
+
+jj <- create.new.toy.datasets(N=9,n=8)
+phi.true <- phi.true.toy(phi=phi.toy)
+D1.toy  <- jj$D1.toy;y.toy   <- jj$y.toy;D2.toy  <- jj$D2.toy;z.toy <- jj$z.toy;d.toy   <- jj$d.toy
+
+etahat.d2 <- etahat(D1=D1.toy, D2=D2.toy, H1=H1.toy, y=y.toy,
+E.theta=E.theta.toy, extractor=extractor.toy, phi=phi.toy)
+
+beta2hat.fun(D1=D1.toy, D2=D2.toy, H1=H1.toy, H2=H2.toy, V=NULL,
+z=z.toy, etahat.d2=etahat.d2, extractor=extractor.toy,
+E.theta=E.theta.toy, Edash.theta=Edash.theta.toy,
+phi=phi.toy)
+
+
+
+}
+\keyword{array}

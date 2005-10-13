@@ -6,7 +6,6 @@
 Emulation of computer code output
 }
 \description{
-
   This package allows one to estimate the output of a computer program,
  as a function of the input parameters, without actually running it.
  The computer program is assumed to be a Gaussian process, whose
@@ -41,17 +40,19 @@ Robin K. S. Hankin
 Maintainer: <r.hankin@noc.soton.ac.uk>
 }
 \references{
-
-  J. Oakley 1999. \dQuote{Bayesian uncertainty analysis for complex
-    computer codes}, PhD thesis, University of Sheffield.
-
-  J. Oakley and A. O'Hagan, 2002. \dQuote{Bayesian Inference for the
-    Uncertainty Distribution of Computer Model Outputs}, Biometrika
-  89(4), pp769-784
-  
-  R. K. S. Hankin 2005. \dQuote{Introducing BACCO, an R bundle for
-    Bayesian analysis of computer code output}, Journal of Statistical
-  Software, 14(16)
+  \itemize{
+    \item
+    J. Oakley 1999. \emph{Bayesian uncertainty analysis for complex
+      computer codes}, PhD thesis, University of Sheffield.
+    \item
+    J. Oakley and A. O'Hagan, 2002. \emph{Bayesian Inference for the
+      Uncertainty Distribution of Computer Model Outputs}, Biometrika
+    89(4), pp769-784
+    \item
+    R. K. S. Hankin 2005. \emph{Introducing BACCO, an R bundle for
+      Bayesian analysis of computer code output}, Journal of Statistical
+    Software, 14(16)
+  }
 }
 \keyword{ package }
 \examples{

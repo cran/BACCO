@@ -39,7 +39,6 @@ The value returned is
 \left|A\right|^{-1/2}\cdot\left|H^TA^{-1}H\right|^{-1/2}.
 }{(sigmahatsquared)^{-(n-q)/2}|A|^{-1/2}|t(H) \%*\% A \%*\% H|^{-1/2}.}
 
-
 }
 \value{
 Returns the likelihood.
@@ -51,16 +50,19 @@ Returns the likelihood.
   \code{foo.A()}, are written.  An example would be \code{betahat.fun()}.
 }
 \references{
- J. Oakley 1999. \dQuote{Bayesian uncertainty analysis for complex
-   computer codes}, PhD thesis, University of Sheffield.
-
- J. Oakley and A. O'Hagan, 2002. \dQuote{Bayesian Inference for the
-   Uncertainty Distribution of Computer Model Outputs}, Biometrika
- 89(4), pp769-784
- 
- R. K. S. Hankin 2005. \dQuote{Introducing BACCO, an R bundle for
+  \itemize{
+    \item
+    J. Oakley 1999. \emph{Bayesian uncertainty analysis for complex
+      computer codes}, PhD thesis, University of Sheffield.
+    \item
+    J. Oakley and A. O'Hagan, 2002. \emph{Bayesian Inference for the
+      Uncertainty Distribution of Computer Model Outputs}, Biometrika
+    89(4), pp769-784
+    \item
+    R. K. S. Hankin 2005. \emph{Introducing BACCO, an R bundle for
    Bayesian analysis of computer code output}, Journal of Statistical
  Software, 14(16)
+ }
 }
 
 \author{Robin K. S. Hankin}

@@ -20,14 +20,13 @@ s.chi(H, Ainv, d, s0 = 0, fast.but.opaque = TRUE)
     with this argument on or off should indicate the likely accuracy attained.}
 }
 \details{
-See O'Hagan's paper (ref below), equation 12 for details and context.
+  See O'Hagan's paper (ref below), equation 12 for details and context.
 }
 \references{
   A. O'Hagan 1992. \dQuote{Some Bayesian Numerical Analysis}, pp345-363 of
   \emph{Bayesian Statistics 4} (ed J. M. Bernardo et al), Oxford University
   Press
-  }
-  
+}  
 \author{Robin K. S. Hankin}
 \examples{
 

@@ -24,24 +24,27 @@ h2.toy(x)
   not in general (for example, consider
   \eqn{h(x,\theta)=c(1,x,x^2)}{h(x,theta)=c(1,x,x^2)} and \eqn{X\sim
   N(m,V)}{X~N(m,V)}.  Then \eqn{E_X(h(x,\theta))}{E_X(h(x,theta))} will
-  be \eqn{(1,m,m^2+V,\theta)}{(1,m,m^2+V,theta)}; note the V).  
+  be \eqn{(1,m,m^2+V,\theta)}{(1,m,m^2+V,theta)}; note the V)
 }
 \value{
-Returns basis functions of a vector; in the toy case, just prepend a
-\code{1}.
+  Returns basis functions of a vector; in the toy case, just prepend a
+  \code{1}.
 }
 \references{
-  M. C. Kennedy and A. O'Hagan 2001. \dQuote{Bayesian
-    calibration of computer models}.  Journal of the Royal Statistical
-  Society B, 63(3) pp425-464
-  
-  M. C. Kennedy and A. O'Hagan 2001.  \dQuote{Supplementary details on
-    Bayesian calibration of computer models}, Internal report, University
-  of Sheffield.  Available at \url{http://www.shef.ac.uk/~st1ao/ps/calsup.ps}
-  
-  R. K. S. Hankin 2005. \dQuote{Introducing BACCO, an R bundle for
-    Bayesian analysis of computer code output}, Journal of Statistical
-  Software, 14(16)
+  \itemize{
+    \item
+    M. C. Kennedy and A. O'Hagan 2001. \emph{Bayesian
+      calibration of computer models}.  Journal of the Royal Statistical
+    Society B, 63(3) pp425-464
+    \item
+    M. C. Kennedy and A. O'Hagan 2001.  \emph{Supplementary details on
+      Bayesian calibration of computer models}, Internal report, University
+    of Sheffield.  Available at \url{http://www.shef.ac.uk/~st1ao/ps/calsup.ps}
+    \item
+    R. K. S. Hankin 2005. \emph{Introducing BACCO, an R bundle for
+      Bayesian analysis of computer code output}, Journal of Statistical
+    Software, 14(16)
+  }
 }
 \author{Robin K. S. Hankin}
 \seealso{\code{\link{H1.toy}}}

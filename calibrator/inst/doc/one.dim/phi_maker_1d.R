@@ -47,3 +47,5 @@ print(phi.1d2$rho)
 
 phi.TRUE <- phi.change(phi.fun=phi.fun.1d, old.phi=phi.1d,
 psi1=psi1.TRUE, psi2=psi2.TRUE,lambda=lambda.TRUE,rho=1)
+
+

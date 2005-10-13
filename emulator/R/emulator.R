@@ -81,6 +81,10 @@ function (xold, yold = NULL, method = 1, distance.function = corr,
     if(identical(method,1)) {
       a <- list(...)
       scales <- a$scales
+      if(length(scales)==1){
+        scales <- rep(scales,ncol(xold))
+      }
+      
       pos.def.matrix <- a$pos.def.matrix
       if (is.null(scales) & is.null(pos.def.matrix)) {
         stop("need either scales or a pos.definite.matrix")
@@ -491,7 +495,7 @@ function (val, d, use.like = TRUE, give.answers = FALSE,  func=regressor.basis,
     n <- ncol(val)
     if (use.like) {
         objective.fun <- function(scale, val, d) {
-            -scales.likelihood(scales = rep(exp(scale),n), xold = val, 
+            out <- -scales.likelihood(scales = rep(exp(scale),n), xold = val, 
                 d = d, func=func)
         }
     }

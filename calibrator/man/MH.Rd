@@ -2,9 +2,9 @@
 \alias{MH}
 \title{Very basic implementation of the Metropolis-Hastings algorithm}
 \description{
-Very basic implementation of the Metropolis-Hastings algorithm using a
-multivariate Gaussian proposal distribution.   Useful for sampling
-from \code{p.eqn8.supp()}.
+  Very basic implementation of the Metropolis-Hastings algorithm using a
+  multivariate Gaussian proposal distribution.   Useful for sampling
+  from \code{p.eqn8.supp()}.
 }
 \usage{
 MH(n, start, sigma, pi)
@@ -16,16 +16,16 @@ MH(n, start, sigma, pi)
   \item{pi}{Functional proportional to the desired sampling pdf}
 }
 \details{
-This is a \strong{basic} implementation.  The proposal
-distribution~\eqn{q(X|Y)} is
-\eqn{q(\cdot|X)=N(X,\sigma^2)}{q(.|X)=N(X,sigma^2)}.
+  This is a \strong{basic} implementation.  The proposal
+  distribution~\eqn{q(X|Y)} is
+  \eqn{q(\cdot|X)=N(X,\sigma^2)}{q(.|X)=N(X,sigma^2)}
 }
 \value{
   Returns a matrix whose rows are samples from \eqn{\pi()}{pi()}.  Note
   that the first few rows will be \dQuote{burn-in}, so should be
-  ignored.
+  ignored
 }
-\references{W. R. Gilks et al 1996. \dQuote{Markov Chain Monte Carlo in
+\references{W. R. Gilks et al 1996. \emph{Markov Chain Monte Carlo in
     practice}.  Chapman and Hall, 1996.    ISBN 0-412-05551-1}
 \author{Robin K. S. Hankin}
 \note{

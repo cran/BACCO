@@ -55,13 +55,29 @@ FALSE, func=regressor.basis, ...)
   In this package, \dQuote{scales} means the diagonal elements of the
   \eqn{B} matrix.  See the help page for \code{corr} for more
   discussion of this topic.
-}
-\references{J. Oakley 2004. \dQuote{Estimating percentiles of uncertain
-    computer code outputs}.  Applied Statistics, 53(1), pp89-93.
 
-  J. Oakley 1999. \dQuote{Bayesian uncertainty analysis for complex
-    computer codes}, PhD thesis, University of Sheffield.
+  Note the warning about partial matching under the \dQuote{dot-dot-dot}
+  argument in both \code{optim.Rd} [used in \code{optimal.scales()}] and
+  \code{optimize.Rd} [used in \code{optimal.scale()}]: any unmatched
+  arguments will be passed to the objective function.  Thus, passing
+  named but unmatched arguments to \code{optimal.scale[s]()} will cause
+  an error, because those arguments will be passed, by \code{optim()} or
+  \code{optimize()}, to the (internal) \code{objective.fun()}.
+
+  In particular, note that passing \code{control=list(maxit=4)} to
+  \code{optimal.scale()} will cause an error for this reason
+  [\code{optimize()} does not take a \code{control} argument].
+}
+\references{
+  \itemize{
+    \item
+    J. Oakley 2004. \emph{Estimating percentiles of uncertain
+      computer code outputs}.  Applied Statistics, 53(1), pp89-93.
+    \item
+    J. Oakley 1999. \emph{Bayesian uncertainty analysis for complex
+      computer codes}, PhD thesis, University of Sheffield.
   }
+}
 \author{Robin K. S. Hankin}
 \seealso{\code{\link{interpolant}},\code{\link{corr}}}
 \examples{

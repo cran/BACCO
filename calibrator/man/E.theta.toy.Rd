@@ -18,41 +18,44 @@ phi=NULL)
   \item{D2}{Observation points}
   \item{H1}{Regression function for D1}
   \item{phi}{hyperparameters.  Default value of \code{NULL} only to be
-    used in \code{Edash.theta.toy()} when \code{fast.but.opaque} is \code{TRUE}.}
+    used in \code{Edash.theta.toy()} when \code{fast.but.opaque} is \code{TRUE}}
   \item{x}{lat/long point (for \code{Edash.theta.toy})}
   \item{t.vec}{Matrix whose rows are parameter values (for \code{Edash.theta.toy})}
   \item{k}{Integer specifying column (for \code{Edash.theta.toy})}
     \item{give.mean}{In \code{E.theta.toy()}, Boolean, with default \code{TRUE} meaning to return
-    the mean (expectation), and \code{FALSE} meaning to return the \dQuote{variance}.}
+    the mean (expectation), and \code{FALSE} meaning to return the \dQuote{variance}}
   \item{fast.but.opaque}{In \code{Edash.theta.toy()}, Boolean, with
     default \code{FALSE} meaning to use a slow but clear method.  If
-    \code{TRUE}, use faster code but parameters \code{a} and \code{b} must then be specified.}
+    \code{TRUE}, use faster code but parameters \code{a} and \code{b} must then be specified}
   \item{a}{Constant term, needed if \code{fast.but.opaque} is
     \code{TRUE}: 
     \eqn{\left(V_\theta^{-1}+2\Omega_t\right)^{-1}V_\theta^{-1}m_\theta}{(V_theta^{-1}+2Omega_t)^{-1}V_theta^{-1}m_theta}.
-    Specifying \code{a} in advance saves execution time.}
+    Specifying \code{a} in advance saves execution time}
   \item{b}{Linear term, needed if \code{fast.but.opaque} is \code{TRUE}:
     \eqn{2\left(V_\theta^{-1}+2\Omega_t\right)^{-1}\Omega_t}{2(V_theta^{-1}+2Omega_t)^{-1}Omega_t}
     (multiplied by \code{t[k,]} in \code{Edash.theta.toy()}).}
   \item{x1}{In \code{E.theta.toy(g=F,...)}, the value of \code{x} in
     \eqn{h_1(x,\theta)}{h1(x,theta)}.  The default value is \code{NULL}
     because in simple cases such as that implemented here, the output is
-    independent of \code{x1} and \code{x2}.}
+    independent of \code{x1} and \code{x2}}
   \item{x2}{In \code{E.theta.toy(g=F,...)}, the value of \code{x} in
     \eqn{h_1(x,\theta)}{h1(x,theta)}}
 }
 \references{
-  M. C. Kennedy and A. O'Hagan 2001. \dQuote{Bayesian
-    calibration of computer models}.  Journal of the Royal Statistical
-  Society B, 63(3) pp425-464
-  
-  M. C. Kennedy and A. O'Hagan 2001.  \dQuote{Supplementary details on
-    Bayesian calibration of computer models}, Internal report, University
-  of Sheffield.  Available at \url{http://www.shef.ac.uk/~st1ao/ps/calsup.ps}
-  
-  R. K. S. Hankin 2005. \dQuote{Introducing BACCO, an R bundle for
-    Bayesian analysis of computer code output}, Journal of Statistical
-  Software, 14(16)
+  \itemize{
+    \item
+    M. C. Kennedy and A. O'Hagan 2001. \emph{Bayesian
+      calibration of computer models}.  Journal of the Royal Statistical
+    Society B, 63(3) pp425-464
+    \item
+    M. C. Kennedy and A. O'Hagan 2001.  \emph{Supplementary details on
+      Bayesian calibration of computer models}, Internal report, University
+    of Sheffield.  Available at \url{http://www.shef.ac.uk/~st1ao/ps/calsup.ps}
+    \item
+    R. K. S. Hankin 2005. \emph{Introducing BACCO, an R bundle for
+      Bayesian analysis of computer code output}, Journal of Statistical
+    Software, 14(16)
+  }
 }
 \note{
   A terse discussion follows; see the \code{calex.pdf} vignette and the

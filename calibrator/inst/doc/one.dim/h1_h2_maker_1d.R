@@ -1,4 +1,4 @@
-# This file is intented to be called by calex_1d.R.  It defines basis
+# This file is intended to be called by calex_1d.R.  It defines basis
 # functions for the code, H1.1d(), and the model inadequacy, H2.1d():
 
 h1.1d <- function(x){
@@ -19,8 +19,12 @@ H1.1d <- function(D1){
 
 h2.1d <- function(x){
   ##  out <- c(sin(x[1]*4),x[1]^3)
-  out <- c(x[1],x[1]^3)
-  names(out) <- c("x","x.cubed")
+  f <- function(x){(x-0.5)^2-1/6}
+  g <- function(x){sin(x*pi*2)}
+  
+  out <- c(f(x[1]),g(x[1]))
+  names(out) <- c("parabolic","periodic")
+
   return(out)
 }
 

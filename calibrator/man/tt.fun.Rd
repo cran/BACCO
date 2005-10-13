@@ -6,7 +6,7 @@
 \title{Integrals needed in KOH2001}
 \description{
   Calculates the three integrals needed for \code{V}, under the
-  restrictions specified in the KOH2001 supplement.  
+  restrictions specified in the KOH2001 supplement
 }
 \usage{
 tt.fun(D1, extractor, x.i, x.j,  test.for.symmetry=FALSE, method=1, phi)
@@ -102,20 +102,23 @@ are called by \code{V.fun()}.  They are defined separately as a
 debugging aid, and to simplify the structure of \code{V.fun()}.
 }
 \value{
-Each function returns a matrix as described in KOH2001.
+Each function returns a matrix as described in KOH2001
 }
 \references{
-  M. C. Kennedy and A. O'Hagan 2001. \dQuote{Bayesian
-    calibration of computer models}.  Journal of the Royal Statistical
-  Society B, 63(3) pp425-464
-  
-  M. C. Kennedy and A. O'Hagan 2001.  \dQuote{Supplementary details on
-    Bayesian calibration of computer models}, Internal report, University
-  of Sheffield.  Available at \url{http://www.shef.ac.uk/~st1ao/ps/calsup.ps}
-  
-  R. K. S. Hankin 2005. \dQuote{Introducing BACCO, an R bundle for
-    Bayesian analysis of computer code output}, Journal of Statistical
-  Software, 14(16)
+  \itemize{
+    \item
+    M. C. Kennedy and A. O'Hagan 2001. \emph{Bayesian
+      calibration of computer models}.  Journal of the Royal Statistical
+    Society B, 63(3) pp425-464
+    \item
+    M. C. Kennedy and A. O'Hagan 2001.  \emph{Supplementary details on
+      Bayesian calibration of computer models}, Internal report, University
+    of Sheffield.  Available at \url{http://www.shef.ac.uk/~st1ao/ps/calsup.ps}
+    \item
+    R. K. S. Hankin 2005. \emph{Introducing BACCO, an R bundle for
+      Bayesian analysis of computer code output}, Journal of Statistical
+    Software, 14(16)
+  }
 }
 \author{Robin K. S. Hankin}
 \seealso{\code{\link{V.fun}}}

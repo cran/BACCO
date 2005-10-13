@@ -8,7 +8,7 @@
   in a form suitable for passing to the other functions in the library.
 
   The user should never make \eqn{\phi}{phi} by hand; always use one of
-  these functions.
+  these functions
 }
 \usage{
 phi.fun.toy(rho, lambda, psi1, psi1.apriori, psi2, psi2.apriori,
@@ -39,10 +39,8 @@ phi.change(phi.fun, old.phi = NULL, rho = NULL, lambda = NULL,
     Recall that \eqn{\Omega_x}{omega_x} and \eqn{Omega_t}{omega_t} are
     arbitrary functions of \eqn{\psi_1}{psi1}.  In this case,
     the values are \code{omega_x=psi1[1:2]}, \code{omega_t=psi1[3:4]}
-    and \code{sigma1squared=psi1[6]}
-  }
+    and \code{sigma1squared=psi1[6]}}
   \item{psi1.apriori}{A priori PDF for \eqn{\psi_1}{psi1}.  In the form
-
     of a two element list with first element (\code{mean}) the mean and
     second element (\code{sigma}) the covariance matrix; distribution of
     the logarithms is assumed to be multivariate normal.  In the toy
@@ -51,15 +49,12 @@ phi.change(phi.fun, old.phi = NULL, rho = NULL, lambda = NULL,
     \eqn{\sigma_1^2}{sigma1squared}), and the variance is the
     corresponding six-by-six matrix.  Use function \code{prob.psi1()} to
     calculate the apriori probability density for a particular value of
-    \eqn{\psi_1}{psi1}
-  }
+    \eqn{\psi_1}{psi1}}
   \item{psi1.apriori.mean}{In function \code{phi.change.toy()}, use this
     argument to change just the mean of \code{psi1} (and leave the value
-    of \code{sigma} unchanged)
-  }
+    of \code{sigma} unchanged)}
   \item{psi1.apriori.sigma}{In function \code{phi.change.toy()}, use
-    this argument to change just the variance matrix  of \code{psi1}
-  }
+    this argument to change just the variance matrix  of \code{psi1}}
   \item{psi2}{Roughness lengths hyperparameter for \code{D2}.
 
     Internal function \code{pdm.maker.psi2()} takes \code{psi2} as an
@@ -69,8 +64,7 @@ phi.change(phi.fun, old.phi = NULL, rho = NULL, lambda = NULL,
 
     NB: function \code{stage2()} optimizes more than just \code{psi2}.
     It simultaneously optimizes \code{psi2} and \code{lambda} and
-    \code{rho}
-  }
+    \code{rho}}
   \item{psi2.apriori}{A priori PDF for \eqn{\psi_2}{psi2} \strong{and}
     hyperparameters \eqn{\rho}{rho} and \eqn{\lambda}{lambda} (in that
     order). 
@@ -88,15 +82,12 @@ phi.change(phi.fun, old.phi = NULL, rho = NULL, lambda = NULL,
     The second element of \code{phi.toy$psi2.apriori}, \code{sigma}, is
     the corresponding four-by-four variance matrix.  Use function
     \code{prob.psi2()} to calculate the apriori probability density of a
-    particular value of \eqn{\psi_2}{psi2}
-  }
+    particular value of \eqn{\psi_2}{psi2}}
   \item{psi2.apriori.mean}{In \code{phi.change.toy()}, use to change
-    just the mean of \code{psi2}
-  }
+    just the mean of \code{psi2}}
     \item{psi2.apriori.sigma}{In
     \code{phi.change.toy()}, use to change just the variance matrix of
-    \code{psi2}
-  }
+    \code{psi2}}
   \item{theta.apriori}{Apriori PDF for
     \eqn{\theta}{theta}.  As above, in the form of a list with elements
     for the mean and covariance.  The distribution is multivariate
@@ -104,14 +95,11 @@ phi.change(phi.fun, old.phi = NULL, rho = NULL, lambda = NULL,
     lognormal!  To be explicit: \eqn{\log(\theta)}{log(theta)} is
     lognormally distributed).  Use function \code{prob.theta()} to
     calculate the apriori probability density of a particular value of
-    \eqn{\theta}{theta}
-  }
+    \eqn{\theta}{theta}}
   \item{theta.apriori.mean}{In \code{phi.change.toy()}, use to change
-    just the mean of \code{theta}
-  }
+    just the mean of \code{theta}}
   \item{theta.apriori.sigma}{In \code{phi.change.toy()},
-    use to change just the variance matrix of \code{theta}
-  }
+    use to change just the variance matrix of \code{theta}}
   \item{power}{Exponent of the exponential as passed to
     \code{corr.matrix()} (and thence to \code{corr()}) of package
     \code{emulator}.  For the general case of nondiagonal
@@ -124,8 +112,7 @@ phi.change(phi.fun, old.phi = NULL, rho = NULL, lambda = NULL,
     but is included here because it's appropriate and convenient.  A
     disadvantage of the present system is that the
     \code{distance.function} argument to the \code{corr.matrix()}
-    function is hardwired to be \code{corr}
-  }
+    function is hardwired to be \code{corr}}
 }
 \value{
   Returns a list of several elements:
@@ -171,17 +158,20 @@ phi.change(phi.fun, old.phi = NULL, rho = NULL, lambda = NULL,
   defined separately.
 }
 \references{
-  M. C. Kennedy and A. O'Hagan 2001. \dQuote{Bayesian
-    calibration of computer models}.  Journal of the Royal Statistical
-  Society B, 63(3) pp425-464
-  
-  M. C. Kennedy and A. O'Hagan 2001.  \dQuote{Supplementary details on
-    Bayesian calibration of computer models}, Internal report, University
-  of Sheffield.  Available at \url{http://www.shef.ac.uk/~st1ao/ps/calsup.ps}
-  
-  R. K. S. Hankin 2005. \dQuote{Introducing BACCO, an R bundle for
-    Bayesian analysis of computer code output}, Journal of Statistical
-  Software, 14(16)
+  \itemize{
+    \item
+    M. C. Kennedy and A. O'Hagan 2001. \emph{Bayesian
+      calibration of computer models}.  Journal of the Royal Statistical
+    Society B, 63(3) pp425-464
+    \item
+    M. C. Kennedy and A. O'Hagan 2001.  \emph{Supplementary details on
+      Bayesian calibration of computer models}, Internal report, University
+    of Sheffield.  Available at \url{http://www.shef.ac.uk/~st1ao/ps/calsup.ps}
+    \item
+    R. K. S. Hankin 2005. \emph{Introducing BACCO, an R bundle for
+      Bayesian analysis of computer code output}, Journal of Statistical
+    Software, 14(16)
+  }
 }
 \author{Robin K. S. Hankin}
 \seealso{

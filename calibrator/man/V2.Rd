@@ -12,18 +12,33 @@ V2(x, other = NULL,  phi)
   \item{other}{Second matrix; if \code{NULL}, use x}
   \item{phi}{Hyperparameters}
 }
+\details{
+  This function returns the variance matrix of observations of the real
+  process \eqn{z} at points
+  \eqn{D_2=\left\{x_1,\ldots,x_n\right\}}{D2={x_1,...,x_n}}.
+
+  It appears in the lower right corner of the variance matrix on the
+  bottom of page 1 of the supplement, calculated by function
+  \code{Vd()}. 
+
+  It is also used in functions \code{Cov.eqn9.supp()} and
+  \code{V.fun()}.
+}
 \references{
-  M. C. Kennedy and A. O'Hagan 2001. \dQuote{Bayesian
-    calibration of computer models}.  Journal of the Royal Statistical
-  Society B, 63(3) pp425-464
-  
-  M. C. Kennedy and A. O'Hagan 2001.  \dQuote{Supplementary details on
-    Bayesian calibration of computer models}, Internal report, University
-  of Sheffield.  Available at \url{http://www.shef.ac.uk/~st1ao/ps/calsup.ps}
-  
-  R. K. S. Hankin 2005. \dQuote{Introducing BACCO, an R bundle for
-    Bayesian analysis of computer code output}, Journal of Statistical
-  Software, 14(16)
+  \itemize{
+    \item
+    M. C. Kennedy and A. O'Hagan 2001. \emph{Bayesian
+      calibration of computer models}.  Journal of the Royal Statistical
+    Society B, 63(3) pp425-464
+    \item
+    M. C. Kennedy and A. O'Hagan 2001.  \emph{Supplementary details on
+      Bayesian calibration of computer models}, Internal report, University
+    of Sheffield.  Available at \url{http://www.shef.ac.uk/~st1ao/ps/calsup.ps}
+    \item
+    R. K. S. Hankin 2005. \emph{Introducing BACCO, an R bundle for
+      Bayesian analysis of computer code output}, Journal of Statistical
+    Software, 14(16)
+  }
 }
 \author{Robin K. S. Hankin}
 \seealso{\code{\link{V1}}}

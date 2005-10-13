@@ -7,7 +7,8 @@
 }
 \usage{
 EK.eqn10.supp(X.dist, D1, D2, H1, H2, d, hbar.fun,
-lower.theta,upper.theta, extractor, give.info, phi, ...)
+   lower.theta, upper.theta, extractor, give.info=FALSE,
+   include.prior=FALSE, phi, ...)
 }
 \arguments{
   \item{X.dist}{Probability distribution of \code{X}, in the form of a
@@ -20,6 +21,7 @@ lower.theta,upper.theta, extractor, give.info, phi, ...)
   \item{H1}{Regression function for \code{D1}}
   \item{H2}{Regression function for \code{D2}}
   \item{d}{Vector of code outputs and field observations}
+  \item{include.prior}{Boolean; passed to function \code{p.eqn8.supp()} (qv)}
   \item{hbar.fun}{Function that gives expectation (with respect to \code{X})
     of \code{h1(x,theta)} and \code{h2(x)} as per section 4.2}
   \item{lower.theta}{Lower integration limit for \code{theta} (NB: a vector)}
@@ -29,12 +31,12 @@ lower.theta,upper.theta, extractor, give.info, phi, ...)
     an example}
   \item{give.info}{Boolean, with default \code{FALSE} meaning to return
     just the answer and \code{TRUE} to return the answer along with all
-    output from both integrations as performed by \code{adapt()}.}
+    output from both integrations as performed by \code{adapt()}}
   \item{phi}{Hyperparameters}
   \item{...}{Extra arguments passed to the integration
     function.  If multidimensional (ie \code{length(theta)>1}), then the
     arguments are passed to \code{adapt()}; if one dimensional, they
-    are passed to \code{integrate()}.}
+    are passed to \code{integrate()}}
 }
 \details{
 This function evaluates a numerical approximation to equation 10 of
@@ -45,7 +47,7 @@ Equation 10 integrates over the prior distribution of \code{theta}.  If
 
 In the case of multidimensional integration, the eponymous
 \code{adapt()} is used.  Note that, as of version 1.0-3, this is
-restricted to less than 20 dimensions---which is not checked for.
+restricted to fewer than 20 dimensions---which is not checked for.
 Evaluation is slow, as multidimensional integration is hard (spot the
 understatement).
 
@@ -53,28 +55,30 @@ In the case of one dimensional integration---theta being a
 scalar---function \code{integrate()} of the stats package is used.
 
 Note that equation 10 is conditional on the observed data \strong{and}
-the hyperparameters.
-
+the hyperparameters
 }
 \value{
   Returns a scalar
 }
 \references{
-  M. C. Kennedy and A. O'Hagan 2001. \dQuote{Bayesian
-    calibration of computer models}.  Journal of the Royal Statistical
-  Society B, 63(3) pp425-464
-  
-  M. C. Kennedy and A. O'Hagan 2001.  \dQuote{Supplementary details on
-    Bayesian calibration of computer models}, Internal report, University
-  of Sheffield.  Available at \url{http://www.shef.ac.uk/~st1ao/ps/calsup.ps}
-  
-  R. K. S. Hankin 2005. \dQuote{Introducing BACCO, an R bundle for
-    Bayesian analysis of computer code output}, Journal of Statistical
-  Software, 14(16)
+  \itemize{
+    \item
+    M. C. Kennedy and A. O'Hagan 2001. \emph{Bayesian
+      calibration of computer models}.  Journal of the Royal Statistical
+    Society B, 63(3) pp425-464
+    \item
+    M. C. Kennedy and A. O'Hagan 2001.  \emph{Supplementary details on
+      Bayesian calibration of computer models}, Internal report, University
+    of Sheffield.  Available at \url{http://www.shef.ac.uk/~st1ao/ps/calsup.ps}
+    \item
+    R. K. S. Hankin 2005. \emph{Introducing BACCO, an R bundle for
+      Bayesian analysis of computer code output}, Journal of Statistical
+    Software, 14(16)
+  }
 }
 \author{Robin K. S. Hankin}
 \note{
-The function was not reviewed by the Journal of Statistical Software
+  The function was not reviewed by the Journal of Statistical Software
 }
 \examples{
 1+1
@@ -82,8 +86,6 @@ The function was not reviewed by the Journal of Statistical Software
 # Not run because it takes R CMD check too long.
 data(toys)
 EK.eqn10.supp(X.dist=X.dist.toy, D1=D1.toy, D2=D2.toy, H1=H1.toy, H2=H2.toy, d=d.toy, hbar.fun=hbar.fun.toy, lower.theta=c(-3,-3,-3), upper.theta=c(3,3,3),extractor=extractor.toy, phi=phi.toy)
-
-
 }
 }
 \keyword{array}

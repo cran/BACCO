@@ -15,7 +15,7 @@ dists.2frames(a, b=NULL, A=NULL, A.lower=NULL, test.for.symmetry=TRUE)
     use \code{a}}
   \item{A}{Positive definite matrix; if \code{NULL}, a value for
     \code{A.lower} is needed.  If a value for \code{A} is supplied, use
-    a clear but possibly slower method.}
+    a clear but possibly slower method}
   \item{A.lower}{The lower triangular Cholesky decomposition of
     \code{A} (only needed if \code{A} is \code{NULL}).
     
@@ -23,24 +23,28 @@ dists.2frames(a, b=NULL, A=NULL, A.lower=NULL, test.for.symmetry=TRUE)
     relatively opaque but possibly faster method will be used.  The time
     saving ought to be negligible unless \code{nrow(a)} (or
     \code{nrow(b)} if supplied), is huge.  \strong{Note that this option does
-    not test for symmetry of matrix A}.  }
+    not test for symmetry of matrix A}}
     \item{test.for.symmetry}{Boolean, with default \code{TRUE} meaning
     to calculate all element arrays (elegantly), and \code{FALSE}
     meaning to calculate only the upper triangular elements (using
     loops), which ought to be faster.  The value of this argument should
-    not affect the returned value, up to numerical accuracy.}  }
+    not affect the returned value, up to numerical accuracy}
+}
 \references{
-  M. C. Kennedy and A. O'Hagan 2001. \dQuote{Bayesian
-    calibration of computer models}.  Journal of the Royal Statistical
-  Society B, 63(3) pp425-464
-  
-  M. C. Kennedy and A. O'Hagan 2001.  \dQuote{Supplementary details on
-    Bayesian calibration of computer models}, Internal report, University
-  of Sheffield.  Available at \url{http://www.shef.ac.uk/~st1ao/ps/calsup.ps}
-  
-  R. K. S. Hankin 2005. \dQuote{Introducing BACCO, an R bundle for
-    Bayesian analysis of computer code output}, Journal of Statistical
-  Software, 14(16)
+  \itemize{
+    \item
+    M. C. Kennedy and A. O'Hagan 2001. \emph{Bayesian
+      calibration of computer models}.  Journal of the Royal Statistical
+    Society B, 63(3) pp425-464
+    \item
+    M. C. Kennedy and A. O'Hagan 2001.  \emph{Supplementary details on
+      Bayesian calibration of computer models}, Internal report, University
+    of Sheffield.  Available at \url{http://www.shef.ac.uk/~st1ao/ps/calsup.ps}
+    \item
+    R. K. S. Hankin 2005. \emph{Introducing BACCO, an R bundle for
+      Bayesian analysis of computer code output}, Journal of Statistical
+    Software, 14(16)
+  }
 }
 \author{Robin K. S. Hankin}
 \seealso{\code{\link{dists.2frames}}}

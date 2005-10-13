@@ -48,15 +48,15 @@ betahat.fun.koh.vector(D1, D2, H1, H2, theta, d, phi)
   }
 }
 \references{
-  M. C. Kennedy and A. O'Hagan 2001. \dQuote{Bayesian
+  M. C. Kennedy and A. O'Hagan 2001. \emph{Bayesian
     calibration of computer models}.  Journal of the Royal Statistical
   Society B, 63(3) pp425-464
   
-  M. C. Kennedy and A. O'Hagan 2001.  \dQuote{Supplementary details on
+  M. C. Kennedy and A. O'Hagan 2001.  \emph{Supplementary details on
     Bayesian calibration of computer models}, Internal report, University
   of Sheffield.  Available at \url{http://www.shef.ac.uk/~st1ao/ps/calsup.ps}
   
-  R. K. S. Hankin 2005. \dQuote{Introducing BACCO, an R bundle for
+  R. K. S. Hankin 2005. \emph{Introducing BACCO, an R bundle for
     Bayesian analysis of computer code output}, Journal of Statistical
   Software, 14(16)
 }

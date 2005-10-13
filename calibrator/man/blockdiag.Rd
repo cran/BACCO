@@ -16,7 +16,7 @@ blockdiag(m1, m2, p.tr = 0, p.ll = 0)
 }
 \author{Robin K. S. Hankin}
 \note{The function documented here is a subset of \code{adiag} of
-  package \pkg{magic}.
+  package \pkg{magic}
   }
 \examples{
 data(toys)

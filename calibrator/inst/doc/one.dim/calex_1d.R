@@ -17,10 +17,10 @@ library(calibrator)
 library(emulator)
 
 # First, how many code observations:
-n1 <- 25
+n1 <- 40
 
 # and how many field observations:
-n2 <- 27
+n2 <- 90
 
 
 
@@ -42,7 +42,6 @@ betahat.fun.koh(theta=theta.TRUE, d=d.1d, D1=D1.1d, D2=D2.1d, H1=H1.1d, H2=H2.1d
 
 # Ok, not too bad; the true answer is (0,1,1,1,1), so there is an
 # error of about 2%
-
 
 
 # Now what happens if we use a very wrong  value for theta:
@@ -87,10 +86,6 @@ abline(v=0.5)
 
 
 
-
-
-
-
 # Now use Metropolis-Hastings.  We need a wrapper to give the PDF for theta:
 
 
@@ -116,6 +111,11 @@ if(max(theta.sample.1d)>min(theta.sample.1d)){
 
 Ez.eqn9.supp(x=0.1,  theta=theta.sample.1d,  d=d.1d, D1=D1.1d,  D2=D2.1d, H1=H1.1d, H2=H2.1d, phi=phi.TRUE)
 
+
+
+# We can now evaluate the covariance at, say, x=0.4 for a range of thetas:
+jj.theta <- as.matrix( (1:10)/10)
+cov.p5.supp(x=0.4,xdash=NULL,theta=jj.theta,d=d.1d, D1=D1.1d, D2=D2.1d, H1=H1.1d, H2=H2.1d , phi=phi.1d)
 
 
 
@@ -207,6 +207,7 @@ EK.eqn10.supp(X.dist=X.dist.1d, D1=D1.1d, D2=D2.1d,
 } else {
    print("optimization not performed because variable do.hyper.opt set to FALSE.  To do the optimization, set variable do.hyper.opt to TRUE, near the beginning of this file, and source() it again")
 }
+
 
 
 

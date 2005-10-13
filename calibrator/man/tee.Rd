@@ -5,7 +5,7 @@
 \description{
   Returns a vector whose elements are the \dQuote{distances} from a point
   to the observations and code run points (\code{tee()}); and basis
-  functions for use in \code{Ez.eqn9.supp()}.
+  functions for use in \code{Ez.eqn9.supp()}
 }
 \usage{
 tee(x, theta, D1, D2, phi)
@@ -26,20 +26,23 @@ h.fun(x, theta, H1, H2, phi)
   Function \code{h.fun()} returns the first of the subsidiary equations
   in equation 9 of the supplement and function \code{tee()} returns the
   second (NB: do not confuse this with functions \code{t1bar()} and
-  \code{t2bar()} which are internal to \code{EK.eqn10.supp()}).
+  \code{t2bar()} which are internal to \code{EK.eqn10.supp()})
 }
 \references{
-  M. C. Kennedy and A. O'Hagan 2001. \dQuote{Bayesian
-    calibration of computer models}.  Journal of the Royal Statistical
-  Society B, 63(3) pp425-464
-  
-  M. C. Kennedy and A. O'Hagan 2001.  \dQuote{Supplementary details on
-    Bayesian calibration of computer models}, Internal report, University
-  of Sheffield.  Available at \url{http://www.shef.ac.uk/~st1ao/ps/calsup.ps}
-  
-  R. K. S. Hankin 2005. \dQuote{Introducing BACCO, an R bundle for
-    Bayesian analysis of computer code output}, Journal of Statistical
-  Software, 14(16)
+  \itemize{
+    \item
+    M. C. Kennedy and A. O'Hagan 2001. \emph{Bayesian
+      calibration of computer models}.  Journal of the Royal Statistical
+    Society B, 63(3) pp425-464
+    \item
+    M. C. Kennedy and A. O'Hagan 2001.  \emph{Supplementary details on
+      Bayesian calibration of computer models}, Internal report, University
+    of Sheffield.  Available at \url{http://www.shef.ac.uk/~st1ao/ps/calsup.ps}
+    \item
+    R. K. S. Hankin 2005. \emph{Introducing BACCO, an R bundle for
+      Bayesian analysis of computer code output}, Journal of Statistical
+    Software, 14(16)
+  }
 }
 \author{Robin K. S. Hankin}
 \seealso{

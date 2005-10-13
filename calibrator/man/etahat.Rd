@@ -20,28 +20,28 @@ etahat(D1, D2, H1, y, E.theta, extractor, phi)
   \item{phi}{Hyperparameters}
 }
 \references{
-  M. C. Kennedy and A. O'Hagan 2001. \dQuote{Bayesian
+  M. C. Kennedy and A. O'Hagan 2001. \emph{Bayesian
     calibration of computer models}.  Journal of the Royal Statistical
   Society B, 63(3) pp425-464
   
-  M. C. Kennedy and A. O'Hagan 2001.  \dQuote{Supplementary details on
+  M. C. Kennedy and A. O'Hagan 2001.  \emph{Supplementary details on
     Bayesian calibration of computer models}, Internal report, University
   of Sheffield.  Available at \url{http://www.shef.ac.uk/~st1ao/ps/calsup.ps}
   
-  R. K. S. Hankin 2005. \dQuote{Introducing BACCO, an R bundle for
+  R. K. S. Hankin 2005. \emph{Introducing BACCO, an R bundle for
     Bayesian analysis of computer code output}, Journal of Statistical
   Software, 14(16)
 }
-
-\details{ Argument \code{E.theta} is officially a function that, given
+\details{
+  Argument \code{E.theta} is officially a function that, given
   \eqn{x},y returns
   \eqn{E_\theta\left(h_1(x,\theta)\right)}{E_theta(h1(x,theta))}.
   
   However, if supplied a non-function (this is tested by
   \code{is.function()} in the code), \code{E.theta} is interpreted as
   values of \eqn{\theta}{theta} to use.  Recycling is carried out by
-  function \code{D1.fun()}.
-  }
+  function \code{D1.fun()}
+}
 \author{Robin K. S. Hankin}
 \seealso{\code{\link{p.page4}}}
 \examples{

@@ -16,10 +16,11 @@ cov.p5.supp  (x, xdash=NULL, theta, d, D1, D2, H1, H2, phi)
     are the points of interest}
   \item{xdash}{The second point, or (\code{Cov.eqn9.supp()}) 
     a matrix whose rows are the points of interest.  The default of
-    \code{NULL} means to use \code{xdash=x}.}
-  \item{theta}{Parameters; supply a vector to \code{Cov.eqn9.supp()} and
-    a matrix whose rows are the points in parameter space to
-    \code{cov.p5.supp()}}
+    \code{NULL} means to use \code{xdash=x}}
+  \item{theta}{Parameters.  For \code{Cov.eqn9.supp()}, supply a vector
+    which will be interpreted as a single point in parameter space.  For
+    \code{cov.p5.supp()}, supply a matrix whose rows will be interpreted
+    as points in parameter space}
   \item{d}{Observed values}
   \item{D1}{Code run design matrix}
   \item{D2}{Observation points of real process}
@@ -42,23 +43,27 @@ Function \code{cov.p5.supp()} takes a vector for arguments \code{x} and
 \code{xdash} and a matrix for argument \code{theta} whose rows are the
 points in parameter space.  A vector \code{V}, with elements
 corresponding to the rows of argument \code{theta} is returned:
-\eqn{V[i] = \mbox{cov}\left(z(x),z(x')|\theta_i\right)}{V[i] = cov(z(x),z(x')|theta[i])}. 
+\deqn{V[i] = \mbox{cov}\left(z(x),z(x')|\theta_i\right)}{V[i] =
+  cov(z(x),z(x')|theta[i])}
 }
 \value{
-Returns a matrix of covariances
+  Returns a matrix of covariances
 }
 \references{
-  M. C. Kennedy and A. O'Hagan 2001. \dQuote{Bayesian
-    calibration of computer models}.  Journal of the Royal Statistical
-  Society B, 63(3) pp425-464
-  
-  M. C. Kennedy and A. O'Hagan 2001.  \dQuote{Supplementary details on
-    Bayesian calibration of computer models}, Internal report, University
-  of Sheffield.  Available at \url{http://www.shef.ac.uk/~st1ao/ps/calsup.ps}
-  
-  R. K. S. Hankin 2005. \dQuote{Introducing BACCO, an R bundle for
-    Bayesian analysis of computer code output}, Journal of Statistical
-  Software, 14(16)
+  \itemize{
+    \item
+    M. C. Kennedy and A. O'Hagan 2001. \emph{Bayesian
+      calibration of computer models}.  Journal of the Royal Statistical
+    Society B, 63(3) pp425-464
+    \item
+    M. C. Kennedy and A. O'Hagan 2001.  \emph{Supplementary details on
+      Bayesian calibration of computer models}, Internal report, University
+    of Sheffield.  Available at \url{http://www.shef.ac.uk/~st1ao/ps/calsup.ps}
+    \item
+    R. K. S. Hankin 2005. \emph{Introducing BACCO, an R bundle for
+      Bayesian analysis of computer code output}, Journal of Statistical
+    Software, 14(16)
+    }
 }
 \author{Robin K. S. Hankin}
 \note{

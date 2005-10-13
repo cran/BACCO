@@ -23,12 +23,12 @@ lognormally.distributed=FALSE, return.log=FALSE, phi)
   \item{include.prior}{Boolean, with \code{TRUE}
     meaning to include the prior PDF for \eqn{\theta}{theta} and default
     \code{FALSE} meaning  return the likelihood, multiplied by an
-    undetermined constant.}
+    undetermined constant}
   \item{lognormally.distributed}{Boolean, with \code{TRUE} meaning to
     assume prior is lognormal (see \code{prob.theta()} for more info)}
   \item{return.log}{Boolean, with default \code{FALSE} meaning to return
     the probability; \code{TRUE} means to return the (natural) logarithm
-    of the answer.}
+    of the answer}
   \item{phi}{Hyperparameters}
 }
 \details{
@@ -36,20 +36,23 @@ lognormally.distributed=FALSE, return.log=FALSE, phi)
   for \code{p.eqn8.supp.vector()}.  The forms differ in their treatment
   of \eqn{\theta}{theta}.  In the former, \eqn{\theta}{theta} must be a
   vector; in the latter, \eqn{\theta}{theta} may be a matrix, in which
-  case \code{p.eqn8.supp.vector()} is applied to the rows.
+  case \code{p.eqn8.supp.vector()} is applied to the rows
 }
 \references{
-  M. C. Kennedy and A. O'Hagan 2001. \dQuote{Bayesian
-    calibration of computer models}.  Journal of the Royal Statistical
-  Society B, 63(3) pp425-464
-  
-  M. C. Kennedy and A. O'Hagan 2001.  \dQuote{Supplementary details on
-    Bayesian calibration of computer models}, Internal report, University
-  of Sheffield.  Available at \url{http://www.shef.ac.uk/~st1ao/ps/calsup.ps}
-  
-  R. K. S. Hankin 2005. \dQuote{Introducing BACCO, an R bundle for
-    Bayesian analysis of computer code output}, Journal of Statistical
-  Software, 14(16)
+  \itemize{
+    \item
+    M. C. Kennedy and A. O'Hagan 2001. \emph{Bayesian
+      calibration of computer models}.  Journal of the Royal Statistical
+    Society B, 63(3) pp425-464
+    \item
+    M. C. Kennedy and A. O'Hagan 2001.  \emph{Supplementary details on
+      Bayesian calibration of computer models}, Internal report, University
+    of Sheffield.  Available at \url{http://www.shef.ac.uk/~st1ao/ps/calsup.ps}
+    \item
+    R. K. S. Hankin 2005. \emph{Introducing BACCO, an R bundle for
+      Bayesian analysis of computer code output}, Journal of Statistical
+    Software, 14(16)
+  }
 }
 \author{Robin K. S. Hankin}
 \seealso{\code{\link{W2}},\code{\link{stage1}}}

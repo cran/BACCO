@@ -315,7 +315,7 @@ function (x, other = NULL, phi)
     if (is.vector(x)) {
         x <- as.data.frame(t(x))
     }
-    return(t(phi$sigma1squared * corr.matrix(xold = x, yold = other, 
+    return(t(phi$sigma2squared * corr.matrix(xold = x, yold = other, 
         pos.def.matrix = phi$omegastar_x, power = phi$power)))
 }
 "Vd" <-
@@ -1291,18 +1291,18 @@ function (D1, extractor, x.i, x.j, test.for.symmetry = FALSE,
 }
 
 "EK.eqn10.supp" <- function(X.dist, D1, D2, H1, H2, d, hbar.fun,
-  lower.theta, upper.theta, extractor, give.info=FALSE, phi, ...){
-  scalar.1 <-
-    phi$rho*phi$sigma1squared/sqrt(det(diag(nrow=nrow(phi$omega_x)) +
+  lower.theta, upper.theta, extractor, give.info=FALSE, include.prior=FALSE, phi, ...){
+  scalar1 <-
+    phi$sigma1squared/sqrt(det(diag(nrow=nrow(phi$omega_x)) +
                                        2*X.dist$var %*% phi$omega_x))
-  scalar.2 <-
+  scalar2 <-
     phi$sigma2squared/sqrt(det(diag(nrow=nrow(phi$omegastar_x)) +
                                    2*X.dist$var %*% phi$omegastar_x))
   
   matrix.1 <- solve(2*X.dist$var + solve(phi$omega_x))
   matrix.2 <- solve(2*X.dist$var + solve(phi$omegastar_x))
   
-  "t1bar" <- function(theta, D1, D2, X.dist){
+  "t1bar" <- function(theta, D1, D2, X.dist){ # Eqn 14 of the supplement
     f1 <- function(i){
       as.vector(quad.form(phi$omega_t, theta - t.vec[i,]))
     }
@@ -1310,10 +1310,12 @@ function (D1, extractor, x.i, x.j, test.for.symmetry = FALSE,
       as.vector(quad.form(matrix.1, X.dist$mean - x.star[i,]))
     }
     out <- sapply(1:nrow(t.vec), function(i) { exp(-f1(i) - f2(i)) })
-    return(scalar.1*out)
+    return( (phi$rho) * scalar1 * out)
   }
   
-  "t2bar" <- function(D1, D2, X.dist){#note absence of theta!
+  "t2bar" <- function(D1, D2, X.dist){ # This is eqn 15 of the
+                                       # supplement.  Note absence of
+                                       # theta!
     f1 <- function(i){
       as.vector(quad.form(matrix.1 , X.dist$mean - D2[i,]))
     }
@@ -1324,7 +1326,7 @@ function (D1, extractor, x.i, x.j, test.for.symmetry = FALSE,
     out1 <- sapply(1:nrow(D2), function(i) { exp(-f1(i)) })
     out2 <- sapply(1:nrow(D2), function(i) { exp(-f2(i)) })
     
-    return(scalar.1*out1 + scalar.2*out2)
+    return( (phi$rho)^2*scalar1*out1 + scalar2*out2)
   }
   
   "tbar.fun" <- function(theta, D1, D2, X.dist, phi){
@@ -1344,7 +1346,7 @@ function (D1, extractor, x.i, x.j, test.for.symmetry = FALSE,
       H2=H2, phi=phi) %*% bhat))
     
     out <- out*p.eqn8.supp(theta=theta, D1=D1, D2=D2, H1=H1, H2=H2,
-                           d=d, include.prior = FALSE,
+                           d=d, include.prior = include.prior,
                            lognormally.distributed = FALSE,
                            return.log = FALSE, phi=phi)
     return(out)
@@ -1352,7 +1354,7 @@ function (D1, extractor, x.i, x.j, test.for.symmetry = FALSE,
 
   "integrand.denominator" <- function(theta){
     p.eqn8.supp(theta=theta, D1=D1, D2=D2, H1=H1, H2=H2, d=d,
-                include.prior = FALSE,
+                include.prior = include.prior,
                 lognormally.distributed = FALSE,
                 return.log = FALSE, phi=phi)
   }

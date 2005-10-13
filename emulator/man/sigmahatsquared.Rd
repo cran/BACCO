@@ -18,14 +18,28 @@ sigmahatsquared.A(H, A, d)
   \item{Ainv}{Inverse of the correlation matrix (eg \code{solve(corr.matrix(val))})}
   \item{d}{Vector of observations}
 }
+\details{
+  The formula is
+
+\deqn{\frac{y^T\left(A^{-1}-A^{-1}H(H^T A^{-1}H)^{-1} H^T
+    A^{-1}\right)y}{n-q-2}}{ommitted; see pdf}
+
+where \eqn{y} is the data vector, \eqn{H} the matrix whose rows are the
+regressor functions of the design matrix, \eqn{A} the correlation
+matrix, \eqn{n} the number of observations and \eqn{q} the number of
+elements in the basis function.
+}
 \references{
-  J. Oakley and A. O'Hagan, 2002. \dQuote{Bayesian Inference for the
-    Uncertainty Distribution of Computer Model Outputs}, Biometrika
-  89(4), pp769-784
-  
-  R. K. S. Hankin 2005. \dQuote{Introducing BACCO, an R bundle for
-    Bayesian analysis of computer code output}, Journal of Statistical
-  Software, 14(16)
+  \itemize{
+    \item
+    J. Oakley and A. O'Hagan, 2002. \emph{Bayesian Inference for the
+      Uncertainty Distribution of Computer Model Outputs}, Biometrika
+    89(4), pp769-784
+    \item
+    R. K. S. Hankin 2005. \emph{Introducing BACCO, an R bundle for
+      Bayesian analysis of computer code output}, Journal of Statistical
+    Software, 14(16)
+  }
 }
 \author{Robin K. S. Hankin}
 \examples{

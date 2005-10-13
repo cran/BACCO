@@ -35,7 +35,7 @@ E.theta, Edash.theta, give.answers=FALSE, test.for.symmetry=FALSE, phi)
     for small matrices.
     
     Set this argument to \code{TRUE} only when debugging, or testing
-    accuracy.} 
+    accuracy} 
   \item{phi}{Hyperparameters}
 }
 \details{
@@ -51,19 +51,21 @@ E.theta, Edash.theta, give.answers=FALSE, test.for.symmetry=FALSE, phi)
   the calculation.  The final element is the matrix is the covariances
   as returned when \code{give.answers} is \code{FALSE}.
 }
-
 \references{
-  M. C. Kennedy and A. O'Hagan 2001. \dQuote{Bayesian
-    calibration of computer models}.  Journal of the Royal Statistical
-  Society B, 63(3) pp425-464
-  
-  M. C. Kennedy and A. O'Hagan 2001.  \dQuote{Supplementary details on
-    Bayesian calibration of computer models}, Internal report, University
-  of Sheffield.  Available at \url{http://www.shef.ac.uk/~st1ao/ps/calsup.ps}
-  
-  R. K. S. Hankin 2005. \dQuote{Introducing BACCO, an R bundle for
-    Bayesian analysis of computer code output}, Journal of Statistical
-  Software, 14(16)
+  \itemize{
+    \item
+    M. C. Kennedy and A. O'Hagan 2001. \emph{Bayesian
+      calibration of computer models}.  Journal of the Royal Statistical
+    Society B, 63(3) pp425-464
+    \item
+    M. C. Kennedy and A. O'Hagan 2001.  \emph{Supplementary details on
+      Bayesian calibration of computer models}, Internal report, University
+    of Sheffield.  Available at \url{http://www.shef.ac.uk/~st1ao/ps/calsup.ps}
+    \item
+    R. K. S. Hankin 2005. \emph{Introducing BACCO, an R bundle for
+      Bayesian analysis of computer code output}, Journal of Statistical
+    Software, 14(16)
+  }
 }
 \author{Robin K. S. Hankin}
 \note{This function takes a long time to run}

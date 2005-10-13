@@ -16,12 +16,12 @@ corr.matrix(xold, yold=NULL, method=1, distance.function=corr, ...)
   \item{x2}{Second point}
   \item{scales}{Vector specifying the diagonal elements of B (see below)}
   \item{pos.def.matrix}{Positive definite matrix to be used by
-    \code{corr.matrix()} for B. Exactly one of \code{scales} and
+    \code{corr.matrix()} for B.  Exactly one of \code{scales} and
     \code{pos.definite.matrix} should be specified.  Supplying
-    \code{scales} specifies the diagonal
-    elements of B (off diagonal elements are set to zero); supply
-    \code{pos.definite.matrix} in the general case.  Note that
-    neither \code{corr()} nor \code{corr.matrix()} test for positive
+    \code{scales} specifies the diagonal elements of B (off diagonal
+    elements are set to zero); supply \code{pos.definite.matrix} in the
+    general case.  A single value is recycled.   Note that neither
+    \code{corr()} nor \code{corr.matrix()} test for positive
     definiteness}
   \item{power}{In function \code{corr()}, the power to use in the
     exponent of the exponential.  In
@@ -92,16 +92,19 @@ corr.matrix(xold, yold=NULL, method=1, distance.function=corr, ...)
 Returns the correlation function
 }
 \references{
-  J. Oakley 1999. \dQuote{Bayesian uncertainty analysis for complex
-    computer codes}, PhD thesis, University of Sheffield.
-
-  J. Oakley and A. O'Hagan, 2002. \dQuote{Bayesian Inference for the
-  Uncertainty Distribution of Computer Model Outputs}, Biometrika
-  89(4), pp769-784
-
-  R. K. S. Hankin 2005. \dQuote{Introducing BACCO, an R bundle for
-    Bayesian analysis of computer code output}, Journal of Statistical
-  Software, 14(16)
+  \itemize{
+    \item 
+    J. Oakley 1999. \emph{Bayesian uncertainty analysis for complex
+      computer codes}, PhD thesis, University of Sheffield.
+    \item
+    J. Oakley and A. O'Hagan, 2002. \emph{Bayesian Inference for the
+      Uncertainty Distribution of Computer Model Outputs}, Biometrika
+    89(4), pp769-784
+    \item
+    R. K. S. Hankin 2005. \emph{Introducing BACCO, an R bundle for
+      Bayesian analysis of computer code output}, Journal of Statistical
+    Software, 14(16)
+  }
 }
 \note{
   It is worth reemphasising that supplying \code{scales} makes

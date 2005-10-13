@@ -18,12 +18,16 @@ prior.B(H , Ainv , B0=NULL)
   \item{b0}{prior constant}
   \item{B0}{prior coefficients}
 }
-\references{J. Oakley 2004. \dQuote{Estimating percentiles of uncertain
-    computer code outputs}.  Applied Statistics, 53(1), pp89-93.
-
-  J. Oakley 1999. \dQuote{Bayesian uncertainty analysis for complex
-    computer codes}, PhD thesis, University of Sheffield.
+\references{
+  \itemize{
+    \item
+    J. Oakley 2004. \emph{Estimating percentiles of uncertain
+      computer code outputs}.  Applied Statistics, 53(1), pp89-93.
+    \item
+    J. Oakley 1999. \emph{Bayesian uncertainty analysis for complex
+      computer codes}, PhD thesis, University of Sheffield.
   }
+}
 \author{Robin K. S. Hankin}
 \examples{
 

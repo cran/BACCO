@@ -41,15 +41,17 @@ betahat.fun.A(xold, A, d, give.variance=FALSE, func)
   effect.  An example would be \code{scales.likelihood()}.
 }
 \references{
-  J. Oakley and A. O'Hagan, 2002. \dQuote{Bayesian Inference for the
-  Uncertainty Distribution of Computer Model Outputs}, Biometrika
-  89(4), pp769-784
-
-  R. K. S. Hankin 2005. \dQuote{Introducing BACCO, an R bundle for
-    Bayesian analysis of computer code output}, Journal of Statistical
-  Software, 14(16)
+  \itemize{
+    \item
+    J. Oakley and A. O'Hagan, 2002. \emph{Bayesian Inference for the
+      Uncertainty Distribution of Computer Model Outputs}, Biometrika
+    89(4), pp769-784
+    \item
+    R. K. S. Hankin 2005. \emph{Introducing BACCO, an R bundle for
+      Bayesian analysis of computer code output}, Journal of Statistical
+    Software, 14(16)
+  }
 }
-
 \author{Robin K. S. Hankin}
 \examples{
 data(toy)

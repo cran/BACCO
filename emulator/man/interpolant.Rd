@@ -3,13 +3,15 @@
 \alias{interpolant.quick}
 \alias{int.qq}
 \title{Interpolates between known points using Bayesian estimation}
-\description{Calculates the a postiori distribution of results at a
-  point using the techniques outlined by Oakley.  This function is the
+\description{
+  Calculates the a postiori distribution of results at a point using the
+  techniques outlined by Oakley.  Function \code{interpolant()} is the
   primary function of the package.  Function \code{interpolant.quick()}
   gives the expectation of the emulator at a set of points, and function
   \code{interpolant()} gives the expectation and other information (such
   as the variance) at a single point.  Function \code{int.qq()} gives a
-  quick-quick vectorized interpolant using certain timesaving assumptions.
+  quick-quick vectorized interpolant using certain timesaving
+  assumptions.
 }
 \usage{
 interpolant(x, d, xold, Ainv=NULL, A=NULL, use.Ainv=TRUE, scales=NULL, pos.def.matrix=NULL,
@@ -40,9 +42,10 @@ int.qq(x, d, xold, Ainv, pos.def.matrix, func=regressor.basis)
     \code{use.Ainv=FALSE}; see below.
     
     If \code{FALSE}, function \code{interpolant()} does not use
-    \code{Ainv}, but makes extensive use of \code{solve(A,x)} (mostly in
-    the form of \code{quad.form.inv()} calls).  This option avoids the
-    overhead of inverting a matrix, but has non-negligible marginal costs.
+    \code{Ainv}, but makes extensive use of \code{solve(A,x)}, mostly in
+    the form of \code{quad.form.inv()} calls.  This option avoids the
+    overhead of inverting a matrix, but has non-negligible marginal
+    costs.
 
     If \code{Ainv} is not available, there is little to choose, in terms
     of execution time, between calculating it explicitly (that is,
@@ -58,12 +61,22 @@ int.qq(x, d, xold, Ainv, pos.def.matrix, func=regressor.basis)
     \code{TRUE} meaning to return the whole list of a postiori
     parameters as detailed on pp12-15 of Oakley, and default \code{FALSE}
     meaning to return just the best estimate}
+
   \item{scales}{Vector of \dQuote{roughness} lengths used to calculate
-    \code{t(x)}.  Note that \code{scales} is needed twice: once to calculate
-    \code{Ainv} and once to calculate \code{t(x)} inside
-    \code{interpolant} (which is determined by calling \code{corr}
-    inside an \code{apply()} loop).  A good place to start might be
-    \code{scales=rep(1,ncol(xold))}}
+    \code{t(x)}, the correlations between \code{x} and the points in the
+    design matrix \code{xold}.
+    
+    Note that \code{scales} is needed twice overall: once to calculate
+    \code{Ainv}, and once to calculate \code{t(x)} inside
+    \code{interpolant()} (\code{t(x)} is determined by calling
+    \code{corr()} inside an \code{apply()} loop).  A good place to start
+    might be \code{scales=rep(1,ncol(xold))}.
+    
+    It's probably worth restating here that the elements of
+    \code{scales} correspond to the diagonal elements of the \eqn{B}
+    matrix (see \code{?corr}) and so have the dimensions of
+    \eqn{[D]^{-2}}{1/D^2} where \eqn{D} is the dimensions of
+    \code{xold}}
   \item{pos.def.matrix}{A positive definite matrix that is used if
     \code{scales} is not supplied.  Note that precisely one of
     \code{scales} and \code{pos.def.matrix} must be supplied}
@@ -78,34 +91,39 @@ int.qq(x, d, xold, Ainv, pos.def.matrix, func=regressor.basis)
     usually \code{corr()}}
 }
 \value{
-  If \code{give.full.list} is TRUE, a list is return with components
+  In function \code{interpolant()}, if \code{give.full.list} is
+  \code{TRUE}, a list is returned with components
+  
   \item{betahat}{Standard MLE of the (linear) fit, given the
     observations}
   \item{prior}{Estimate for the prior}
   \item{sigmahat.square}{A postiori estimate for variance}
   \item{mstar.star}{A postiori expectation}
   \item{cstar}{a priori correlation of a point with itself}
-    \item{cstar.star}{A postiori correlation of a point with itself}
+  \item{cstar.star}{A postiori correlation of a point with itself}
   \item{Z}{Standard deviation (although the distribution is actually a
     t-distribution with \eqn{n-q} degrees of freedom)}
 }
 \references{
-  J. Oakley 2004. \dQuote{Estimating percentiles of uncertain
-    computer code outputs}.  Applied Statistics, 53(1), pp89-93.
-
-  J. Oakley 1999. \dQuote{Bayesian uncertainty analysis for complex
-    computer codes}, PhD thesis, University of Sheffield.
-
-  J. Oakley and A. O'Hagan, 2002. \dQuote{Bayesian Inference for the
-    Uncertainty Distribution of Computer Model Outputs}, Biometrika
-  89(4), pp769-784
-  
-  R. K. S. Hankin 2005. \dQuote{Introducing BACCO, an R bundle for
-    Bayesian analysis of computer code output}, Journal of Statistical
-  Software, 14(16)
-}
+  \itemize{
+    \item
+    J. Oakley 2004. \dQuote{Estimating percentiles of uncertain
+      computer code outputs}.  Applied Statistics, 53(1), pp89-93.
+    \item
+    J. Oakley 1999. \dQuote{Bayesian uncertainty analysis for complex
+      computer codes}, PhD thesis, University of Sheffield.
+    \item
+    J. Oakley and A. O'Hagan, 2002. \dQuote{Bayesian Inference for the
+      Uncertainty Distribution of Computer Model Outputs}, Biometrika
+    89(4), pp769-784
+    \item
+    R. K. S. Hankin 2005. \dQuote{Introducing BACCO, an R bundle for
+      Bayesian analysis of computer code output}, Journal of Statistical
+    Software, 14(16)
+  }
+  }
 \author{Robin K. S. Hankin}
-\seealso{\code{\link{makeinputfiles}}}
+\seealso{\code{\link{makeinputfiles}},\code{\link{corr}}}
 \examples{
 # example has 10 observations on 6 dimensions.
 # function is just sum( (1:6)*x) where x=c(x_1, ... , x_2)

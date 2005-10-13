@@ -12,7 +12,7 @@ symmetrize(a)
   \item{a}{Upper triangular matrix to be symmetrized}
 }
 \details{
-Also works for lower triangular matrices
+  Also works for lower triangular matrices
 }
 \author{Robin K. S. Hankin}
 \examples{
@@ -22,7 +22,5 @@ X <- crossprod(jj,jj)    # X has a Wishart distribution (and in
 
 chol(X)
 symmetrize(chol(X))
-
-
 }
 \keyword{array}

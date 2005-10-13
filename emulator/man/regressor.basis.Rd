@@ -7,25 +7,27 @@
 }
 \usage{
 regressor.basis(x)
-regressor.multi(x.df,func)
+regressor.multi(x.df,func=regressor.basis)
 }   
 \arguments{
   \item{x}{vector of coordinates}
   \item{x.df}{Matrix whose rows are coordinates of points}
   \item{func}{Regressor basis function to use; defaults to \code{regressor.basis}}
 }
-\details{ 
+\details{
+  
   The regressor basis specified by \code{regressor.basis()} is just the
-  addition of a constant, which is conventionally placed in the first
-  position.  This is a very common choice for a set of bases, although
-  it is important to investigate both simpler and more sophisticated
-  alternatives.  Tony would recommend simpler functions (perhaps as
-  simple as \code{function(x){1}}, that is, nothing but a constant), and
-  Jonty would recommend more complicated bespoke functions that reflect
-  prior beliefs.
+  addition of a constant term, which is conventionally placed in the
+  first position.  This is a very common choice for a set of bases,
+  although it is important to investigate both simpler and more
+  sophisticated alternatives.  Tony would recommend simpler functions
+  (perhaps as simple as \code{function(x){1}}, that is, nothing but a
+  constant), and Jonty would recommend more complicated bespoke
+  functions that reflect prior beliefs.
 
   Function \code{regressor.multi()} is just a wrapper for
-  \code{regressor.basis()} that works for matrices.
+  \code{regressor.basis()} that works for matrices.  This is used
+  internally and the user should not need to change it.
 
   Note that the user is free to define and use functions other than this
   one when using, for example, \code{corr()}.
@@ -39,27 +41,30 @@ regressor.multi(x.df,func)
   element (see the R source code for function \code{regressor.basis()},
   in which the first element is named \dQuote{\code{const}}).
 
-  Returning an vector all of whose elements are unnamed will cause some
-  of the package functions to fail in various weird places.  It is
-  good practice to use named vectors in any case.
+  Returning a vector all of whose elements are unnamed will cause some
+  of the package functions to fail in various weird places.  It is good
+  practice to use named vectors in any case.
 
   Function \code{regressor.multi()} includes an ugly hack to ensure that
+  the perfectly reasonable choice of
   \code{regressor.basis=function(x){1}} works.  The hack is needed
   because \code{apply()} treats functions that return a length-1 value
-  argument differently from functions that return a vector:
-  if \code{x <- as.matrix(1:10)}
+  argument differently from functions that return a vector: if \code{x
+  <- as.matrix(1:10)}
 
 then
-  
-  \code{apply(x,1,function(x){c(1)})}
 
-  is different from
-  
+\code{apply(x,1,function(x){c(1,x)})}
 
-  \code{apply(x,1,function(x){c(1,x)})}
-    
- }
-  
+returns a matrix (as desired), but
+
+\code{apply(x,1,function(x){c(1)})}
+
+returns a vector (of \code{1}s) which is not what is wanted.  The best
+way to deal with this (IMHO) is to confine the ugliness to a single
+function, here \code{regressor.multi()}.
+
+}
 \author{Robin K. S. Hankin}
 \examples{
 regressor.basis(rep(5,6))

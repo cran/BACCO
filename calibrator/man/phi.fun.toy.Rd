@@ -21,11 +21,16 @@ phi.change(phi.fun, old.phi = NULL, rho = NULL, lambda = NULL,
 }
 \arguments{
   \item{phi.fun}{In \code{phi.change()}, the name of the function that 
-    creates the hyperparameters.  Use \code{phi.fun.toy()} for the toy dataset.}
-  \item{old.phi}{Old value of \eqn{\phi}{phi} to be modified (only for
-    \code{phi.change.toy})}
-  \item{rho}{Correlation hyperparameter}
-  \item{lambda}{Noise hyperparameter}
+    creates the hyperparameters.  Use \code{phi.fun.toy()} for the toy
+    dataset
+  }
+  \item{old.phi}{In function \code{phi.change()}, the hyperparameter
+    object \eqn{\phi}{phi} to be modified
+  }
+  \item{rho}{Correlation hyperparameter appearing in main equation
+  }
+  \item{lambda}{Noise hyperparameter
+  }
   \item{psi1}{Roughness lengths hyperparameter for design matrix
     \code{D1}.  Internal function \code{pdm.maker.psi1()} takes
     \code{psi1} as an argument and returns \code{omega_x},
@@ -34,29 +39,37 @@ phi.change(phi.fun, old.phi = NULL, rho = NULL, lambda = NULL,
     Recall that \eqn{\Omega_x}{omega_x} and \eqn{Omega_t}{omega_t} are
     arbitrary functions of \eqn{\psi_1}{psi1}.  In this case,
     the values are \code{omega_x=psi1[1:2]}, \code{omega_t=psi1[3:4]}
-    and \code{sigma1squared=psi1[6]}.
+    and \code{sigma1squared=psi1[6]}
   }
   \item{psi1.apriori}{A priori PDF for \eqn{\psi_1}{psi1}.  In the form
-    of a two element
-    list with first element (\code{mean}) the mean and second element
-    (\code{sigma}) the covariance matrix; distribution of the logarithms
-    is assumed to be multivariate normal.  In the toy example, the mean
-    is a vector of length six (the first five are \eqn{\psi_1}{psi1}
-    and the sixth is for \eqn{\sigma_1^2}{sigma1squared}), and the
-    variance is the corresponding six-by-six matrix.  Use function
-    \code{prob.psi1()} to calculate the apriori probability density for a
-    particular value of \eqn{\psi_1}{psi1}.}
+
+    of a two element list with first element (\code{mean}) the mean and
+    second element (\code{sigma}) the covariance matrix; distribution of
+    the logarithms is assumed to be multivariate normal.  In the toy
+    example, the mean is a vector of length six (the first five are
+    \eqn{\psi_1}{psi1} and the sixth is for
+    \eqn{\sigma_1^2}{sigma1squared}), and the variance is the
+    corresponding six-by-six matrix.  Use function \code{prob.psi1()} to
+    calculate the apriori probability density for a particular value of
+    \eqn{\psi_1}{psi1}
+  }
   \item{psi1.apriori.mean}{In function \code{phi.change.toy()}, use this
     argument to change just the mean of \code{psi1} (and leave the value
-    of \code{sigma} unchanged).}
+    of \code{sigma} unchanged)
+  }
   \item{psi1.apriori.sigma}{In function \code{phi.change.toy()}, use
-    this argument to change just the variance matrix  of \code{psi1}}
+    this argument to change just the variance matrix  of \code{psi1}
+  }
   \item{psi2}{Roughness lengths hyperparameter for \code{D2}.
 
     Internal function \code{pdm.maker.psi2()} takes \code{psi2} as an
     argument and returns \code{omegastar_x} and \code{sigma2squared}.
+    In \code{phi.fun.toy()}, the values are \code{omegastar_x=psi2[1:2]}
+    and \code{sigma2squared=psi2[3]}.
 
-    The values are \code{omegastar_x=psi2[1:2]} and \code{sigma2squared=psi1[3]}.
+    NB: function \code{stage2()} optimizes more than just \code{psi2}.
+    It simultaneously optimizes \code{psi2} and \code{lambda} and
+    \code{rho}
   }
   \item{psi2.apriori}{A priori PDF for \eqn{\psi_2}{psi2} \strong{and}
     hyperparameters \eqn{\rho}{rho} and \eqn{\lambda}{lambda} (in that
@@ -75,38 +88,47 @@ phi.change(phi.fun, old.phi = NULL, rho = NULL, lambda = NULL,
     The second element of \code{phi.toy$psi2.apriori}, \code{sigma}, is
     the corresponding four-by-four variance matrix.  Use function
     \code{prob.psi2()} to calculate the apriori probability density of a
-    particular value of \eqn{\psi_2}{psi2}.}
-    \item{psi2.apriori.mean}{In \code{phi.change.toy()}, use to change
-    just the mean of \code{psi2}} \item{psi2.apriori.sigma}{In
+    particular value of \eqn{\psi_2}{psi2}
+  }
+  \item{psi2.apriori.mean}{In \code{phi.change.toy()}, use to change
+    just the mean of \code{psi2}
+  }
+    \item{psi2.apriori.sigma}{In
     \code{phi.change.toy()}, use to change just the variance matrix of
-    \code{psi2}} \item{theta.apriori}{Apriori PDF for
+    \code{psi2}
+  }
+  \item{theta.apriori}{Apriori PDF for
     \eqn{\theta}{theta}.  As above, in the form of a list with elements
     for the mean and covariance.  The distribution is multivariate
     normal (NB: The distribution is multivariate normal and NOT
     lognormal!  To be explicit: \eqn{\log(\theta)}{log(theta)} is
     lognormally distributed).  Use function \code{prob.theta()} to
     calculate the apriori probability density of a particular value of
-    \eqn{\theta}{theta}.}  \item{theta.apriori.mean}{In
-    \code{phi.change.toy()}, use to change just the mean of
-    \code{theta}} \item{theta.apriori.sigma}{In \code{phi.change.toy()},
-    use to change just the variance matrix of \code{theta}}
-    \item{power}{Exponent of the exponential as passed to
+    \eqn{\theta}{theta}
+  }
+  \item{theta.apriori.mean}{In \code{phi.change.toy()}, use to change
+    just the mean of \code{theta}
+  }
+  \item{theta.apriori.sigma}{In \code{phi.change.toy()},
+    use to change just the variance matrix of \code{theta}
+  }
+  \item{power}{Exponent of the exponential as passed to
     \code{corr.matrix()} (and thence to \code{corr()}) of package
     \code{emulator}.  For the general case of nondiagonal
     \code{positive.definite.matrix}, the metric is \eqn{e^{-\left|
-    (x-x')^TB(x-x')\right|^{\rm power/2}}}{exp(-abs( (x-x')^T B (x-x')
-    )^(power/2))}, thus reducing to the standard case for
+	(x-x')^TB(x-x')\right|^{\rm power/2}}}{exp(-abs( (x-x')^T B (x-x')
+      )^(power/2))}, thus reducing to the standard case for
     \code{power}=2.
     
     Note that \code{power} is not a hyperparameter according to KOH2001,
     but is included here because it's appropriate and convenient.  A
     disadvantage of the present system is that the
     \code{distance.function} argument to the \code{corr.matrix()}
-    function is hardwired to be \code{corr}.
+    function is hardwired to be \code{corr}
   }
 }
 \value{
-Returns a list of several elements:
+  Returns a list of several elements:
   \item{rho}{Correlation hyperparameter}
   \item{lambda}{Noise hyperparameter}   
   \item{psi1}{Roughness lengths hyperparameter for \code{D1}}

@@ -38,7 +38,7 @@ source("data_maker_1d.R")
 # Right, now can we estimate the coefficients?  The true values are
 # given in params_maker_1d.R, named beta1.TRUE and beta2.TRUE.  The
 # thing estimated by betahat.fun.koh is c(beta1,beta2):
-betahat.fun.koh(theta=theta.TRUE, d=d.1d, D1=D1.1d, D2=D2.1d, H1=H1.1d, H2=H2.1d, phi=phi.true)
+betahat.fun.koh(theta=theta.TRUE, d=d.1d, D1=D1.1d, D2=D2.1d, H1=H1.1d, H2=H2.1d, phi=phi.TRUE)
 
 # Ok, not too bad; the true answer is (0,1,1,1,1), so there is an
 # error of about 2%
@@ -47,7 +47,7 @@ betahat.fun.koh(theta=theta.TRUE, d=d.1d, D1=D1.1d, D2=D2.1d, H1=H1.1d, H2=H2.1d
 
 # Now what happens if we use a very wrong  value for theta:
 betahat.fun.koh(theta=100, d=d.1d, D1=D1.1d, D2=D2.1d, H1=H1.1d,
-                H2=H2.1d, phi=phi.true)
+                H2=H2.1d, phi=phi.TRUE)
 
 # Terrible!  the estimate is waaaay off!
 
@@ -57,19 +57,25 @@ betahat.fun.koh(theta=100, d=d.1d, D1=D1.1d, D2=D2.1d, H1=H1.1d,
 # wrapper functions, f(), which gives a log value (ie the support),
 # and g() that returns the actual value (ie the likelihood).
 
-f.single <- function(x){p.eqn8.supp(theta=x, D1=D1.1d, D2=D2.1d, H1=H1.1d,
-                             H2=H2.1d, d=d.1d,
-                             phi=phi.true,return.log=TRUE)}
-f.single2 <- function(x){p.eqn8.supp(theta=x, D1=D1.1d, D2=D2.1d, H1=H1.1d,
-                             H2=H2.1d, d=d.1d,
-                             phi=phi.true,return.log=FALSE)}
+f.single <-
+  function(x){p.eqn8.supp(theta=x, D1=D1.1d, D2=D2.1d, H1=H1.1d,
+                          H2=H2.1d, d=d.1d,
+                          phi=phi.TRUE,return.log=TRUE)}
+f.single_log <-
+  function(x){p.eqn8.supp(theta=x, D1=D1.1d, D2=D2.1d, H1=H1.1d,
+                          H2=H2.1d, d=d.1d,
+                          phi=phi.TRUE,return.log=FALSE)}
 f <- function(x){sapply(x,f.single)}
-g <- function(x){sapply(x,f.single2)}
+g <- function(x){sapply(x,f.single_log)}
+
+# Thus f() and g() differ in that f() returns the log likelihood and
+# g() returns the likelihood.
 
 
-# We can plot this, remembering that the true value of theta is
+# We can plot these, remembering that the true value of theta is
 # specified in params_maker_1d.R as theta.TRUE, which is 0.5:
 
+par(ask=TRUE)
 x <- seq(from=0,to=1,len=63)
 plot(x,g(x),type= "b",
      main="likelihood function for theta; true value is 0.5", 
@@ -90,7 +96,7 @@ abline(v=0.5)
 
 pi.1d <- function(x){p.eqn8.supp(theta=x, D1=D1.1d, D2=D2.1d, H1=H1.1d,
                              H2=H2.1d, d=d.1d,
-                             phi=phi.true,return.log=FALSE)}
+                             phi=phi.TRUE,return.log=FALSE)}
 
 
 #So to sample from the posterior for theta we need MH() with a suitable kernel:
@@ -104,8 +110,11 @@ if(max(theta.sample.1d)>min(theta.sample.1d)){
   print("shapiro test not applicable because MH() returned a sample of identical values")
 }
 
-Ez.eqn9.supp(x=0.1,  theta=theta.sample.1d,  d=d.1d, D1=D1.1d,  D2=D2.1d, H1=H1.1d, H2=H2.1d, phi=phi.1d)
+# Bear in mind that there is no "true" value for the process at x=0.1.
+# The best we can do is to determine the posterior distribution of the
+# process at x=0.1 and this is done using Ez.eqn9.supp():
 
+Ez.eqn9.supp(x=0.1,  theta=theta.sample.1d,  d=d.1d, D1=D1.1d,  D2=D2.1d, H1=H1.1d, H2=H2.1d, phi=phi.TRUE)
 
 
 
@@ -117,10 +126,19 @@ Ez.eqn9.supp(x=0.1,  theta=theta.sample.1d,  d=d.1d, D1=D1.1d,  D2=D2.1d, H1=H1.
 # correct.  The next few lines will try to estimate the
 # hyperparameters.  Bear in mind that this is hard.
 
+# Also bear in mind that the number of iterations is small here, to
+# save time.  If you want to see how the optimizations perform with
+# more iterations, set variable "maximum.iterations" to a larger value:
+
+maximum.iterations <- 2
+
+
+
+
 # First, try stage1():
 
 if(do.hyper.opt){
-phi.stage1 <- stage1(D1=D1.1d, y=y.1d, H1=H1.1d, maxit=4,
+phi.stage1 <- stage1(D1=D1.1d, y=y.1d, H1=H1.1d, maxit=maximum.iterations,
  method="SANN", trace=0, do.print=FALSE, phi.fun=phi.fun.1d,
  phi=phi.1d)
 
@@ -144,7 +162,7 @@ phi.stage1$omega_t
   phi.stage2 <- stage2(D1=D1.1d[use1,,drop=FALSE], D2=D2.1d[use2,,drop=FALSE], H1=H1.1d, H2=H2.1d,
       y=y.1d[use1], z=z.1d[use2], extractor=extractor.1d,
      phi.fun=phi.fun.1d, E.theta=E.theta.1d, Edash.theta=Edash.theta.1d,
-     maxit=2, method="SANN", phi=phi.stage1)
+     maxit=maximum.iterations, method="SANN", phi=phi.stage1)
 
 
 # This will change psi2, _and_ rho _and_ lambda:

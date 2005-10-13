@@ -5,7 +5,7 @@ jj.psi1 <- 1:3
 names(jj.psi1) <- c("x",  "A", "s1sq")
 
 jj.psi2 <- 1:2
-names(jj.psi2) <- c("x",         "s1sq")
+names(jj.psi2) <- c("x",         "s2sq")
 
 jj.mean1 <- rep(1,3)
 names(jj.mean1) <- names(jj.psi1)
@@ -42,8 +42,8 @@ phi.1d <-
 
 
 phi.1d2 <- phi.change(old.phi=phi.1d, phi.fun=phi.fun.1d, rho=3)
+
 print(phi.1d2$rho)
 
-
-phi.true <- phi.change(phi.fun=phi.fun.1d, old.phi=phi.1d,
+phi.TRUE <- phi.change(phi.fun=phi.fun.1d, old.phi=phi.1d,
 psi1=psi1.TRUE, psi2=psi2.TRUE,lambda=lambda.TRUE,rho=1)

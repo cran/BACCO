@@ -18,10 +18,10 @@ H1.1d <- function(D1){
 }
 
 h2.1d <- function(x){
-out <- c(sin(x[1]*4),x[1]^3)
-out <- c(x[1],x[1]^3)
-names(out) <- c("sinx","x.cubed")
-return(out)
+  ##  out <- c(sin(x[1]*4),x[1]^3)
+  out <- c(x[1],x[1]^3)
+  names(out) <- c("x","x.cubed")
+  return(out)
 }
 
 H2.1d <- 

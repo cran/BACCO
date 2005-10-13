@@ -14,6 +14,7 @@ names(psi1.TRUE) <- c("x","A","sigma1squared")
 beta2.TRUE <- c(1,1)
 names(beta2.TRUE) <- c("const","x.cubed")
 
-psi2.TRUE <- c(3,3,0.001)
+psi2.TRUE <- c(3,0.1)
+names(psi2.TRUE) <- c("x_rough","sigma2SQUARED")
 
-lambda.TRUE <- 0.001
+lambda.TRUE <- 0.01

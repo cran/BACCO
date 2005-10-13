@@ -24,48 +24,48 @@ do.filewrite=FALSE, do.print=TRUE, include.prior = TRUE, lognormally.distributed
   \item{D2}{Matrix whose rows are points at which observations were made}
   \item{H1}{Regressor basis functions for \code{D1}}
   \item{H2}{Regressor basis functions for \code{D2}}
-  \item{y}{Code outputs.  Toy example is \code{y.toy}.}
-  \item{z}{Observations.  Toy example is \code{z.toy}.}
+  \item{y}{Code outputs.  Toy example is \code{y.toy}}
+  \item{z}{Observations.  Toy example is \code{z.toy}}
   \item{d}{Data vector consisting of the code runs and observations}
-  \item{extractor}{extractor function for \code{D1}.}
-  \item{E.theta}{Expectation WRT theta.  Toy example is \code{E.theta.toy()}.}
+  \item{extractor}{extractor function for \code{D1}}
+  \item{E.theta}{Expectation WRT theta.  Toy example is \code{E.theta.toy()}}
   \item{Edash.theta}{Expectation WRT the dashed theta.  Toy example is
-    \code{Edash.theta.toy()}.}
+    \code{Edash.theta.toy()}}
   \item{phi.fun}{Function to create hyperparameters; passed  (in
     \code{stage1()} and \code{stage2()}) to \code{phi.change()}.  Toy
-    version is \code{phi.fun.toy()}.}
+    version is \code{phi.fun.toy()}}
   \item{method}{Method argument passed to \code{optim()}; qv}
   \item{include.prior}{Boolean variable with default \code{TRUE} meaning
     to include the prior distribution in the optimization process and
     \code{FALSE} meaning to use an uniformative prior (effectively
     uniform support).  This variable is passed to \code{p.eqn4.supp()}
     for \code{stage1()}, \code{p.page4()} for \code{stage2()}, and
-    \code{p.eqn8.supp()}  for \code{stage3()}.} 
+    \code{p.eqn8.supp()}  for \code{stage3()}} 
   \item{lognormally.distributed}{Boolean with \code{TRUE} meaning to use
-    a lognormal distn.  See \code{prob.theta} for details.}
+    a lognormal distn.  See \code{prob.theta} for details}
   \item{do.filewrite}{Boolean, with \code{TRUE} meaning to
     save a \code{load}able file \code{stage[123].<date>}, containing the interim value of \code{phi}
     and the corresponding optimand to \code{directory} at each evalution
-    of the optimizer.  If \code{FALSE}, don't write the files.}
+    of the optimizer.  If \code{FALSE}, don't write the files}
     \item{directory}{The directory to write files to; only matters if
       \code{do.filewrite} is \code{TRUE}}
     \item{isotropic}{In function \code{stage2()}, Boolean with default
       \code{FALSE} meaning to carry out a full optimization, and
       \code{TRUE} meaning to restrict the scope to isotroic roughness
-      matrices.  See details section below.}
+      matrices.  See details section below}
   \item{do.print}{Boolean, with default \code{TRUE} meaning to print
-    interim values of \code{phi} at each evaluation.}
+    interim values of \code{phi} at each evaluation}
   \item{use.standin}{In \code{stage2()}, a Boolean argument, with
     default \code{FALSE} meaning to use the real value for matrix
     \code{V.temp}, and \code{TRUE} meaning to use a standing that is the
     same size but contains fictitious values.  The only time to set
     \code{use.standin} to \code{TRUE} is when debugging as it runs
-    several orders of magnitude faster.}
+    several orders of magnitude faster}
   \item{theta.start}{In \code{stage3()}, the starting point of the
     optimization with default \code{NULL} meaning to use the maximum
-    likelihood point of the apriori distribution (ie \code{phi$theta.apriori$mean}).}
+    likelihood point of the apriori distribution (ie \code{phi$theta.apriori$mean})}
   \item{phi}{Hyperparameters.  Used as initial values for the
-    hyperparameters in the optimization routines.}
+    hyperparameters in the optimization routines}
 }
 \details{
   The three functions documented here carry out the multi-stage
@@ -85,21 +85,19 @@ do.filewrite=FALSE, do.print=TRUE, include.prior = TRUE, lognormally.distributed
   The initial conditions are provided by argument \code{phi}.  The
   relevant part of this is \code{phi$psi2}.  
   
-  \code{stage2()} estimates the other hyperparameters (viz:
-  \eqn{\rho}{rho}, \eqn{\lambda}{lambda}, and \eqn{\psi_2}{psi2}) using
+  Function \code{stage2()} estimates \eqn{\psi_2}{psi2} \strong{and}
+  \eqn{\rho}{rho} \strong{and} \eqn{\lambda}{lambda}, using
   optimization.  Note that \eqn{\psi_2}{psi2} includes
-  \eqn{\sigma_2^2}{sigma2squared} (in the toy case, \eqn{\psi_2}{psi2}
-  has three elements: the first two are the diagonal of
-  \code{omegastar_x} and the third is \eqn{\sigma_2^2}{sigma2squared}
-  \strong{but} this information is encoded in \code{phi.fun.toy()},
-  which changes from application to application).  Function
-  \code{stage3()} attempts to find the maximum likelihood estimate of
-  \eqn{\theta}{theta}, given hyperparameters and observations, using
-  optimization.
+  \eqn{\sigma_2^2}{sigma2squared} in addition to \code{omegastar_X} (in
+  the toy case, \eqn{\psi_2}{psi2} has three elements: the first two are
+  the diagonal of \code{omegastar_x} and the third is
+  \eqn{\sigma_2^2}{sigma2squared} \strong{but} this information is
+  encoded in \code{phi.fun.toy()}, which changes from application to
+  application).
 
-
-
-  
+  Function \code{stage3()} attempts to find the maximum likelihood
+  estimate of \eqn{\theta}{theta}, given hyperparameters and
+  observations, using optimization
 }
 \references{
   M. C. Kennedy and A. O'Hagan 2001. \dQuote{Bayesian

@@ -32,7 +32,7 @@ names(y.1d) <- rownames(D1.1d)
 jj.mean.MI <-  drop(H2.1d(D2.1d) %*% beta2.TRUE)
 
 # Variance matrix from corr.matrix but with psi2:
-jj.sigma.MI <- corr.matrix(D2.1d, scales=psi2.TRUE[1])*psi2.TRUE[3]
+jj.sigma.MI <- corr.matrix(D2.1d, scales=psi2.TRUE[1])*phi.TRUE$sigma2squared
 
 # Now sample from the appropriate multivariate Gaussian:
 model.inadequacy <- rmvnorm(n=1, mean=jj.mean.MI, sigma=jj.sigma.MI)

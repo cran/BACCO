@@ -3,17 +3,19 @@
 \alias{hpa.toy}
 \alias{z.toy}
 \alias{subsets.toy}
+\alias{betas.toy}
 \docType{data}
 \title{Toy datasets for approximator package}
 \description{
   Toy datasets that illustrate the package.
 }
 \usage{
-  data(toys)
+  data(toyapps)
   D1.toy
   hpa.toy
   z.toy
   subsets.toy
+  betas.toy
 }
 \format{
 
@@ -34,6 +36,7 @@
   element \eqn{i} corresponds to obsevations of level \eqn{i}.  The
   lengths will match those of \code{subsets.toy}.
 
+  \code{betas.toy} is a matrix of coefficients.
   
   \strong{Brief description of toy functions fully documented under their own manpage}
   
@@ -66,5 +69,10 @@
 \author{Robin K. S. Hankin}
 \examples{
 data(toyapps)
+
+is.consistent(subsets.toy , z.toy)
+
+generate.toy.observations(D1.toy, subsets.toy, basis.toy, hpa.toy, betas.toy)
+
 }
 \keyword{datasets}

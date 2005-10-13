@@ -3,6 +3,7 @@ function (level, Di, Dj, hpa)
 {
     corr.matrix(Di, Dj, pos.def.matrix = hpa$B[[level]])
 }
+
 "H.fun.app" <-
 function (D1, subsets, basis, hpa) 
 {
@@ -42,6 +43,7 @@ function (hpa, i, j)
         return(prod(hpa$rhos[seq(from = i, to = j)]))
     }
 }
+
 "V.fun.app" <-
 function (D1, subsets, hpa) 
 {
@@ -65,6 +67,7 @@ function (D1, subsets, hpa)
     colnames(out) <- rownames(out)
     return(out)
 }
+
 "as.sublist" <-
 function (D1, subsets) 
 {
@@ -196,6 +199,7 @@ function (x, hpa, basis)
   colnames(out) <- rownames(x)
   return(drop(out))
 }
+
 "hpa.fun.toy" <-
 function (x) 
 {
@@ -219,22 +223,26 @@ function (x)
     names(rhos) <- paste("level", 1:3, sep = "")
     return(list(sigma_squareds = sigma_squareds, B = B, rhos = rhos))
 }
+
 "is.consistent" <-
 function (subsets, z) 
 {
     all(unlist(lapply(subsets, length)) == unlist(lapply(z, length)))
 }
+
 "is.nested" <-
 function (subsets) 
 {
     !any(sapply(mapply(setdiff, subsets[-1], subsets[-length(subsets)]), 
         length))
 }
+
 "is.strict" <-
 function (subsets) 
 {
     all(diff(unlist(lapply(subsets, length))) < 0)
 }
+
 "mdash.fun" <-
 function (x, D1, subsets, hpa, Vinv = NULL, use.Vinv = TRUE, 
     z, basis) 
@@ -247,7 +255,6 @@ function (x, D1, subsets, hpa, Vinv = NULL, use.Vinv = TRUE,
             Vinv <- solve(V.fun.app(D1, subsets, hpa))
         }
         bhat <- betahat.app.H(H = H, Vinv = Vinv, z = z)
-        browser()
         out <- drop(crossprod(hdash, bhat) + crossprod(tx , Vinv) %*% (unlist(z) - 
             H %*% bhat))
         names(out) <- rownames(x)
@@ -262,16 +269,22 @@ function (x, D1, subsets, hpa, Vinv = NULL, use.Vinv = TRUE,
         return(out)
     }
 }
+
 "object" <-
 function(level,D,z,basis,subsets,hpa)
 {
   rhos <- hpa$rhos
   sigma_squared <- hpa$sigma_squareds
-  bit1 <- log(det(A(level=level,Di=D[subsets[[level]],],Dj=NULL,hpa=hpa)))
+  if(FALSE){
+    bit1 <- log(det(A(level=level,Di=D[subsets[[level]],],Dj=NULL,hpa=hpa)))
+  }
+  jj <- A(level=level,Di=D[subsets[[level]],],Dj=NULL,hpa=hpa)
+  
+  bit1 <- sum(log(abs(eigen(jj,TRUE,TRUE)$values)))
 
   n.i <- length(z[[level]])
-
   bit2 <- n.i*log(sigma_squared[[level]])
+
 
   if(level == 1){
     d <- z[[1]]
@@ -285,7 +298,6 @@ function(level,D,z,basis,subsets,hpa)
   mismatch <- d -  basis(D[subsets[[level]],]) %*% betahat
   mat <- solve(sigma_squared[[level]]*A(level=level,Di=D[subsets[[level]],],Dj=NULL,hpa=hpa))
   bit3 <-  quad.form(mat,mismatch)
-
   return(bit1 + bit2 + bit3)
 }
   
@@ -333,7 +345,7 @@ function (x, D1, subsets, hpa)
         out <- c(out, t.new)
         t.old <- t.new
     }
-    names(out) <- c(lapply(subsets.toy,names),recursive=TRUE)
+    names(out) <- c(lapply(subsets,names),recursive=TRUE)
     return(out)
 }
 
@@ -342,10 +354,12 @@ function(D, z, basis, subsets, hpa.start, give.answers=FALSE, ...)
   {
     f <- function(candidate){
       hpa.temp <- hpa.start
-      hpa.temp$B[[1]] <- exp(diag(candidate[1],nrow=3, ncol=3))
-      hpa.temp$sigma_squared[1] <- exp(candidate[2])
-      object(level=1,
+      hpa.temp$B[[1]] <- diag(exp(rep(candidate[1],ncol(D))))
+      hpa.temp$sigma_squareds[1] <- exp(candidate[2])
+
+      jj <- object(level=1,
              D=D,z=z, basis=basis, subsets=subsets, hpa=hpa.temp)
+      return(jj)
     }
 
     start.point <- log(c(hpa.start$B[[1]][1,1], hpa.start$sigma_squareds[1]))
@@ -353,7 +367,7 @@ function(D, z, basis, subsets, hpa.start, give.answers=FALSE, ...)
     u <- optim.output$par
     hpa.out <- hpa.start
     diag(hpa.out$B[[1]]) <- exp(u[1])
-    hpa.out$sigma_squared[1] <- exp(u[2])
+    hpa.out$sigma_squareds[1] <- exp(u[2])
     if(give.answers){
       return(list(optim.output=optim.output,hpa=hpa.out))
     } else {
@@ -365,35 +379,35 @@ function(D, z, basis, subsets, hpa.start, give.answers=FALSE, ...)
 #opt1(D=D1.toy,z=z.toy,basis=basis.toy,subsets=subsets.toy, hpa.start=hpa.toy,control=list(maxit=1))
 
 "opt.gt.1" <-
-  function(level, D, z, basis, subsets, hpa.start, give.answers=FALSE,
-  ...)
-  {
-    if(level<2){stop("level should be 2 or greater")}
-    
-    f <- function(candidate){
-      hpa.temp <- hpa.start
-      hpa.temp$B[[level]] <- diag(candidate[1],nrow=3, ncol=3)
-      hpa.temp$sigma_squared[level] <- candidate[2]
-      hpa.temp$rhos[level-1] <- candidate[2]
-      object(level=level,
-             D=D,z=z, basis=basis, subsets=subsets, hpa=hpa.temp)
-    }
-    start.point <- c(hpa.start$B[[level]][1,1], hpa.start$sigma_squareds[level], hpa.start$rhos[level-1])
-    optim.output <- optim(start.point, f, ...)
-    u <- optim.output$par
-    hpa.out <- hpa.start
-    diag(hpa.out$B[[level]]) <- u[1]
-    hpa.out$sigma_squared[level] <- u[2]
-    hpa.out$rhos[level-1] <- u[3]
-    if(give.answers){
-      return(list(optim.output=optim.output,hpa.out=hpa.out))
-    } else {
-      return(hpa.out)
-    }
+function(level, D, z, basis, subsets, hpa.start, give.answers=FALSE,
+...)
+{
+  if(level<2){stop("level should be 2 or greater")}
+  
+  f <- function(candidate){
+    hpa.temp <- hpa.start
+    hpa.temp$B[[level]] <- diag(exp(rep(candidate[1], ncol(D))))
+    hpa.temp$sigma_squareds[level] <- exp(candidate[2])
+    hpa.temp$rhos[level-1] <- exp(candidate[3])
+    object(level=level,
+           D=D,z=z, basis=basis, subsets=subsets, hpa=hpa.temp)
   }
+  start.point <- log(c(hpa.start$B[[level]][1,1], hpa.start$sigma_squareds[level], hpa.start$rhos[level-1]))
+  optim.output <- optim(start.point, f, ...)
+  u <- optim.output$par
+  hpa.out <- hpa.start
+  diag(hpa.out$B[[level]]) <- exp(u[1])
+  hpa.out$sigma_squareds[level] <- exp(u[2])
+  hpa.out$rhos[level-1] <- exp(u[3])
+  if(give.answers){
+    return(list(optim.output=optim.output,hpa.out=hpa.out))
+  } else {
+    return(hpa.out)
+  }
+}
 
-
-"c.fun" <- function(x,xdash=x,subsets,hpa){
+"c.fun" <- function(x,xdash=x,subsets,hpa)
+{
   s <- length(subsets)
   out <- 0
   for(i in 1:s){
@@ -472,3 +486,49 @@ function(D, z, basis, subsets, hpa.start, give.answers=FALSE, ...)
   return(cxxdash)
 }
 
+"basis.genie" <- 
+function (x) 
+{
+    if (is.vector(x)) {
+        stopifnot(length(x) == 4)
+        out <- c(1, x)
+        names(out) <- c("const", LETTERS[1:4])
+        return(out)
+    }
+    else {
+        return(t(apply(x, 1, match.fun(sys.call()[[1]]))))
+    }
+}
+
+"hpa.fun.genie" <- 
+function (x) 
+{
+    if (length(x) != 17) {
+        stop("x must have 17 elements")
+    }
+    pdm.maker <- function(x) {
+        jj <- diag(x[1:4])
+        rownames(jj) <- c("InvDrag","FWF.scl","powercloud","fluxfactor")
+        colnames(jj) <- rownames(jj)
+        return(jj)
+    }
+    sigma_squareds <- x[1:3]
+    names(sigma_squareds) <- paste("level", 1:3, sep = "")
+    B <- NULL
+    B[[1]] <- pdm.maker(x[4:7])
+    B[[2]] <- pdm.maker(x[8:11])
+    B[[3]] <- pdm.maker(x[12:15])
+    names(B) <- paste("level", 1:3, sep = ".")
+    rhos <- x[16:17]
+    names(rhos) <- paste("level", 1:2, sep = ".")
+    return(list(sigma_squareds = sigma_squareds, B = B, rhos = rhos))
+}
+
+"subset_maker" <-
+function(x)
+{
+  out <- lapply(x,function(i){1:i})
+  names(out) <- paste("level",1:length(out),sep=".")
+  return(out)
+}
+  

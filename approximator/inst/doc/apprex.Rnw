@@ -1,0 +1,501 @@
+% -*- mode: noweb; noweb-default-code-mode: R-mode; -*-
+
+\documentclass[a4paper]{article}
+
+\author{Robin K. S. Hankin}
+\title{Creating a simple {\tt approximator} case study from scratch: a cookbook}
+%\VignetteIndexEntry{Apprex: a cookbook for the calibrator package}
+\SweaveOpts{echo=FALSE}
+\usepackage{a4wide}
+
+\begin{document}
+\maketitle
+
+\newcommand{\bt}{\mathbf{t}}
+\newcommand{\bd}{\mathbf{d}}
+\newcommand{\bx}{\mathbf{x}}
+\newcommand{\bX}{\mathbf{X}}
+\newcommand{\by}{\mathbf{y}}
+\newcommand{\bz}{\mathbf{z}}
+\newcommand{\bh}{\mathbf{h}}
+\newcommand{\bm}{\mathbf{m}}
+
+\newcommand{\bth}{\mbox{\boldmath $\theta$}}
+\newcommand{\bbeta}{\mbox{\boldmath $\beta$}}
+\newcommand{\bOm}{\mbox{\boldmath $\Omega$}}
+\newcommand{\bV}{\mbox{\boldmath $V$}}
+
+\newcommand{\cov}{\mathop{\mathrm{cov}}}
+
+
+\SweaveOpts{echo=TRUE}
+\section{Introduction}
+Package {\tt approximator} of bundle {\tt BACCO} performs Bayesian
+calibration of computer models when fast approximations are available.
+This document constructs a minimal
+working example of a simple problem, step by step.  Datasets and
+functions have a {\tt .vig} suffix, representing ``vignette''.
+
+This document is not a substitute for KOH or KOHa or Hankin 2005 or
+the online help files in {\tt BACCO}.  It is not intended to stand
+alone: for example, the notation used here is that of KOH, and the
+user is expected to consult the online help in the BACCO package when
+appropriate.
+
+This document is primarily didactic, although it is informal.
+
+Nevertheless, many of the points raised here are duplicated in the
+{\tt BACCO} helpfiles.
+
+Note that many of the objects created in this document are
+interdependent and changing one sometimes implies changing many
+others.
+
+The author would be delighted to know of any improvements or suggestions.
+Email me at {\tt r.hankin@noc.soton.ac.uk}.
+
+\section{List of objects that the user needs to supply}
+
+
+The user needs to supply five objects:
+\begin{itemize}
+\item A design matrix, here {\tt D1.vig} (rows of this show where code
+level 1  has been evaluated)
+\item A subset object, in the form of a list.  Here it is {\tt
+subsets.vig}.   This list has one
+element per level of code.  A subset object  shows which
+points in the design matrix have been evaluated at each level.
+\item Basis functions.  Here {\tt basis.vig}.  This shows the basis
+functions used for fitting the prior
+\item Data, here {\tt z.vig}.  This shows the data obtained from
+evaluating the various levels of code at the points given by the
+design matrix and the subsets object.
+\item A hyperparameter object, here {\tt hpa.vig}.  This object holds
+correlation scales, the rhos, and the sigmas.
+\end{itemize}
+Each of these is discussed in a separate subsection below.
+
+But the first thing we need to do is install the library:
+<<echo=FALSE,print=FALSE>>=
+<<results=hide>>=
+library(emulator)
+library(approximator)
+@ 
+
+
+<<datagen_design_matrix, echo=false, results=hide>>=
+n <- 20
+D1.vig <- latin.hypercube(n,2)
+@
+
+<<datagen_subsets, echo=false, results=hide>>=
+subsets.vig <- subsets.fun(n,levels=4,prob=0.9)
+names(subsets.vig) <- paste("level",1:4,sep=".")
+@ 
+
+\subsection{Design matrix: USER TO SUPPLY}
+
+In these sections I show the objects that the user needs to supply,
+under a heading like the one above.  In the case of the {\tt
+approximator} package, the objects have a simple structure (list of
+vectors, function, etc) and so I just show what they look like.
+
+The first thing needed is the design matrix {\tt D1.vig}, ie the
+points in parameter space at which the lowest-level code is executed.
+The example here has just two parameters, {\tt a} and {\tt b}:
+<<>>=
+head(D1.vig)
+nrow(D1.vig)
+@ 
+Notes
+\begin{itemize}
+\item Each row is a point in parameter space, here two dimensional.
+The bottom level code is run at each of these points (see {\tt subsets.vig})
+\item The parameters are labelled {\tt a} and {\tt b}
+\end{itemize}
+
+
+\subsection{Subsets object: USER TO SUPPLY}
+We now need a {\tt subsets.object}, which gives the row numbers of the
+runs at each level.
+<<>>=
+subsets.vig
+@ 
+Notes
+\begin{itemize}
+\item This is a list of 4 elements (ie the number of levels)
+\item each element is a subset of those above it
+\end{itemize}
+
+\subsection{Basis functions: USER TO SUPPLY}
+Now we need to choose a basis function.  Do this by copying {\tt
+basis.toy()} but fiddling with it:
+
+<<>>=
+basis.vig <- 
+function (x) 
+{
+    if (is.vector(x)) {
+        stopifnot(length(x) == 2)
+        out <- c(1, x , x[1]*x[2])
+        names(out) <- c("const", LETTERS[1:2], "interaction")
+        return(out)
+    }
+    else {
+        return(t(apply(x, 1, match.fun(sys.call()[[1]]))))
+    }
+}
+@ 
+
+
+Notes
+\begin{itemize}
+\item This is shamelessly ripped off from {\tt basis.toy()}, except
+that I've changed the basis to be {\tt c(1,a,b,ab)}.
+\item Also note the rather strange way this function deals with
+vectors and matrices.  Vectors via the first bit, and matrices via
+that strange {\tt apply()} bit at the end.
+\end{itemize}
+
+
+
+<<datagen_generate_vig_fun, echo=false, results=hide>>=
+"generate.vig.observations" <-
+function (D1, subsets, basis.fun, hpa, betas = NULL, export.truth=FALSE)
+{
+
+      if(is.null(betas)){
+        betas <-
+          rbind(c(1, 2, 3, 4),
+                c(1, 1, 3, 4),
+                c(1, 1, 1, 4),
+                c(1, 1, 1, 1))
+        colnames(betas) <- c("const", LETTERS[1:2], "interaction")
+        rownames(betas) <- paste("level", 1:4, sep = "")
+      }
+      
+      if(export.truth){
+        return(list(
+                    hpa=hpa,
+                    betas=betas
+                    )
+               )
+      }
+
+
+    sigma_squareds <- hpa$sigma_squareds
+    B <- hpa$B
+    rhos <- hpa$rhos
+    delta <- function(i) {
+      out <- rmvnorm(n = 1,
+                     mean = basis.fun(D1[subsets[[i]], , drop =
+                       FALSE]) %*% betas[i, ],
+                     sigma = sigma_squareds[i] * corr.matrix(xold = D1[subsets[[i]], , drop = FALSE], pos.def.matrix = B[[i]])
+                     )
+      out <- drop(out)
+      names(out) <- rownames(D1[subsets[[i]], , drop = FALSE])
+      return(out)
+    }
+    
+    use.clever.but.untested.method <- FALSE
+    
+    if(use.clever.but.untested.method){
+      z1 <- delta(1)
+      z2 <- delta(2) + rhos[1] * z1[match(subsets[[2]], subsets[[1]])]
+      z3 <- delta(3) + rhos[2] * z2[match(subsets[[3]], subsets[[2]])]
+      z4 <- delta(4) + rhos[3] * z3[match(subsets[[4]], subsets[[3]])]
+      return(list(z1 = z1, z2 = z2, z3 = z3, z4 = z4))
+    } else {
+      out <- NULL
+      out[[1]] <- delta(1)
+      for(i in 2:length(subsets)){
+        out[[i]] <- delta(i) + rhos[i-1] *
+    out[[i-1]][match(subsets[[i]], subsets[[i-1]])]
+      }
+      return(out)
+    }
+  }
+@ 
+
+
+<<datagen_hpa.fun,echo=false,results=hide>>=
+"hpa.fun.vig" <-
+function (x) 
+{
+    if (length(x) != 15) {
+        stop("x must have 19 elements")
+    }
+    "pdm.maker" <- function(x) {
+        jj <- diag(x[1:2],nrow=2)
+        rownames(jj) <- LETTERS[1:2]
+        colnames(jj) <- LETTERS[1:2]
+        return(jj)
+    }
+    sigma_squareds <- x[1:4]
+    names(sigma_squareds) <- paste("level", 1:4, sep = "")
+    B <- NULL
+    B[[1]] <- pdm.maker(x[05:06])
+    B[[2]] <- pdm.maker(x[07:08])
+    B[[3]] <- pdm.maker(x[09:10])
+    B[[4]] <- pdm.maker(x[11:12])
+    rhos <- x[13:15]
+    names(rhos) <- paste("level", 1:3, sep = "")
+    return(list(sigma_squareds = sigma_squareds, B = B, rhos = rhos))
+}
+@
+
+
+<<datagen_hpa.vig_creator, echo=false, results=hide>>=
+hpa.vig <- hpa.fun.vig(c(rep(0.01,4),rep(20,8),rep(1,3)))
+@
+
+
+<<datagen_generate_vig_obs, echo=false, results=hide>>=
+z.vig <- 
+generate.vig.observations(D1=D1.vig,subsets=subsets.vig, basis.fun=basis.vig,hpa=hpa.vig)
+@ 
+
+\subsection{Data: USER TO SUPPLY}
+
+The data needed is output from the four levels of code.  The code is
+evaluated at points specified by the design matrix {\tt D1.vig}.
+
+
+Code level 1 is evaluated at each point of {\tt D1.vig} (ie {\tt D1.vig[subsets[[1]],]})
+
+Code level 2 is evaluated at {\tt D1.vig[subsets[[2]],]}
+
+Code level {\tt n} is evaluated at {\tt D1.vig[subsets[[n]],]}
+
+
+
+
+The data we have for the {\tt .vig} example is a list of four
+elements.  Each element is a vector whose ith element is the code
+output at the appropriate point in the design matrix.  We can get a
+feel for the dataset by looking at the head of each vector, and
+extracting the length:
+
+<<>>=
+lapply(z.vig,head)
+lapply(z.vig,length)
+@ 
+
+\subsection{Hyperparameters: USER TO SUPPLY}
+We now need some hyperparameters.  The appendix gives an example of
+how to specify a function that creates a hyperparameter object.  Here
+I will show an example
+
+
+<<>>=
+hpa.vig
+@ 
+
+Notes
+\begin{itemize}
+\item The hyperparameter object is a list of three elements:
+\begin{itemize}
+\item The first element, {\tt sigma\_squareds}, is a vector
+of variances (one per level)
+\item The second element is a list of length $n$ (the number of
+levels).  Each of these elements is a positive definite matrix of
+correlation lengths (here diagonal for simplicity)
+\item The third element is a vector of length $n-1$ of the rhos.
+\end{itemize}
+\item Different problems will have different hyperparameter objects
+\item In this case it's probably easier to create a hyperparameter
+object by hand, but in the appendix I show how a function to generate
+hyperparameter objects may be written.  This option is sometimes
+better.
+\end{itemize}
+
+
+\section{Data analysis}
+
+The previous section showed what data and functions the user needs to
+supply.  These all have a {\tt .vig} suffix.   This section shows the
+data being analyzed.
+
+\subsection{Estimate of the coefficients in the  hyperparameter object}
+
+
+This estimate uses the initial value for the hyperparameters.
+
+The hyperparameters themselves may be estimated by using functions
+{\tt opt.1()} and {\tt opt.gt.1()} for level 1 and levels 2 and
+greater, respectively.
+
+
+<<>>=
+     jj <- list(trace=100,maxit=10)
+     hpa.vig.level1 <- opt.1(D=D1.vig, z=z.vig, basis=basis.vig, subsets=subsets.vig, hpa.start=hpa.vig,control=jj)
+     hpa.vig.level1
+@ 
+
+Notes
+\begin{itemize}
+\item Function {\tt opt.1()} takes a whole bunch o' inputs and returns
+a modified hyperparameter object.
+\item The hyperparamer object that {\tt opt.1()} returns is identical
+to {\tt hpa.start} except for {\tt sigma\_squareds[1]} and {\tt
+B[[1]]}, corresponding to the first level.
+\item We can use this output as a start point to functions
+{\tt opt.gt.1()} et seq
+\end{itemize}
+
+
+<<>>=
+     jj <- list(trace=0,maxit=20)
+     hpa.vig.level2 <- opt.gt.1(level=2, D=D1.vig, z=z.vig, basis=basis.vig, subsets=subsets.vig, hpa.start=hpa.vig.level1,control=jj)
+     hpa.vig.level3 <- opt.gt.1(level=3, D=D1.vig, z=z.vig, basis=basis.vig, subsets=subsets.vig, hpa.start=hpa.vig.level2,control=jj)
+     hpa.vig.level4 <- opt.gt.1(level=4, D=D1.vig, z=z.vig, basis=basis.vig, subsets=subsets.vig, hpa.start=hpa.vig.level3,control=jj)
+     hpa.vig.level4
+@ 
+
+
+Now we can try and estimate the betas using the optimized
+hyperparameter object:
+
+<<>>=
+betahat.app(D1=D1.vig,subsets=subsets.vig,basis=basis.vig, hpa=hpa.vig.level4, z=z.vig)
+@ 
+
+Not too bad.
+
+\subsection{The package in use}
+The final stage would be using function {\tt mdash.fun()}, which gives
+the posterior expectation of the Gaussian process (for level 4):
+
+
+<<>>=
+mdash.fun(x=c(0.5,0.5),D1=D1.vig, subsets=subsets.vig,hpa=hpa.vig.level4,z=z.vig,basis=basis.vig)
+@ 
+
+
+We can now give an error estimate here:
+<<>>=
+cdash.fun(x=c(0.5,0.5), D1=D1.vig, subsets=subsets.vig,
+  basis=basis.vig, hpa=hpa.vig)
+@ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\clearpage
+\appendix
+\section*{Appendix}
+\section{Data generation}
+
+In practice the user generates data from a climate model.  Here, I
+will generate data that matches the assumptions of the approximator
+software exactly.
+
+Now we need a design matrix:
+
+<<eval=false>>=
+<<datagen_design_matrix>>
+@ 
+
+See how the function {\tt latin.hypercube()} is used.
+
+
+Now we need to specify which rows of the design matrix are run at each
+of the various levels.  We can generate some of this randomly.  The
+lowest level code will use all rows of {\tt D1.vig}, level 2 will use
+about half of them, level 3 (ie the top level) will use about half of
+them, and level 4 about half of {\em them:}
+
+<<eval=false>>=
+<<datagen_subsets>>
+@
+
+
+Notes
+\begin{itemize}
+\item See the { \tt.vig} suffix, for "vignette".
+\item randomly chosen values illustrate the general nature of the software
+\end{itemize}
+
+
+Notes
+\begin{itemize}
+\item The {\tt is.vector()} test allows one to treat matrices and
+vectors in a consistent way
+\item the last line is a kludge, but no better way seems to exist
+\end{itemize}
+
+
+Now we need a function that creates a hyperparameter object:
+
+
+Notes
+\begin{itemize}
+\item This is a modification of {\tt hpa.fun.toy()} but with a smaller
+number of params
+\item This function isn't strictly necessary, but the alternative
+(defining a hyperparameter object {\em ab initio} is fiddly and error-prone.
+\end{itemize}
+
+
+
+Now we can call this function and create a hyperparameter object
+
+
+<<eval=false>>=
+<<datagen_hpa.vig_creator>>
+@ 
+
+<<eval=false>>=
+<<datagen_hpa.fun,echo=false,results=hide>>=
+@
+
+Now we can generate some data.  In practice, this data will come from
+a climate model.  Here I will cheat and define a function {\tt
+generate.vig.observations()} to generate data that comes from a known
+distribution:
+
+First define a function ripped off from {\tt generate.toy.obs()}:
+
+<<eval=false>>=
+<<datagen_generate_vig_fun>>
+@ 
+ 
+
+Then call it:
+
+<<eval=false>>=
+<<datagen_generate_vig_obs>>
+@ 
+ 
+<<>>=
+z.vig
+@
+
+
+
+\bibliography{/Users/rksh/unix/bib/uncertainty}
+
+  \noindent
+  Robin K. S. Hankin\\
+  National Oceanography Centre, Southampton\\
+  European Way\\
+  Southampton SO14 3ZH\\
+  United Kingdom\\
+  E-mail: {\tt r.hankin@noc.soton.ac.uk}
+  URL: {\tt http://www.noc.soton.ac.uk}
+
+
+\end{document}

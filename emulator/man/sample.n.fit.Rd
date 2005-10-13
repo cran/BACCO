@@ -6,7 +6,7 @@ Sample 'n' fit:  sample from an appropriate multivariate Gaussian
 process in one dimension, then fit an emulator to it.
 }
 \usage{
-sample.n.fit(n = 10, scales.generate = 100, scales.fit = 100, func = NULL, ...)
+sample.n.fit(n = 10, scales.generate = 100, scales.fit = 100, func = regressor.basis, ...)
 }
 \arguments{
   \item{n}{Number of observations to make}
@@ -17,8 +17,8 @@ sample.n.fit(n = 10, scales.generate = 100, scales.fit = 100, func = NULL, ...)
     give an emulator that is the prior with short, sharp excursions to
     make the emulator go through the points; large values give smooth
     emulators that exhibit overshoots resembling Gibbs's phenomenon}
-  \item{func}{Function to use for prior, with \code{NULL} being
-    interpreted as \code{c(1,x)}.}
+  \item{func}{Function used to determine basis vectors, defaulting
+    to \code{regressor.basis} if not given.}
   \item{\dots}{Further arguments passed to \code{plot()}.}
 }
 \details{

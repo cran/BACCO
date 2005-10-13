@@ -34,7 +34,7 @@ one when using, for example, \code{corr()}.
 
   Returning an vector all of whose elements are unnamed will cause some
   of the package functions to fail in various weird places.  It is
-  good practice in any case.
+  good practice to use named vectors in any case.
 
   Function \code{regressor.multi()} includes an ugly hack to ensure that
   \code{regressor.basis=function(x){1}} works.  The hack is needed

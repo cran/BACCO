@@ -7,6 +7,12 @@
 # executed with only a small number of evaluations, to save time. 
 
 
+# First, a Boolean specifying whether or not to do the hyperparamter
+# optimization (which takes a long time):
+do.hyper.opt <- FALSE
+
+
+#Load the libraries:
 library(calibrator)
 library(emulator)
 
@@ -17,9 +23,6 @@ n1 <- 25
 n2 <- 27
 
 
-# And a Boolean specifying whether or not to do the hyperparamter
-# optimization (which takes a long time):
-do.hyper.opt <- FALSE
 
 # Now, source some files that set up the problem:
 source("extractor_maker_1d.R")
@@ -81,7 +84,7 @@ abline(v=0.5)
 # First, try stage1():
 
 if(do.hyper.opt){
-phi.stage1 <- stage1(D1=D1.1d, y=y.1d, H1=H1.1d, maxit=1,
+phi.stage1 <- stage1(D1=D1.1d, y=y.1d, H1=H1.1d, maxit=4,
  method="SANN", trace=0, do.print=FALSE, phi.fun=phi.fun.1d,
  phi=phi.1d)
 
@@ -106,7 +109,7 @@ phi.stage1$omega_t
   phi.stage2 <- stage2(D1=D1.1d[use1,,drop=FALSE], D2=D2.1d[use2,,drop=FALSE], H1=H1.1d, H2=H2.1d,
       y=y.1d[use1], z=z.1d[use2], extractor=extractor.1d,
      phi.fun=phi.fun.1d, E.theta=E.theta.1d, Edash.theta=Edash.theta.1d,
-     maxit=1, method="SANN", phi=phi.stage1)
+     maxit=4, method="SANN", phi=phi.stage1)
 
 
 # This will change psi2, _and_ rho _and_ lambda:
@@ -149,4 +152,6 @@ EK.eqn10.supp(X.dist=X.dist.1d, D1=D1.1d, D2=D2.1d,
   lower.theta=c(-3), upper.theta=c(3),extractor=extractor.1d,
   phi=phi.stage2)
 
+} else {
+   print("optimization not performed because variable do.hyper.opt set to FALSE.  To do the optimization, set variable do.hyper.opt to TRUE, near the beginning of this file, and source() it again")
 }

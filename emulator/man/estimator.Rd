@@ -12,7 +12,8 @@ This routine is useful when finding optimal coefficients for the
 correlation using boot methods.
 }
 \usage{
-estimator(val, A, d, scales=NULL, pos.def.matrix=NULL, power=2)
+estimator(val, A, d, scales=NULL, pos.def.matrix=NULL,
+func=regressor.basis, power=2)
 }
 \arguments{
   \item{val}{Design matrix: a data frame with rows corresponding to points at which the
@@ -27,6 +28,8 @@ estimator(val, A, d, scales=NULL, pos.def.matrix=NULL, power=2)
     (called \eqn{B}{B} in Oakley) is not diagonal, pass this matrix to
     \code{estimator()} via the \code{pos.def.matrix} argument.}
   \item{pos.def.matrix}{Positive definite matrix \eqn{B}{B}}.
+  \item{func}{Function used to determine basis vectors, defaulting
+    to \code{regressor.basis} if not given.}
   \item{power}{Exponent in exponential}
   }
 \details{

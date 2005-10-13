@@ -23,7 +23,8 @@ use.Ainv = TRUE, d, func = regressor.basis)
       to be much difference in execution time for the two methods.}
   \item{d}{Observations}
   \item{power}{Power to use in metric}
-  \item{func}{Regression function for observation points}
+  \item{func}{Function used to determine basis vectors, defaulting
+    to \code{regressor.basis} if not given.}
 }
 \details{
 This function returns the likelihood function defined in Oakley's PhD

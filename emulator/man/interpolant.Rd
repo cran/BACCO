@@ -17,7 +17,7 @@ func=regressor.basis, give.full.list = FALSE, distance.function=corr, ...)
 interpolant.quick(x, d, xold, Ainv, scales=NULL,
 pos.def.matrix=NULL, func=regressor.basis, give.Z = FALSE,
 distance.function=corr, ...)
-int.qq(x, d, xold, Ainv, func=regressor.basis)
+int.qq(x, d, xold, Ainv, pos.def.matrix, func=regressor.basis)
 }
 \arguments{
   \item{x}{Point(s)  at which estimation is desired.  For
@@ -52,9 +52,8 @@ int.qq(x, d, xold, Ainv, func=regressor.basis)
     \strong{Note:} if \code{Ainv} is given to the function, but
     \code{use.Ainv} is \code{FALSE}, the code will do as requested and use
     the slow \code{solve(A,x)}, which is probably not what you want.  }
-    
   \item{func}{Function used to determine basis vectors, defaulting
-    to \code{regressor.basis}} if not given.
+    to \code{regressor.basis} if not given.}
   \item{give.full.list}{In \code{interpolant()}, Boolean variable with
     \code{TRUE} meaning to return the whole list of a postiori
     parameters as detailed on pp12-15 of Oakley, and default \code{FALSE}
@@ -148,7 +147,7 @@ bayes.unknown <- interpolant(x.unknown, d.noisy, val, scales=fish, Ainv=Ainv,g=T
 
 
 # Just a quickie for int.qq():
-int.qq(x=rbind(x.unknown,x.unknown+0.1),d.noisy,val,Ainv)
+int.qq(x=rbind(x.unknown,x.unknown+0.1),d.noisy,val,Ainv,pos.def.matrix=diag(fish))
 
 
 ## (To find the best correlation lengths, use optimal.scales())
@@ -209,14 +208,27 @@ Z(0.1)     #nonzero error.
 u <- rbind(x.known,x.unknown)
 interpolant.quick(u, d.noisy, val, scales=fish, Ainv=Ainv,g=TRUE)
 
+
+
+
+# Now an example from climate science.  "results.table" is a dataframe
+# of goldstein (a climate model) results.  Each of its 100 rows shows a
+# point in parameter space together with certain key outputs from the
+# goldstein program.  The following R code shows how we can set up an
+# emulator based on the first 27 goldstein runs, and use the emulator to
+# predict the output for the remaining 73 goldstein runs.  The results
+# of the emulator are then plotted on a scattergraph showing that the
+# emulator is producing estimates that are close to the "real" goldstein
+# runs.
+
+
 data(results.table)
 data(expert.estimates)
-
 
        # Decide which column we are interested in:
 output.col <- 26
 
-       #
+       # extract the "important" columns:
 wanted.cols <- c(2:9,12:19)
 
        # Decide how many to keep;
@@ -226,7 +238,8 @@ wanted.row <- 1:27
        # Values to use are the ones that appear in goin.test2.comments:
 val <- results.table[wanted.row , wanted.cols]
 
-       # Now normalize val so that 0<results.table[,i]<1 for all i:
+       # Now normalize val so that 0<results.table[,i]<1 is 
+       # approximately true for all i:
 
 normalize <- function(x){(x-mins)/(maxes-mins)}
 unnormalize <- function(x){mins + (maxes-mins)*x}
@@ -240,15 +253,17 @@ names(jj) <- names(val)
 val <- jj
 
 
-       ## Answer is the 19th (or 20th or ... or 26th)
+       ## The value we are interested in  is the 19th (or 20th or ... or 26th) column.
 d  <- results.table[wanted.row ,  output.col]
 
-A <- corr.matrix(val,scales=rep(1,ncol(val)), method=2, power=1.5)
+       ##  Now some scales, estimated earlier from the data using
+       ##   optimal.scales():
+
+scales.optim <- exp(c( -2.917, -4.954, -3.354, 2.377, -2.457, -1.934, -3.395,
+-0.444, -1.448, -3.075, -0.052, -2.890, -2.832, -2.322, -3.092, -1.786))
+
+A <- corr.matrix(val,scales=scales.optim, method=2, power=1.5)
 Ainv <-  solve(A)
-
-
-scales.optim <- c( -2.917, -4.954, -3.354, 2.377, -2.457, -1.934, -3.395,
--0.444, -1.448, -3.075, -0.052, -2.890, -2.832, -2.322, -3.092, -1.786)
 
 print("and plot points used in optimization:")
 d.observed <- results.table[ , output.col]

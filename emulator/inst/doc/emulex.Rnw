@@ -1,0 +1,193 @@
+% -*- mode: noweb; noweb-default-code-mode: R-mode; -*-
+
+\documentclass[a4paper]{article}
+
+\author{Robin K. S. Hankin}
+\title{Creating a simple {\tt emulator} case study from scratch: a cookbook}
+%\VignetteIndexEntry{Emulex: a cookbook for the emulator package}
+\SweaveOpts{echo=FALSE}
+\usepackage{a4wide}
+
+\begin{document}
+\maketitle
+
+\newcommand{\cov}{\mathop{\mathrm{cov}}}
+
+
+\SweaveOpts{echo=TRUE}
+\section{Introduction}
+Package {\tt emulator} of bundle {\tt BACCO} performs Bayesian
+emulation of computer models.  This document constructs a minimal
+working example of a simple problem, step by step.  Datasets and
+functions have a {\tt .vig} suffix, representing ``vignette''.
+
+This document is not a substitute for KOH or KOHa or Hankin 2005 or
+the online help files in {\tt BACCO}.  It is not intended to stand
+alone: for example, the notation used here is that of KOH, and the
+user is expected to consult the online help in the BACCO package when
+appropriate.
+
+This document is primarily didactic, although it is informal.
+
+Nevertheless, many of the points raised here are duplicated in the
+{\tt BACCO} helpfiles.
+
+The author would be delighted to know of any improvements or suggestions.
+Email me at {\tt r.hankin@noc.soton.ac.uk}.
+
+\section{List of objects that the user needs to supply}
+
+
+The user needs to supply three objects:
+\begin{itemize}
+\item A design matrix, here {\tt val.vig} (rows of this show where the
+code has been evaluated)
+\item Basis functions.  Here {\tt basis.vig}.  This shows the basis
+functions used for fitting the prior
+\item Data, here {\tt z.vig}.  This shows the data obtained from
+evaluating the various levels of code at the points given by the
+design matrix and the subsets object.
+\end{itemize}
+Each of these is discussed in a separate subsection below.
+
+But the first thing we need to do is install the library:
+<<echo=FALSE,print=FALSE>>=
+<<results=hide>>=
+library(emulator)
+@ 
+
+
+<<datagen_design_matrix, echo=false, results=hide>>=
+n <- 30
+val.vig <- latin.hypercube(n,2)
+@
+
+@ 
+
+\subsection{Design matrix: USER TO SUPPLY}
+
+In these sections I show the objects that the user needs to supply,
+under a heading like the one above.  In the case of the {\tt emulator}
+we need a design matrix and a vector of outputs.
+
+The first thing needed is the design matrix {\tt val.vig}, ie the
+points in parameter space at which the lowest-level code is executed.
+The example here has just two parameters, {\tt a} and {\tt b}:
+<<>>=
+head(val.vig)
+nrow(val.vig)
+@ 
+Notes
+\begin{itemize}
+\item Each row is a point in parameter space, here two dimensional.
+\item The parameters are labelled {\tt a} and {\tt b}
+\end{itemize}
+
+
+\subsection{Basis functions: USER TO SUPPLY}
+Now we need to choose a basis function.  Do this by copying {\tt
+basis.toy()} but fiddling with it:
+
+<<>>=
+basis.vig <- 
+function (x) 
+{
+        out <- c(1, x , x[1]*x[2])
+        names(out) <- c("const", LETTERS[1:2], "interaction")
+        return(out)
+}
+@ 
+
+
+Notes
+\begin{itemize}
+\item This is shamelessly ripped off from {\tt basis.toy()}, except
+that I've changed the basis to be {\tt c(1,a,b,ab)}.
+\end{itemize}
+
+<<datagen, echo=false, results=hide>>=
+REAL.BETA <- 1:4
+REAL.SCALES <- c(3,6)
+REAL.SIGMASQUARED <- 0.3
+
+A <- corr.matrix(xold=val.vig,scales=REAL.SCALES)
+
+z.vig  <- 
+as.vector(rmvnorm(n=1,mean=crossprod(REAL.BETA,apply(val.vig,1,basis.vig)),sigma=A*REAL.SIGMASQUARED))
+@ 
+
+\subsection{Data: USER TO SUPPLY}
+
+The data we have for the {\tt .vig} example is a vector whose elements
+are the output of the code at the points specified in {\tt val.vig}:
+
+<<>>=
+head(z.vig)
+summary(z.vig)
+@ 
+
+\section{Data analysis}
+
+The previous section showed what data and functions the user needs to
+supply.  These all have a {\tt .vig} suffix.   This section shows the
+data being analyzed.
+
+
+First we will estimate the scales to use:
+
+<<>>=
+os <- optimal.scales(val=val.vig, scales.start=c(10,10), d=z.vig, func=basis.vig)
+os
+@ 
+
+
+So we can estimate the coefficients.  But first we have to calculate
+the variance matrix and invert it:
+
+<<>>=
+A.os <- corr.matrix(xold=val.vig,scales=REAL.SCALES)
+Ainv.os <- solve(A)
+@ 
+
+Given this, use {\tt betahat.fun()} to get the coeffs:
+
+<<>>=
+betahat.fun(xold=val.vig, d=z.vig, Ainv=solve(A),func=basis.vig)
+@ 
+
+
+The central function is interpolant:
+
+<<>>=
+interpolant(x=c(0.5,0.5), d=z.vig, Ainv=Ainv.os, scales=os,
+xold=val.vig, func=basis.vig, give.full.list=TRUE)
+@ 
+
+
+And that's it, really.
+
+\clearpage
+\appendix
+\section{Data generation}
+
+The data used in this study were created by directly sampling from the
+appropriate multivariate Gaussian:
+<<eval=false>>=
+<<datagen>>
+@
+
+
+\vfill
+\bibliography{/Users/rksh/unix/bib/uncertainty}
+
+  \noindent
+  Robin K. S. Hankin\\
+  National Oceanography Centre, Southampton\\
+  European Way\\
+  Southampton SO14 3ZH\\
+  United Kingdom\\
+  E-mail: {\tt r.hankin@noc.soton.ac.uk}
+  URL: {\tt http://www.noc.soton.ac.uk}
+
+
+\end{document}

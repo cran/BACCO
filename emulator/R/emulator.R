@@ -130,12 +130,13 @@ function (xold, yold = NULL, method = 1, distance.function = corr,
       stop("method must be 1, 2, or 3")
     }
 }
+
 "estimator" <-
-function (val, A, d, scales = NULL, pos.def.matrix = NULL, power = 2) 
+function (val, A, d, scales = NULL, pos.def.matrix = NULL, func=regressor.basis, power = 2) 
 {
     d.missing.estimated <- d + NA
     for (i in 1:nrow(val)) {
-        val.oneshort <- val[-i, ]
+        val.oneshort <- val[-i, ,drop=FALSE]
         val.missing <- val[i, ]
         d.oneshort <- d[-i]
         d.missing <- d[i]
@@ -143,10 +144,11 @@ function (val, A, d, scales = NULL, pos.def.matrix = NULL, power = 2)
         Ainv.oneshort <- solve(A.oneshort)
         d.missing.estimated[i] <- interpolant(val.missing, d.oneshort, 
             val.oneshort, Ainv = Ainv.oneshort, scales = scales, 
-            pos.def.matrix = pos.def.matrix, power = power, g = TRUE)$mstar.star
+            pos.def.matrix = pos.def.matrix, func=func, power = power, g = TRUE)$mstar.star
     }
     return(d.missing.estimated)
 }
+
 "interpolant" <-
 function (x, d, xold, Ainv = NULL, A = NULL, use.Ainv = TRUE, 
           scales = NULL, pos.def.matrix = NULL, func = regressor.basis,
@@ -216,15 +218,17 @@ function (x, d, xold, Ainv = NULL, A = NULL, use.Ainv = TRUE,
         return(as.vector(mstar.star))
     }
 }
-"int.qq" <- function(x, d, xold, Ainv, func=regressor.basis){
+
+"int.qq" <- function(x, d, xold, Ainv, pos.def.matrix, func=regressor.basis){
   bhat <- betahat.fun(xold,Ainv,d)
   out <- 
     crossprod(apply(x,1,func),bhat) + 
       crossprod(
-                crossprod(Ainv,corr.matrix(x,xold,scales=fish)),
+                crossprod(Ainv,corr.matrix(x,xold,pos.def.matrix=pos.def.matrix)),
                 d-crossprod(apply(xold,1,func), bhat))
 return(as.vector(out))
 }
+
 "interpolant.quick" <-
 function (x, d, xold, Ainv, scales = NULL, pos.def.matrix = NULL, 
     func = regressor.basis, give.Z = FALSE, distance.function=corr, ...) 
@@ -319,7 +323,7 @@ function (x, xold, d, A, Ainv, scales = NULL, pos.def.matrix = NULL,
     func = regressor.basis, ...) {
   mstar <- 
     interpolant.quick(x=x, d=d, xold=xold, Ainv=Ainv, scales=scales,
-                      pos.def.matrix=pos.def.matrix,func=func,
+                      pos.def.matrix=pos.def.matrix, func=func,
                       give.Z=FALSE)
 
 jj.sigma <- var.conditional(x, xold, d, A, Ainv, scales = scales, pos.def.matrix = pos.def.matrix, 
@@ -350,6 +354,7 @@ function (n, d, normalize = FALSE)
     colnames(out) <- letters[1:d]
     return(out)
 }
+
 "makeinputfiles" <-
 function (number.of.runs = 100, gaussian = TRUE, directoryname = "~/goldstein/genie-cgoldstein/", 
     filename = "QWERTYgoin", expert.estimates, area.outside = 0.05) 
@@ -430,6 +435,7 @@ function (number.of.runs = 100, gaussian = TRUE, directoryname = "~/goldstein/ge
     }
     return(0)
 }
+
 "model" <-
 function (x) 
 {
@@ -442,17 +448,18 @@ function (x)
         return(as.real(x[1] < x[2]))
     }
 }
+
 "optimal.scales" <-
-function (val, scales.start, d, use.like = TRUE, give.answers = FALSE, 
+function (val, scales.start, d, use.like = TRUE, give.answers = FALSE, func=regressor.basis,
     ...) 
 {
     if (use.like) {
       initial.value <-
-        scales.likelihood(scales=exp(scales.start),xold=val,d=d)
+        scales.likelihood(scales=exp(scales.start), xold=val, d=d, func=func)
       
         objective.fun <- function(scales, val, d) {
             -scales.likelihood(scales = exp(scales), xold = val, 
-                d = d)/(initial.value)
+                d = d, func=func)/(initial.value)
         }
     }
     else {
@@ -474,6 +481,35 @@ function (val, scales.start, d, use.like = TRUE, give.answers = FALSE,
         return(exp(jj$par))
     }
 }
+
+"optimal.scale" <-
+function (val, d, use.like = TRUE, give.answers = FALSE,  func=regressor.basis,
+    ...) 
+{
+    n <- ncol(val)
+    if (use.like) {
+        objective.fun <- function(scale, val, d) {
+            -scales.likelihood(scales = rep(exp(scale),n), xold = val, 
+                d = d, func=func)
+        }
+    }
+    else {
+        jj.fun <- function(scale1, val, d) {
+            A <- corr.matrix(xold=val, scales = rep(exp(scale1),n))
+            error <- abs(d - estimator(val, A, d, scales = rep(exp(scale1),n), func=func))
+            return(sum(error^2))
+        }
+        objective.fun <- function(scale1,val,d){jj.fun(scale1,val,d)}
+    }
+    jj <- optimize(f=objective.fun, interval=c(-4,10), maximum=FALSE, val = val, d = d, ...)
+    if (give.answers) {
+        return(jj)
+    }
+    else {
+      return(exp(jj$minimum))
+    }
+}
+
 "pad" <-
 function (x, len, padchar = "0", strict = TRUE) 
 {
@@ -492,6 +528,7 @@ function (x, len, padchar = "0", strict = TRUE)
     return(paste(paste(rep(padchar, len - n), collapse = ""), 
         x, sep = "", collapse = ""))
 }
+
 "prior.B" <-
 function (H, Ainv, B0 = NULL) 
 {
@@ -502,6 +539,7 @@ function (H, Ainv, B0 = NULL)
         return(B0 + quad.form(Ainv, H))
     }
 }
+
 "prior.b" <-
 function (H, Ainv, d, b0 = NULL, B0 = NULL) 
 {
@@ -515,6 +553,7 @@ function (H, Ainv, d, b0 = NULL, B0 = NULL)
     }
     return(b)
 }
+
 "quad.form" <-
 function (M, x, chol = FALSE) 
 {
@@ -526,6 +565,7 @@ function (M, x, chol = FALSE)
         return(drop(crossprod(jj, jj)))
     }
 }
+
 "quad.form.inv" <-
 function (M, x) 
 {
@@ -545,6 +585,7 @@ function (x)
     names(x)[1] <- "const"
     return(x)
 }
+
 "regressor.multi" <-
 function (x.df, func = regressor.basis) 
 {
@@ -555,6 +596,7 @@ function (x.df, func = regressor.basis)
     return(out)
   }
 }
+
 "s.chi" <-
 function (H, Ainv, d, s0 = 0, fast.but.opaque = TRUE) 
 {
@@ -568,6 +610,7 @@ function (H, Ainv, d, s0 = 0, fast.but.opaque = TRUE)
     }
     return(out)
 }
+
 "sample.from.exp.est" <-
 function (number.of.runs, expert.estimates, gaussian = TRUE, 
     area.outside = 0.05) 
@@ -599,9 +642,10 @@ function (number.of.runs, expert.estimates, gaussian = TRUE,
     }
     return(lh.real)
 }
+
 "sample.n.fit" <-
   function(n=10 , scales.generate=100 , scales.fit =
-           100, func=NULL, ...
+           100, func=regressor.basis, ...
            )
 {
   
@@ -635,6 +679,7 @@ function (number.of.runs, expert.estimates, gaussian = TRUE,
   points(toy,d.noisy,pch=16,cex=2)
   legend("topright",lty=c(1:2,0),col=c("black","red","green","black"),pch=c(NA,NA,NA,16),legend=c("best estimate","+/- 1sd","prior","training set"))
 }
+
 "scales.likelihood" <-
 function (pos.def.matrix = NULL, scales = NULL, power = 2, xold,
           use.Ainv = TRUE, d, func = regressor.basis) 
@@ -665,6 +710,7 @@ function (pos.def.matrix = NULL, scales = NULL, power = 2, xold,
     }
     return(drop(bit1 * bit2 * bit3))
 }
+
 "sigmahatsquared" <-
 function (H, Ainv, d) 
 {

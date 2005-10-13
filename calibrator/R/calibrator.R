@@ -86,7 +86,6 @@ function (x, t.vec, k, H1, fast.but.opaque = FALSE, a = NULL,
     return(H1(D1.fun(x, edash.mean)))
 }
 
-
 "hbar.fun.toy" <- function(theta, X.dist, phi){
   if(is.vector(theta)){theta <- t(theta)}
   first.bit <- phi$rho*H1.toy(D1.fun(X.dist$mean,theta))
@@ -185,6 +184,7 @@ function (D2)
 function (D1, D2, H1, H2, extractor, E.theta, Edash.theta, give.answers = FALSE, 
     test.for.symmetry = FALSE, phi) 
 {
+
     lambda <- phi$lambda
     rho <- phi$rho
     x.star <- extractor(D1)$x.star
@@ -193,9 +193,13 @@ function (D1, D2, H1, H2, extractor, E.theta, Edash.theta, give.answers = FALSE,
     v1.d1.inv <- solve(v1.d1)
     w1.d1 <- W1(D1 = D1, H1 = H1, phi = phi)
     h1.d1 <- H1(D1)
-    w1.blah <- crossprod(w1.d1, crossprod(h1.d1, v1.d1.inv))
-    v1.blah <- crossprod(v1.d1.inv, h1.d1) %*% w1.d1
-    v1.blah.di.blah <- v1.blah %*% crossprod(h1.d1, v1.d1.inv)
+
+    jj <- crossprod(h1.d1,v1.d1.inv)
+    w1.blah <- crossprod(w1.d1, jj)
+#    v1.blah <- crossprod(v1.d1.inv, h1.d1) %*% w1.d1
+    v1.blah <- crossprod(jj, w1.d1)
+    v1.blah.di.blah <- v1.blah %*% jj
+
     line1 <- line2 <- line3 <- line4 <- line5 <- line6 <- matrix(0, 
         nrow(D2), nrow(D2))
     tvec.arbitrary <- phi$theta.apriori$mean
@@ -212,21 +216,21 @@ function (D1, D2, H1, H2, extractor, E.theta, Edash.theta, give.answers = FALSE,
                 phi = phi)
             jj.tt <- tt.fun(D1 = D1, extractor = extractor, x.i =
                             D2[i,,drop=TRUE], x.j = D2[j,,drop=TRUE], phi = phi)
-            line2[i, j] <- tr(crossprod(v1.d1.inv, jj.tt))
+            line2[i, j] <- sum(rowSums(v1.d1.inv * jj.tt))
             jj.hh <- hh.fun(x.i = D2[i,,drop=TRUE], x.j = D2[j,,drop=TRUE], E.theta = E.theta, 
                 H1 = H1, phi = phi)
-            line3[i, j] <- tr(crossprod(w1.d1, jj.hh))
+            line3[i, j] <- sum(rowSums(w1.d1 * jj.hh))
             jj.th <- ht.fun(x.i = D2[j,,drop=TRUE], x.j = D2[i,,drop=TRUE], D1 = D1, 
                 extractor = extractor, Edash.theta = Edash.theta, 
                 H1 = H1, fast.but.opaque = TRUE, x.star = x.star, 
                 t.vec = t.vec, phi = phi)
-            line4[i, j] <- tr(w1.blah %*% jj.th)
+            line4[i, j] <- sum(rowSums(w1.blah * t(jj.th)))
             jj.ht <- ht.fun(x.i = D2[i,,drop=TRUE], x.j = D2[j,,drop=TRUE], D1 = D1, 
                 extractor = extractor, Edash.theta = Edash.theta, 
                 H1 = H1, fast.but.opaque = TRUE, x.star = x.star, 
                 t.vec = t.vec, phi = phi)
-            line5[i, j] <- tr(crossprod(v1.blah, jj.ht))
-            line6[i, j] <- tr(crossprod(jj.tt, v1.blah.di.blah))
+            line5[i, j] <- sum(rowSums(v1.blah * jj.ht))
+            line6[i, j] <- sum(rowSums(jj.tt * v1.blah.di.blah))
         } 
     }
     C.m <- +line1 - line2 + line3 - line4 - line5 + line6
@@ -1304,17 +1308,17 @@ function (D1, extractor, x.i, x.j, test.for.symmetry = FALSE,
   x.star <- extractor(D1)$x.star
 
   multi.dimensional <- length(phi$theta.apriori$mean)>1
-  print(multi.dimensional)
   if(multi.dimensional){ # multi dimensional case
+
     numerator <-
       adapt(length(phi$theta.apriori$mean),
             lower = lower.theta, upper = upper.theta,
             functn = integrand.numerator, ...)
-    
     denominator <-
       adapt(length(phi$theta.apriori$mean),
           lower = lower.theta, upper = upper.theta,
             functn = integrand.denominator, ...)
+
     
   } else { # one dimensional case
     integrand.numerator.vectorized <- function(theta.vec){

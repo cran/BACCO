@@ -22,6 +22,7 @@ with subsets.
   Biometrika, 87(1): pp1-13
 }
 \author{Robin K. S. Hankin}
+\seealso{\code{\link{is.nested}}}
 \examples{
 data(toyapps)
 stopifnot(is.consistent(subsets.toy,z.toy))

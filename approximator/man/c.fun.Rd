@@ -67,7 +67,5 @@ x <- rbind(x,D1.toy[subsets.toy[[4]][1],])
 
 cdash.fun(x=x,xdash=xdash, D1=D1.toy, basis=basis.toy,subsets=subsets.toy, hpa=hpa.toy)
 # Observe how the bottom row is zero (up to rounding error)
-
-
 }
-\keyword{math} 
+\keyword{math}

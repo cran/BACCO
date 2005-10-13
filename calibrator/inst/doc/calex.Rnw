@@ -3,7 +3,7 @@
 \documentclass[a4paper]{article}
 
 \author{Robin K. S. Hankin}
-\title{Creating a sample usage for {\tt BACCO} from scratch: a cookbook}
+\title{Creating a simple {\tt calibrator} case study from scratch: a cookbook}
 %\VignetteIndexEntry{Calex: a cookbook for the calibrator package}
 \SweaveOpts{echo=FALSE}
 \usepackage{a4wide}
@@ -68,11 +68,33 @@ like to consider.
 Parameters A and B have true but unknown values and we wish to make
 inferences about these true values.
 
+
+\section{List of objects that the user needs to supply}
+The user needs to supply several objects:
+\begin{itemize}
+\item Design matrices for the code runs and the field observations,
+here {\tt D1.int} and {\tt D2.int}.
+\item An extractor function to separate out the parameters from the
+independent variables, here {\tt extractor.int()}
+\item Various basis functions for the code runs (here {\tt h1.int()}
+and {\tt H1.int()}) and field observations (here {\tt h2.int()} and
+{\tt H2.int()})
+\item A function to create a hyperparameter object, here {\tt phi.fun.int()}
+\item Two functions to return expectation under different
+distributions, here {\tt E.theta.int()} and {\tt Edash.theta.int()}
+\item Data, here {\tt y.int} for the code observations and {\tt z.int}
+for the field observations, and {\tt z.int} for both together
+\end{itemize}
+
+
 \section{Design matrices}
 \label{design.matrices}
 
 There are two design matrices to consider: {\tt D1.int}, which is the
-code run set, and {\tt D2.int}, the observation points.
+code run set, and {\tt D2.int}, the observation points.  Generating
+the data is deferred to section 6 because we need basis functions
+(section 3) and hyperparameters (section 4) before we can specify the
+appropriate distribution from which random can be drawn.
 
 In this section, we will generate design matrices of arbitrary size.
 Data is generated in section~\ref{datasection}.
@@ -283,9 +305,10 @@ function (D2)
 
 We now need a function {\tt phi.fun.int()} to create an appropriate
 hyperparameter object.  Note that function {\tt phi.change()} is
-generic (so we don't need to write one).  The best way to do this %'
-is to proceed by analogy and modify function {\tt phi.fun.toy()},
-line by line.  Most of the function is straightforward to create.
+generic (so we don't need to write one).  The best way to write %'
+{\tt phi.fun.int()} is to proceed by analogy and modify function
+{\tt phi.fun.toy()}, line by line.  Most of the function is
+straightforward to create.
 Note that the only parts that need changing in this case are the
 internal functions {\tt pdm.maker.psi1()} and
 {\tt pdm.maker.psi1()}; I use ``pdm" to denote
@@ -485,19 +508,23 @@ The first step is to examine function {\tt E.theta.toy()}:
 E.theta.toy
 @ 
 
-The difficulty is that the basis functions are nonlinear.  Recall that
-function {\tt h1.int()} includes a product:
+That was straightforward because the toy case included only linear
+basis functions.  In the intermediate case presented here, the basis
+functions are nonlinear so expectation will not commute past
+{\tt h1.int()}.  Recall that function {\tt h1.int()} includes
+a product:
 
 <<>>=
 h1.int
 @ 
 
-We can use the fact that $E(XY)=E(X)\cdot E(Y)$ if~$X$ and~$Y$ are
-independent random variables.  As the prior variance matrix (viz,
-{\tt jj.psi1.apriori}) is diagonal, different terms are independent.
-BUT, $E(X^2)\neq\left(E(X)\right)^2$.
-Thus we may copy from function {\tt E.theta.toy()} and modify as
-necesary:
+(the fourth element of the output, viz {\tt xin[1]*xin[3]}, is
+nonlinear).  
+
+The fact that~$E(X^2)\neq\left(E(X)\right)^2$  complicates the matrix
+returned by function {\tt E.theta.int()} (see {\tt ?E.theta.int} for
+details of this matrix).  But we may copy from function {\tt
+E.theta.toy()} and modify as necesary:
 
 <<>>=
 E.theta.int <- function(D2 = NULL, H1 = NULL, x1 = NULL, x2 = NULL, phi, give.mean = TRUE)
@@ -576,7 +603,11 @@ as documented.  This would be
 \end{array}\right)
 \]
 
-And remembering that the covariance is zero this reduces to
+We can now use the fact that $E(XY)=E(X)\cdot E(Y)$ if~$X$ and~$Y$ are
+independent random variables.  In this case, because the prior
+variance matrix (viz, {\tt jj.psi1.apriori}) is diagonal, the
+different terms are indeed independent.  So the covariance is
+zero and the matrix reduces to
 \[
 \left(
 \begin{array}{ccccc}
@@ -1093,7 +1124,7 @@ Now we can conduct a calibrated prediction:
   jj <- EK.eqn10.supp(X.dist=X.dist.int, D1=D1.int, D2=D2.int,
   H1=H1.int, H2=H2.int, d=d.int, hbar.fun=hbar.fun.int,
   lower.theta=c(-3,-3), upper.theta=c(3,3),extractor=extractor.int,
-  phi=phi.stage2,maxpts=10)
+  phi=phi.stage2,minpts=5,maxpts=51)
 jj
 @ 
 
@@ -1103,6 +1134,10 @@ Notes
 \item I have set {\tt maxpts} to 10, as {\tt adapt()} is  very slow
 with the default settings.   We could also fiddle with the limits of
 integration, viz {\tt theta.lower} and {\tt theta.upper}.
+\item The above call generates an error, given by {\tt adapt()}
+complaining that the {\tt minpts} argument has to be changed.  Ignore
+this but note that the warning is well-founded: there are not enough
+function evaluations to make for an accurate integration.
 \end{itemize}
 
 \bibliography{/Users/rksh/unix/bib/uncertainty}

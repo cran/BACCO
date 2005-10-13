@@ -1,5 +1,4 @@
-\name{V.fun}
-\alias{V.fun}
+\name{V.fun.app}
 \alias{V.fun.app}
 \title{Variance matrix}
 \description{

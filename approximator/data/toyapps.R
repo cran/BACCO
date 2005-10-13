@@ -49,3 +49,4 @@ rm(jj)
 set.seed(0)
 "z.toy" <- 
 generate.toy.observations(D1=D1.toy, subsets=subsets.toy, basis.fun=basis.toy)
+

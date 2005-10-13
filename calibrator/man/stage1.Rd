@@ -13,7 +13,8 @@ the three parameters.
 stage1(D1, y, H1,  maxit,  trace=100, method="Nelder-Mead", directory = ".", do.filewrite=FALSE, do.print=TRUE, phi.fun, lognormally.distributed=FALSE, include.prior=TRUE, phi)
 stage2(D1, D2, H1, H2, y, z, maxit, trace=100, method = "Nelder-Mead", directory =
 ".", do.filewrite=FALSE, do.print=TRUE,  extractor, phi.fun, E.theta,
-Edash.theta, isotropic=FALSE, lognormally.distributed = FALSE, include.prior = TRUE, use.standin = FALSE, phi) 
+Edash.theta, isotropic=FALSE, lognormally.distributed = FALSE,
+include.prior = TRUE, use.standin = FALSE, rho.eq.1 = TRUE, phi) 
 stage3(D1, D2, H1, H2, d, maxit, trace=100, method="Nelder-Mead", directory = ".",
 do.filewrite=FALSE, do.print=TRUE, include.prior = TRUE, lognormally.distributed=FALSE, theta.start=NULL, phi) 
 }
@@ -22,15 +23,13 @@ do.filewrite=FALSE, do.print=TRUE, include.prior = TRUE, lognormally.distributed
   \item{trace}{Amount of information displayed, as passed to \code{optim()}}
   \item{D1}{Matrix whose rows are points at which code output is known}
   \item{D2}{Matrix whose rows are points at which observations were made}
-  \item{H1}{Regressor basis functions for \code{D1}}
-  \item{H2}{Regressor basis functions for \code{D2}}
+  \item{H1,H2}{Regressor basis functions for \code{D1} and \code{D2}}
   \item{y}{Code outputs.  Toy example is \code{y.toy}}
   \item{z}{Observations.  Toy example is \code{z.toy}}
   \item{d}{Data vector consisting of the code runs and observations}
   \item{extractor}{extractor function for \code{D1}}
-  \item{E.theta}{Expectation WRT theta.  Toy example is \code{E.theta.toy()}}
-  \item{Edash.theta}{Expectation WRT the dashed theta.  Toy example is
-    \code{Edash.theta.toy()}}
+  \item{E.theta,Edash.theta}{Expectation WRT theta, and dashed theta.
+    Toy examples are \code{E.theta.toy()} and \code{Edash.theta.toy()}}
   \item{phi.fun}{Function to create hyperparameters; passed  (in
     \code{stage1()} and \code{stage2()}) to \code{phi.change()}.  Toy
     version is \code{phi.fun.toy()}}
@@ -47,12 +46,12 @@ do.filewrite=FALSE, do.print=TRUE, include.prior = TRUE, lognormally.distributed
     save a \code{load}able file \code{stage[123].<date>}, containing the interim value of \code{phi}
     and the corresponding optimand to \code{directory} at each evalution
     of the optimizer.  If \code{FALSE}, don't write the files}
-    \item{directory}{The directory to write files to; only matters if
-      \code{do.filewrite} is \code{TRUE}}
-    \item{isotropic}{In function \code{stage2()}, Boolean with default
-      \code{FALSE} meaning to carry out a full optimization, and
-      \code{TRUE} meaning to restrict the scope to isotroic roughness
-      matrices.  See details section below}
+  \item{directory}{The directory to write files to; only matters if
+    \code{do.filewrite} is \code{TRUE}}
+  \item{isotropic}{In function \code{stage2()}, Boolean with default
+    \code{FALSE} meaning to carry out a full optimization, and
+    \code{TRUE} meaning to restrict the scope to isotroic roughness
+    matrices.  See details section below}
   \item{do.print}{Boolean, with default \code{TRUE} meaning to print
     interim values of \code{phi} at each evaluation}
   \item{use.standin}{In \code{stage2()}, a Boolean argument, with
@@ -61,6 +60,8 @@ do.filewrite=FALSE, do.print=TRUE, include.prior = TRUE, lognormally.distributed
     same size but contains fictitious values.  The only time to set
     \code{use.standin} to \code{TRUE} is when debugging as it runs
     several orders of magnitude faster}
+  \item{rho.eq.1}{Boolean, with default \code{TRUE} meaning to hold the
+    value of \code{rho} constant at one (1)}
   \item{theta.start}{In \code{stage3()}, the starting point of the
     optimization with default \code{NULL} meaning to use the maximum
     likelihood point of the apriori distribution (ie \code{phi$theta.apriori$mean})}

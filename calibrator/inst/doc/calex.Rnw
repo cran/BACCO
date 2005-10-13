@@ -469,7 +469,7 @@ arguments, once.  Save the result in, say, {\tt jj} and then use
 function {\tt phi.change()}, which is generic, and much simpler to use.
 \item The value for rho and lambda and power are just scalars 
 \item {\tt psi1} and {\tt psi2} are structures, or named vectors
-(it's always good practice to %' include names).  Vector psi1 has 5
+(it's always good practice to include names).  Vector psi1 has 5
 elements: two for x and y, two for the parameters A and B, and one for
 sigma1squared.  Vector psi2 has three: two for x and y, and one for
 {\tt sigma2squared}.
@@ -521,12 +521,13 @@ one for it being {\tt FALSE}.  If {\tt TRUE}, it returns {\tt H1()}
 using the input value of {\tt D2} and $\overline{\theta}$ (as
 determined from the {\em a priori} distribution).  If {\tt FALSE}, it
 needs to return the matrix described in the help file\footnote{
-$E_\theta(h\cdot h^T)-E_\theta(h)\cdot E_\theta(h)^T$} which in this
-case is independent of {\tt x1} and {\tt x2}.  This matrix is 6-by-6
-because it is the same size as the variance matrix, and that is 6-by-6
-because $h(x)=\mbox{\tt c(1,x)}$ [recall that here {\tt x} is a single
-row of a dataframe like {\tt D1.toy}---actually, it uses the output
-of {\tt D1.fun()}---and this has five columns].
+  $E_\theta(h\cdot h^T)-E_\theta(h)\cdot E_\theta(h)^T$.  An example
+  is given in the next footnote.}  which in this case is independent
+of {\tt x1} and {\tt x2}.  This matrix is 6-by-6 because it is the
+same size as the variance matrix, and that is 6-by-6 because
+$h(x)=\mbox{\tt c(1,x)}$ [recall that here {\tt x} is a single row of
+  a dataframe like {\tt D1.toy}---actually, it uses the output of {\tt
+    D1.fun()}---and this has five columns].
 
 That was straightforward because the toy case included only linear
 basis functions.  In the intermediate case presented here, the basis
@@ -576,7 +577,7 @@ would need to add a variance.
 the prior distribution has zero correlation between A and B.  The
 thing at the top of page 5 of the supplement should be
 \begin{equation}\label{top.of.p5}
-E_\theta\left(\bh_1\left(\bx_j,\bth\right)\bh_1\left(\bx_j,\bth\right)^T\right)
+E_\theta\left(\bh_1\left(\bx_j,\bth\right)\cdot\bh_1\left(\bx_j,\bth\right)^T\right)
 =
 E_\theta\left(
 \begin{array}{ccccc}

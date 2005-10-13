@@ -25,8 +25,15 @@ MH(n, start, sigma, pi)
   that the first few rows will be \dQuote{burn-in}, so should be
   ignored
 }
-\references{W. R. Gilks et al 1996. \emph{Markov Chain Monte Carlo in
-    practice}.  Chapman and Hall, 1996.    ISBN 0-412-05551-1}
+\references{
+  \itemize{
+    \item W. R. Gilks et al 1996. \emph{Markov Chain Monte Carlo in
+      practice}.  Chapman and Hall, 1996.    ISBN 0-412-05551-1
+    \item N. Metropolis and others 1953. \emph{Equation of state
+      calculations by fast computing machines}.  The Journal of Chemical
+    Physics, volume 21, number 6, pages 1087-1092
+  }
+}
 \author{Robin K. S. Hankin}
 \note{
   This function is a little slow because it is not vectorized.

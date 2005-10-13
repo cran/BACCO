@@ -52,9 +52,6 @@
   Function \code{hpa.fun.genie()} creates a hyperparameter object in a
   form suitable for passing to the other functions in the library.
 }
-\details{
-
-}
 \references{
   M. C. Kennedy and A. O'Hagan 2000. \dQuote{Predicting the output from
     a complex computer code when fast approximations are available}

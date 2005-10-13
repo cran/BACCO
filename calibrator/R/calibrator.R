@@ -1077,11 +1077,11 @@ function (D1, y, H1, maxit, trace=100, method = "Nelder-Mead", directory = ".",
 "stage2" <-
   function (D1, D2, H1, H2, y, z, maxit, trace=100, method = "Nelder-Mead",
             directory = ".", do.filewrite=FALSE, do.print=TRUE,
-            extractor, phi.fun, E.theta, Edash.theta,
-            isotropic = FALSE,
-            lognormally.distributed = FALSE, include.prior = TRUE, use.standin = FALSE, phi) 
+            extractor, phi.fun, E.theta, Edash.theta, isotropic = FALSE,
+            lognormally.distributed = FALSE, include.prior = TRUE,
+            use.standin = FALSE, rho.eq.1 = TRUE, phi) 
 {
-      if(do.filewrite & !isTRUE(file.info(directory)$isdir)){
+    if(do.filewrite & !isTRUE(file.info(directory)$isdir)){
       stop("do.filewrite = TRUE; directory name supplied does not exist")
     }
     f <- function(candidate) {
@@ -1096,18 +1096,22 @@ function (D1, y, H1, maxit, trace=100, method = "Nelder-Mead", directory = ".",
                                psi2 = exp(candidate[-c(1,2)])
                                )
       }
-        if (use.standin) {
-            V.temp <- 1 + diag(3, nrow = nrow(D2))
-        }
-        else {
-            V.temp <- V.fun(D1 = D1, D2 = D2, H1 = H1, H2 = H2, 
-                extractor = extractor, E.theta = E.theta, Edash.theta = Edash.theta, 
-                phi = phi.temp)
-        }
-        f.out <- drop(p.page4(D1 = D1, D2 = D2, H1 = H1, H2 = H2, 
-            V = V.temp, z = z, y = y, E.theta = E.theta, Edash.theta=Edash.theta,extractor=extractor,include.prior = include.prior, 
-            lognormally.distributed = lognormally.distributed, 
-            return.log = TRUE, phi = phi.temp))
+      if (use.standin) {
+        V.temp <- 1 + diag(3, nrow = nrow(D2))
+      } else {
+        V.temp <- V.fun(D1 = D1, D2 = D2, H1 = H1, H2 = H2, 
+                        extractor = extractor, E.theta = E.theta, Edash.theta = Edash.theta, 
+                        phi = phi.temp)
+      }
+      if(rho.eq.1){
+        phi.temp <- phi.change(phi.fun = phi.fun, old.phi = phi, rho=1)
+      }
+      f.out <- drop(p.page4(D1 = D1, D2 = D2, H1 = H1, H2 = H2, V = V.temp,
+                            z = z, y = y, E.theta = E.theta, Edash.theta=Edash.theta,
+                            extractor=extractor,include.prior = include.prior, 
+                            lognormally.distributed = lognormally.distributed, 
+                            return.log = TRUE, phi = phi.temp)
+                    )
         if (do.print) {
           print(candidate)
           print(f.out)
@@ -1123,27 +1127,28 @@ function (D1, y, H1, maxit, trace=100, method = "Nelder-Mead", directory = ".",
         }
         return(f.out)
     }
-      if(isotropic){
-        rho.lambda.psi2.start <- log(c(phi$rho, phi$lambda,  phi$psi2[1], phi$sigma2squared))
-      } else {
-        rho.lambda.psi2.start <- log(c(phi$rho, phi$lambda, phi$psi2))
-      }
-      e <- optim(rho.lambda.psi2.start, f, method = method, control = list(fnscale = -1, 
-                                                            trace = trace, maxit = maxit))
-      jj <- exp(e$par)
-      if(isotropic){
-        phi.out <- phi.change(phi.fun = phi.fun, old.phi = phi, rho = jj[1], 
-                              lambda = jj[2], psi2 = c(rep(jj[3],nrow(phi$omegastar_x)),jj[4])
-                              )
-      } else {
-        phi.out <- phi.change(phi.fun = phi.fun, old.phi = phi, rho = jj[1], 
-                              lambda = jj[2], psi2 = jj[-c(1,2)]
-                              )
-      }
-        return(invisible(phi.out))
+    if(isotropic){
+      rho.lambda.psi2.start <- log(c(phi$rho, phi$lambda,  phi$psi2[1], phi$sigma2squared))
+    } else {
+      rho.lambda.psi2.start <- log(c(phi$rho, phi$lambda, phi$psi2))
+    }
+    e <- optim(rho.lambda.psi2.start, f, method = method,
+               control = list(fnscale = -1, trace = trace, maxit = maxit))
+    jj <- exp(e$par)
+    if(isotropic){
+      phi.out <- phi.change(phi.fun = phi.fun, old.phi = phi, rho = jj[1], 
+                            lambda = jj[2], psi2 = c(rep(jj[3],nrow(phi$omegastar_x)),jj[4])
+                            )
+    } else {
+      phi.out <- phi.change(phi.fun = phi.fun, old.phi = phi, rho = jj[1], 
+                            lambda = jj[2], psi2 = jj[-c(1,2)]
+                            )
+    }
+    if(rho.eq.1){
+      phi.out <- phi.change(phi.fun = phi.fun, old.phi=phi.out, rho=1)
+    }
+    return(invisible(phi.out))
 }
-
-
 
 "stage3" <-
 function (D1, D2, H1, H2, d, maxit, trace=100, method = "Nelder-Mead", directory

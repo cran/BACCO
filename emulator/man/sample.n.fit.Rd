@@ -36,10 +36,8 @@ of beta.
 
 sample.n.fit(main="Default: scales match")
 sample.n.fit(scales.generate=5,main="generate scale small")
-sample.n.fit(scales.fit=5,main="fit scales small",sub="note vertial
-scale")
-sample.n.fit(scales.fit=5,main="fit scales small",ylim=c(-3,3),sub="note
-appropriate interpolation, bad extrapolation")
+sample.n.fit(scales.fit=5,main="fit scales small",sub="note vertical scale")
+sample.n.fit(scales.fit=5,main="fit scales small",ylim=c(-3,3),sub="note appropriate interpolation, bad extrapolation")
 
 # Now use a quadratic function instead of the default linear:
  f <- function(x){out <- c(1,x,x^2)

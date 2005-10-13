@@ -63,7 +63,10 @@ phi=NULL)
   and examples.
   
   Function \code{E.theta.toy(give.mean=FALSE,...)} does \strong{not}
-  return the variance! It returns the thing that must be added to
+  return the variance!  The matrix returned is a \strong{different size}
+  from the variance matrix!
+
+  It returns the thing that must be added to
   \code{crossprod(E_theta(h1(x,theta)),t(E_theta(h1(x,theta))))} to give
   \code{E_theta(h1(x,theta).t(h1(x,theta)))}.  If the terms of
   \code{h1()} are of the form \code{c(o,theta)} (where \code{o} is a

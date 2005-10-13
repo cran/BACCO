@@ -2,7 +2,7 @@
 \alias{W2}
 \title{variance matrix for beta2}
 \description{
-Variance matrix for beta2 as per page 4 of the supplement}
+  Variance matrix for beta2 as per page 4 of the supplement
 }
 \usage{
 W2(D2, H2, V, det=FALSE)

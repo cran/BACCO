@@ -20,18 +20,18 @@ distance.function=corr, ...)
 int.qq(x, d, xold, Ainv, pos.def.matrix, func=regressor.basis)
 }
 \arguments{
-  \item{x}{Point(s)  at which estimation is desired.  For
+  \item{x}{Point(s) at which estimation is desired.  For
     \code{interpolant.quick()}, argument \code{x} is a matrix
-    and an expectation is given for each row.}
+    and an expectation is given for each row}
   \item{d}{vector of observations, one for each row of \code{xold}}
   \item{xold}{Matrix with rows corresponding to points at which the
     function is known}
-  \item{A}{Correlation matrix \code{A}.  If not given, it is calculated.}
+  \item{A}{Correlation matrix \code{A}.  If not given, it is calculated}
   \item{Ainv}{Inverse of correlation matrix \code{A}.  Required by
     \code{interpolant.quick()} and \code{int.qq()}.  In \code{interpolant()},
     using the default value of \code{NULL} results in \code{Ainv} being
     calculated explicitly (which may be slow: see next argument for more
-    details).}
+    details)}
   \item{use.Ainv}{Boolean, with default \code{TRUE} meaning to use the
     inverse matrix \code{Ainv} (and, if necessary, calculate it using
     \code{solve(.)}).  This requires the not inconsiderable overhead of
@@ -51,32 +51,32 @@ int.qq(x, d, xold, Ainv, pos.def.matrix, func=regressor.basis)
     
     \strong{Note:} if \code{Ainv} is given to the function, but
     \code{use.Ainv} is \code{FALSE}, the code will do as requested and use
-    the slow \code{solve(A,x)}, which is probably not what you want.  }
+    the slow \code{solve(A,x)}, which is probably not what you want}
   \item{func}{Function used to determine basis vectors, defaulting
-    to \code{regressor.basis} if not given.}
+    to \code{regressor.basis} if not given}
   \item{give.full.list}{In \code{interpolant()}, Boolean variable with
     \code{TRUE} meaning to return the whole list of a postiori
     parameters as detailed on pp12-15 of Oakley, and default \code{FALSE}
-    meaning to return just the best estimate.}
+    meaning to return just the best estimate}
   \item{scales}{Vector of \dQuote{roughness} lengths used to calculate
     \code{t(x)}.  Note that \code{scales} is needed twice: once to calculate
     \code{Ainv} and once to calculate \code{t(x)} inside
     \code{interpolant} (which is determined by calling \code{corr}
     inside an \code{apply()} loop).  A good place to start might be
-    \code{scales=rep(1,ncol(xold))}.}
+    \code{scales=rep(1,ncol(xold))}}
   \item{pos.def.matrix}{A positive definite matrix that is used if
     \code{scales} is not supplied.  Note that precisely one of
-    \code{scales} and \code{pos.def.matrix} must be supplied.}
+    \code{scales} and \code{pos.def.matrix} must be supplied}
   \item{give.Z}{In function \code{interpolant.quick()}, Boolean variable
     with \code{TRUE} meaning to return the best estimate and the error,
-    and default \code{FALSE} meaning to return just the best estimate.}
+    and default \code{FALSE} meaning to return just the best estimate}
   \item{distance.function}{Function to compute distances between
     points, defaulting to \code{corr()}.  See \code{corr.Rd} for
     details. Note that \code{method=2} or \code{method=3} is required
-    if a non-standard distance function is used.}
-  \item{...}{Further arguments passed to the distance function, usually \code{corr()}}
+    if a non-standard distance function is used}
+  \item{...}{Further arguments passed to the distance function,
+    usually \code{corr()}}
 }
-  
 \value{
   If \code{give.full.list} is TRUE, a list is return with components
   \item{betahat}{Standard MLE of the (linear) fit, given the
@@ -87,7 +87,7 @@ int.qq(x, d, xold, Ainv, pos.def.matrix, func=regressor.basis)
   \item{cstar}{a priori correlation of a point with itself}
     \item{cstar.star}{A postiori correlation of a point with itself}
   \item{Z}{Standard deviation (although the distribution is actually a
-    t-distribution with n-q degrees of freedom)}
+    t-distribution with \eqn{n-q} degrees of freedom)}
 }
 \references{
   J. Oakley 2004. \dQuote{Estimating percentiles of uncertain
@@ -95,7 +95,6 @@ int.qq(x, d, xold, Ainv, pos.def.matrix, func=regressor.basis)
 
   J. Oakley 1999. \dQuote{Bayesian uncertainty analysis for complex
     computer codes}, PhD thesis, University of Sheffield.
-
 
   J. Oakley and A. O'Hagan, 2002. \dQuote{Bayesian Inference for the
     Uncertainty Distribution of Computer Model Outputs}, Biometrika

@@ -3,8 +3,8 @@
 \alias{p.equationn4.supp}
 \title{Apostiori probability of psi1}
 \description{
-Gives the probability of \eqn{\psi_1}{psi1}, given observations.
-Equation 4 of the supplement}
+  Gives the probability of \eqn{\psi_1}{psi1}, given observations.
+  Equation 4 of the supplement
 }
 \usage{
 p.eqn4.supp(D1, y, H1, include.prior=TRUE, lognormally.distributed, return.log, phi)

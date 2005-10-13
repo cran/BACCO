@@ -62,8 +62,8 @@ Returns a matrix of covariances
 }
 \author{Robin K. S. Hankin}
 \note{
-  May return the transpose of the desired object}
-  }
+  May return the transpose of the desired object
+}
   \examples{
 data(toys)
 x <- rbind(x.toy,x.toy+1,x.toy,x.toy,x.toy)

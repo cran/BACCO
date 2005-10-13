@@ -2,7 +2,7 @@
 \alias{Ez.eqn7.supp}
 \title{Expectation of z given y, beta2, phi}
 \description{
-Expectation as per equation 7 on the supplement}
+  Expectation as per equation 7 on the supplement
 }
 \usage{
 Ez.eqn7.supp(z, D1, H1, D2, H2,  extractor, beta2, y, E.theta,  phi)

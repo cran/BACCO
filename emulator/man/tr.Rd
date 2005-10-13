@@ -2,7 +2,7 @@
 \alias{tr}
 \title{Trace of a matrix}
 \description{
-Returns the trace of a matrix}
+  Returns the trace of a matrix
 }
 \usage{
 tr(a)
@@ -13,6 +13,5 @@ tr(a)
 \author{Robin K. S. Hankin}
 \examples{
 tr(matrix(1:9,3,3))
-  }
 }
 \keyword{array}

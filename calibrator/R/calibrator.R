@@ -796,9 +796,6 @@ function (phi.fun, old.phi = NULL, rho = NULL, lambda = NULL,
     psi2.apriori.mean = NULL, psi2.apriori.sigma = NULL, theta.apriori = NULL, 
     theta.apriori.mean = NULL, theta.apriori.sigma = NULL, power = NULL) 
 {
-    if (is.null(old.phi)) {
-        old.phi <- phi.toy
-    }
     if (is.null(rho)) {
         rho <- old.phi$rho
     }
@@ -977,7 +974,7 @@ function (phi, lognormally.distributed = TRUE)
 function (theta, phi, lognormally.distributed = FALSE) 
 {
     if (lognormally.distributed) {
-        if (any(x) < 0) {
+        if (any(theta) < 0) {
             return(0)
         }
         return(dmvnorm(x = log(theta), mean = log(phi$theta.aprior$mean), 

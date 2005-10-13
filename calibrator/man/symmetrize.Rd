@@ -2,8 +2,8 @@
 \alias{symmetrize}
 \title{Symmetrize an upper triangular matrix}
 \description{
-Symmetrize an upper triangular matrix by copying the upper triangular
-elements into the lower triangular places}
+  Symmetrize an upper triangular matrix by copying the upper triangular
+  elements into the lower triangular places
 }
 \usage{
 symmetrize(a)

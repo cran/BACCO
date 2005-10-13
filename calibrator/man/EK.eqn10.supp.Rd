@@ -3,7 +3,7 @@
 \title{Posterior mean of K}
 \description{
   Estimates the posterior mean of K as per equation 10 of KOH2001S,
-  section 4.2}
+  section 4.2
 }
 \usage{
 EK.eqn10.supp(X.dist, D1, D2, H1, H2, d, hbar.fun,

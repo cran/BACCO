@@ -106,6 +106,6 @@ x <- t(apply(x,1,normalize))
 ensemble <- interpolant.quick(x , d , val , Ainv, scales=scales.optim, power=1.5) 
 hist(ensemble)
 }
-}
+
 \seealso{\code{\link{expert.estimates}}, \code{\link{results.table}}}
 \keyword{models}

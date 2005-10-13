@@ -16,13 +16,13 @@ corr.matrix(xold, yold=NULL, method=1, distance.function=corr, ...)
   \item{x2}{Second point}
   \item{scales}{Vector specifying the diagonal elements of B (see below)}
   \item{pos.def.matrix}{Positive definite matrix to be used by
-    \code{corr.matrix()} for B.
-    Exactly one of \code{scales} and \code{pos.definite.matrix} should
-    be specified.  Supplying \code{scales} specifies the diagonal
+    \code{corr.matrix()} for B. Exactly one of \code{scales} and
+    \code{pos.definite.matrix} should be specified.  Supplying
+    \code{scales} specifies the diagonal
     elements of B (off diagonal elements are set to zero); supply
-     \code{pos.definite.matrix} in the general case.  Note that
+    \code{pos.definite.matrix} in the general case.  Note that
     neither \code{corr()} nor \code{corr.matrix()} test for positive
-    definiteness.}
+    definiteness}
   \item{power}{In function \code{corr()}, the power to use in the
     exponent of the exponential.  In
     the case of a diagonal \code{pos.def.matrix} (or,
@@ -32,7 +32,7 @@ corr.matrix(xold, yold=NULL, method=1, distance.function=corr, ...)
     For the general case of nondiagonal \code{pos.def.matrix},
     the metric is \eqn{e^{-\left| (x-x')^TB(x-x')\right|^{\rm
     power/2}}}{exp(-abs( (x-x')^T B (x-x') )^(power/2))}, thus reducing
-    to the standard case for \code{power}=2.}
+    to the standard case for \code{power}=2}
   \item{coords}{In function \code{corr()}, a character string, with
     default \dQuote{cartesian} meaning to interpret the elements of
     \code{x1} (and \code{x2}) as coordinates in Cartesian space.  The
@@ -43,38 +43,44 @@ corr.matrix(xold, yold=NULL, method=1, distance.function=corr, ...)
     \code{goldstein} for an example of this option in use).
     Spherical geometry is then used to calculate the geotetic (great
     circle) distance between point \code{x1} and \code{x2}, with
-    function \code{gcd()}.}
+    function \code{gcd()}}
   \item{method}{An integer with values 1, 2, or 3.  If 1, then use a
     fast matrix calculation that returns
- \eqn{e^{-(x-x')^TB(x-x')}}{exp(-(x-x')^T B (x-x'))}.  If 2 or 3, return
+    \eqn{e^{-(x-x')^TB(x-x')}}{exp(-(x-x')^T B (x-x'))}.  If 2 or 3, return
     the appropriate output from \code{corr()}, noting that ellipsis
     arguments are passed to \code{corr()} (for example, \code{power} and
     \code{scales}).  The difference between 2 and 3 is a marginal
-    difference in numerical efficiency.
-
-    \strong{Warning}: if \code{method=1}, arguments like \code{power} are given
-    to \code{corr.matrix()} are ignored silently.
-
-    \strong{Warning:} The code for \code{method=2} (formerly the
+    difference in numerical efficiency; the main difference is
+    computational elegance.
+    
+    \strong{Warning 1:} if \code{method=1}, argument \code{power} (which
+    might be intended to be passed to \code{corr.matrix()}) is ignored
+    silently.
+    
+    \strong{Warning 2:} The code for \code{method=2} (formerly the
     default), has a bug.  If \code{yold} has only one row, then
     \code{corr.matrix(xold,yold,scales,method=2)} returns the transpose
     of what one would expect.  Methods 1 and 3 return the correct
     matrix.
-  }    
-  \item{distance.function}{Function to be used to calculate distances.
-    Defaults to \code{corr()}.}
+
+    \strong{Warning 3:} If argument \code{distance.function} is not the
+    default, and \code{method} is the default (ie 1), then \code{method}
+    will be silently changed to 2 on the grounds that \code{method=1} is
+    meaningless unless the distance function is \code{corr()}} 
+  \item{distance.function}{Function to be used to calculate distances in
+    \code{corr.matrix()}.  Defaults to \code{corr()}}
   \item{xold}{Matrix, each row of which is an evaluated point}
   \item{yold}{(optional) matrix, each row of which is an evaluated
     point.  If missing, use \code{xold}}
   \item{spherical.distance.function}{In \code{corr}, a function to
     determine the distance between two points; used if
-    \code{coords}=\dQuote{spherical}. A good one to choose is
-    \code{gcd()} (that is, Great Circle Distance) of the goldstein library.} 
-  \item{...}{extra arguments given to \code{corr.matrix()} that are
-    passed on to \code{corr()} (such as \code{scales} and \code{power}
-    if \code{distance.function=corr}).}
+    \code{coords}=\dQuote{spherical}.  A good one to choose is
+    \code{gcd()} (that is, Great Circle Distance) of the goldstein library} 
+  \item{...}{In function \code{corr.matrix()}, extra arguments that are
+    passed on to the distance function.  In the default case in which
+    the distance.function is \code{corr()}, one \emph{must} pass
+    \code{scales}, and one might wish to pass \code{power}}
 }
-
 \details{
   Evaluates a slight generalization of Oakley's equation 2.12 for the
   correlation between \eqn{\eta(x)}{eta(x)} and \eqn{\eta(x')}{eta(x')}:
@@ -105,19 +111,14 @@ Returns the correlation function
   \deqn{c(x,x')=\exp\left[-(x-x')^TB(x-x')\right]=\exp\left[\Sigma_i
     s_i(x_i-{x'}_i)^2\right]}{ommitted: see pdf}
 
-  Thus if \eqn{x} has units \eqn{[X]},the units of \code{scales} are
+  Thus if \eqn{x} has units \eqn{[X]}, the units of \code{scales} are
   \eqn{[X^{-2}]}{X^(-2)}.
 
   So if \code{scales[i]} is big, even small displacements in \code{x[i]}
   (that is, moving a small distance in parameter space, in the
   \eqn{i}-th dimension) will result in small correlations.  If
   \code{scales[i]} is small, even large displacements in \code{x[1]}
-  will have large correlations.
-  
-}
-
-  
-  
+  will have large correlations}
 \author{Robin K. S. Hankin}
 \examples{
 corr(1:10,10:1,scales=rep(1,10), power=2)
@@ -155,11 +156,14 @@ f <- function(x,y,theta){
   }
 }
 
+
 corr.matrix(xold=x, distance.function=f , method=2, theta=4)
+
  # Note the first row and first column is a single 1 and 3 zeroes
  # (because the first point, viz x[1,], is "far" from the other ponts).
  # Also note the method=2 argument here; method=1 is the fast slick
- # matrix method suggested by Doug and Jeremy.
+ # matrix method suggested by Doug and Jeremy, but this only works
+ # for distance.function=corr.
 
 
 

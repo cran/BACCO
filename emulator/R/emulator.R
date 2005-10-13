@@ -73,7 +73,12 @@ function (xold, yold = NULL, method = 1, distance.function = corr,
     } else {
       nully <- FALSE
     }
-    if (identical(method,1)) {
+
+    if(!identical(distance.function, corr) & identical(method,1)){
+      method <- 2
+    }
+
+    if(identical(method,1)) {
       a <- list(...)
       scales <- a$scales
       pos.def.matrix <- a$pos.def.matrix
@@ -491,12 +496,11 @@ function (val, d, use.like = TRUE, give.answers = FALSE,  func=regressor.basis,
         }
     }
     else {
-        jj.fun <- function(scale1, val, d) {
-            A <- corr.matrix(xold=val, scales = rep(exp(scale1),n))
-            error <- abs(d - estimator(val, A, d, scales = rep(exp(scale1),n), func=func))
+        objective.fun <- function(scale, val, d) {
+            A <- corr.matrix(xold=val, scales = rep(exp(scale),n))
+            error <- abs(d - estimator(val, A, d, scales = rep(exp(scale),n), func=func))
             return(sum(error^2))
         }
-        objective.fun <- function(scale1,val,d){jj.fun(scale1,val,d)}
     }
     jj <- optimize(f=objective.fun, interval=c(-4,10), maximum=FALSE, val = val, d = d, ...)
     if (give.answers) {

@@ -29,7 +29,7 @@ the top level code would produce at a given, untried point in parameter space.
 \author{
   Robin K. S. Hankin
   
-Maintainer:  <r.hankin@noc.soton.ac.uk>
+Maintainer:  <hankin.robin@gmail.com>
 }
 \references{
   R. K. S. Hankin 2005. \dQuote{Introducing BACCO, an R bundle for

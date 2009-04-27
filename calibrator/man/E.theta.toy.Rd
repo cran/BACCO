@@ -35,11 +35,11 @@ phi=NULL)
     \eqn{2\left(V_\theta^{-1}+2\Omega_t\right)^{-1}\Omega_t}{2(V_theta^{-1}+2Omega_t)^{-1}Omega_t}
     (multiplied by \code{t[k,]} in \code{Edash.theta.toy()}).}
   \item{x1}{In \code{E.theta.toy(g=F,...)}, the value of \code{x} in
-    \eqn{h_1(x,\theta)}{h1(x,theta)}.  The default value is \code{NULL}
+    \eqn{h_1(x,\theta)}{h_1(x,theta)}.  The default value is \code{NULL}
     because in simple cases such as that implemented here, the output is
     independent of \code{x1} and \code{x2}}
   \item{x2}{In \code{E.theta.toy(g=F,...)}, the value of \code{x} in
-    \eqn{h_1(x,\theta)}{h1(x,theta)}}
+    \eqn{h_1(x,\theta)}{h_1(x,theta)}}
 }
 \references{
   \itemize{
@@ -68,7 +68,13 @@ phi=NULL)
 
   It returns the thing that must be added to
   \code{crossprod(E_theta(h1(x,theta)),t(E_theta(h1(x,theta))))} to give
-  \code{E_theta(h1(x,theta).t(h1(x,theta)))}.  If the terms of
+  \code{E_theta(h1(x,theta).t(h1(x,theta)))}.
+
+  In other words, it returns
+  \code{E_theta(h1(x,theta).t(h1(x,theta)))}-
+  \code{crossprod(E_theta(h1(x,theta)),t(E_theta(h1(x,theta))))}.
+  
+  If the terms of
   \code{h1()} are of the form \code{c(o,theta)} (where \code{o} is a
   vector that is a function of \code{x} alone, and independent of
   \code{theta}), then the function will include the variance matrix, in
@@ -86,10 +92,10 @@ phi=NULL)
   \eqn{h_1(x,\theta)=(1,x\theta)^T}{h1(x,theta)=(1,x*theta)'}.  Now
   \eqn{E_\theta\left(h(x,\theta)\right)}{E_theta(h(x,theta))} is just
   \eqn{(1,x\overline{\theta})^T}{(1,x*mean(theta))'} but
-  \deqn{E_\theta\left(h_1(x,\theta)h_1(x,\theta)^T\right)}{E_theta(h1(x,theta)h1(x,theta)^T)}
+  \deqn{E_\theta\left(h_1(x,\theta)h_1(x,\theta)^T\right)}{E_theta(h_1(x,theta)h1(x,theta)^T)}
   is a 2-by-2 matrix (\eqn{M}, say) with
-  \eqn{E_\theta(M)=h1(x,\overline{\theta})h1(x,\overline{\theta})^T +
-  \mbox{variance terms}}{E_theta(M)=h1(x,thetabar)h1(x,thetabar)^T +
+  \eqn{E_\theta(M)=h_1(x,\overline{\theta})h_1(x,\overline{\theta})^T +
+  \mbox{variance terms}}{E_theta(M)=h1(x,thetabar)h_1(x,thetabar)^T +
   variance terms}.
 
 \deqn{
@@ -99,7 +105,7 @@ phi=NULL)
       x\theta & x^2\theta^2
       \end{array}\right)
       }{ommitted: see dvi}
-
+      
   All three functions here are intimately connected to the form of
   \code{h1.toy()} and changing it (or indeed \code{H1.toy()}) will
   usually require rewriting all three functions documented here.  Look

@@ -1,15 +1,55 @@
 % -*- mode: noweb; noweb-default-code-mode: R-mode; -*-
+%\VignetteIndexEntry{Apprex: a cookbook for the approximator package}
+%\VignetteDepends{approximator}
+%\VignetteKeywords{emulator, approximator, BACCO, R}
+%\VignettePackage{approximator}
 
-\documentclass[a4paper]{article}
 
-\author{Robin K. S. Hankin}
-\title{Creating a simple {\tt approximator} case study from scratch: a cookbook}
-%\VignetteIndexEntry{Apprex: a cookbook for the calibrator package}
+
+\documentclass[nojss]{jss}
+
+\usepackage{amsfonts}
+
+%% just as usual
+\author{Robin K. S. Hankin\\University of Cambridge}
+\title{Creating a simple \pkg{approximator} case study from scratch: a cookbook}
+
+\Plainauthor{Robin K. S. Hankin}
+\Plaintitle{Creating a simple approximator case study from scratch: a cookbook}
+\Shorttitle{An approximator cookbook}
+
+%% an abstract and keywords
+\Abstract{
+
+  This document constructs a minimal working example of a simple
+  application of the \pkg{approximator} package, step by step.  Datasets
+  and functions have a {\tt .vig} suffix, representing ``vignette''.
+}
+
+\Keywords{\pkg{emulator}, \pkg{approximator}, \pkg{BACCO}, \proglang{R}}
+\Plainkeywords{emulator, approximator, BACCO, R}
+
+\Address{
+  Robin K. S. Hankin\\
+  University of Cambridge\\
+  19 Silver Street\\
+  Cambridge CB3 9EP\\
+  United Kingdom\\
+  E-mail: \email{hankin.robin@gmail.com}
+}
+%% It is also possible to add a telephone and fax number
+%% before the e-mail in the following format:
+%% Telephone: +43/1/31336-5053
+%% Fax: +43/1/31336-734
+
+%% for those who use Sweave please include the following line (with % symbols):
+%% need no \usepackage{Sweave.sty}
+
+%% end of declarations %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 \SweaveOpts{echo=FALSE}
-\usepackage{a4wide}
-
 \begin{document}
-\maketitle
 
 \newcommand{\bt}{\mathbf{t}}
 \newcommand{\bd}{\mathbf{d}}
@@ -30,29 +70,29 @@
 
 \SweaveOpts{echo=TRUE}
 \section{Introduction}
-Package {\tt approximator} of bundle {\tt BACCO} performs Bayesian
+Package \pkg{approximator} of bundle \pkg{BACCO} performs Bayesian
 calibration of computer models when fast approximations are available.
 This document constructs a minimal
 working example of a simple problem, step by step.  Datasets and
 functions have a {\tt .vig} suffix, representing ``vignette''.
 
-This document is not a substitute for KOH or KOHa or Hankin 2005 or
-the online help files in {\tt BACCO}.  It is not intended to stand
-alone: for example, the notation used here is that of KOH, and the
-user is expected to consult the online help in the BACCO package when
-appropriate.
+This document is not a substitute for~\cite{kennedy2000}
+or~\cite{hankin2005} or the online help files in \pkg{approximator}.
+It is not intended to stand alone: for example, the notation used here
+is that of~\cite{kennedy2000}, and the user is expected to consult the
+online help in the \pkg{approximator} package when appropriate.
 
 This document is primarily didactic, although it is informal.
 
 Nevertheless, many of the points raised here are duplicated in the
-{\tt BACCO} helpfiles.
+\pkg{BACCO} helpfiles.
 
 Note that many of the objects created in this document are
 interdependent and changing one sometimes implies changing many
 others.
 
 The author would be delighted to know of any improvements or suggestions.
-Email me at {\tt r.hankin@noc.soton.ac.uk}.
+Email me at {\tt hankin.robin@gmail.com}.
 
 \section{List of objects that the user needs to supply}
 
@@ -79,20 +119,19 @@ hpa.fun.vig()}) but this is not strictly necessary.
 Each of these is discussed in a separate subsection below.  
 
 But the first thing we need to do is install the library:
-<<echo=FALSE,print=FALSE>>=
-<<results=hide>>=
-library(emulator)
-library(approximator)
+<<loadlibs, echo=FALSE,results=hide>>=
+library("approximator")
 @ 
 
 
 <<datagen_design_matrix, echo=false, results=hide>>=
-n <- 20
+n <- 16
+set.seed(0)
 D1.vig <- latin.hypercube(n,2)
 @
 
 <<datagen_subsets, echo=false, results=hide>>=
-subsets.vig <- subsets.fun(n,levels=4,prob=0.9)
+subsets.vig <- subsets.fun(n,levels=4,prob=0.6)
 names(subsets.vig) <- paste("level",1:4,sep=".")
 @ 
 
@@ -106,7 +145,7 @@ vectors, function, etc) and so I just show what they look like.
 The first thing needed is the design matrix {\tt D1.vig}, ie the
 points in parameter space at which the lowest-level code is executed.
 The example here has just two parameters, {\tt a} and {\tt b}:
-<<>>=
+<<headD1vig>>=
 head(D1.vig)
 nrow(D1.vig)
 @ 
@@ -121,7 +160,7 @@ The bottom level code is run at each of these points (see {\tt subsets.vig})
 \subsection{Subsets object: USER TO SUPPLY}
 We now need a {\tt subsets.object}, which gives the row numbers of the
 runs at each level.
-<<>>=
+<<showsubsets>>=
 subsets.vig
 @ 
 Notes
@@ -172,7 +211,6 @@ head(basis.vig(D1.vig))
 @ 
 
 See how the columns become the basis functions (that is, {\tt c(1, x , x[1]*x[2])}).
-
 
 <<datagen_generate_vig_fun, echo=false, results=hide>>=
 "generate.vig.observations" <-
@@ -291,7 +329,7 @@ output at the appropriate point in the design matrix.  We can get a
 feel for the dataset by looking at the head of each vector, and
 extracting the length:
 
-<<>>=
+<<lapplyzvig>>=
 lapply(z.vig,head)
 lapply(z.vig,length)
 @ 
@@ -302,7 +340,7 @@ how to specify a function that creates a hyperparameter object.  Here
 I will show an example
 
 
-<<>>=
+<<hpafig>>=
 hpa.vig
 @ 
 
@@ -341,7 +379,7 @@ The hyperparameters themselves may be estimated by using functions
 greater, respectively.
 
 
-<<>>=
+<<morestuff>>=
      jj <- list(trace=100,maxit=10)
      hpa.vig.level1 <- opt.1(D=D1.vig, z=z.vig, basis=basis.vig, subsets=subsets.vig, hpa.start=hpa.vig,control=jj)
      hpa.vig.level1
@@ -359,8 +397,8 @@ B[[1]]}, corresponding to the first level.
 \end{itemize}
 
 
-<<>>=
-     jj <- list(trace=0,maxit=20)
+<<fourlevels,cache=TRUE>>=
+     jj <- list(trace=0,maxit=4)
      hpa.vig.level2 <- opt.gt.1(level=2, D=D1.vig, z=z.vig, basis=basis.vig, subsets=subsets.vig, hpa.start=hpa.vig.level1,control=jj)
      hpa.vig.level3 <- opt.gt.1(level=3, D=D1.vig, z=z.vig, basis=basis.vig, subsets=subsets.vig, hpa.start=hpa.vig.level2,control=jj)
      hpa.vig.level4 <- opt.gt.1(level=4, D=D1.vig, z=z.vig, basis=basis.vig, subsets=subsets.vig, hpa.start=hpa.vig.level3,control=jj)
@@ -371,7 +409,7 @@ B[[1]]}, corresponding to the first level.
 Now we can try and estimate the betas using the optimized
 hyperparameter object:
 
-<<>>=
+<<betahatapp>>=
 betahat.app(D1=D1.vig,subsets=subsets.vig,basis=basis.vig, hpa=hpa.vig.level4, z=z.vig)
 @ 
 
@@ -382,13 +420,13 @@ The final stage would be using function {\tt mdash.fun()}, which gives
 the posterior expectation of the Gaussian process (for level 4):
 
 
-<<>>=
+<<mdashfun>>=
 mdash.fun(x=c(0.5,0.5),D1=D1.vig, subsets=subsets.vig,hpa=hpa.vig.level4,z=z.vig,basis=basis.vig)
 @ 
 
 
 We can now give an error estimate here:
-<<>>=
+<<error>>=
 cdash.fun(x=c(0.5,0.5), D1=D1.vig, subsets=subsets.vig,
   basis=basis.vig, hpa=hpa.vig)
 @ 
@@ -420,7 +458,7 @@ software exactly.
 
 Now we need a design matrix:
 
-<<eval=false>>=
+<<showbutdonotevaldatagen,eval=false>>=
 <<datagen_design_matrix>>
 @ 
 
@@ -433,7 +471,7 @@ lowest level code will use all rows of {\tt D1.vig}, level 2 will use
 about half of them, level 3 (ie the top level) will use about half of
 them, and level 4 about half of {\em them:}
 
-<<eval=false>>=
+<<subsetshow, eval=false>>=
 <<datagen_subsets>>
 @
 
@@ -456,7 +494,7 @@ vectors in a consistent way
 Now we need a function
 that creates a hyperparameter object:
 
-<<>>=
+<<hpafunvig>>=
 hpa.fun.vig
 @ 
 
@@ -474,11 +512,11 @@ number of params
 Now we can call this function and create a hyperparameter object
 
 
-<<eval=false>>=
+<<callthis,eval=false>>=
 <<datagen_hpa.vig_creator>>
 @ 
 
-<<eval=false>>=
+<<hpauser,eval=false>>=
 <<datagen_hpa.fun,echo=false,results=hide>>=
 @
 
@@ -489,33 +527,30 @@ distribution:
 
 First define a function ripped off from {\tt generate.toy.obs()}:
 
-<<eval=false>>=
+<<gendat2,eval=false>>=
 <<datagen_generate_vig_fun>>
 @ 
  
 
 Then call it:
 
-<<eval=false>>=
+<<calld,eval=false>>=
 <<datagen_generate_vig_obs>>
 @ 
  
-<<>>=
+<<zfigshow>>=
 z.vig
 @
 
 
 
-\bibliography{/Users/rksh/unix/bib/uncertainty}
+<<SetTheBib,  echo=FALSE, results=hide>>=
+bib <- system.file( "doc", "uncertainty.bib", package = "emulator" )
+bib <- sub('.bib$','',bib)
+@ 
 
-  \noindent
-  Robin K. S. Hankin\\
-  National Oceanography Centre, Southampton\\
-  European Way\\
-  Southampton SO14 3ZH\\
-  United Kingdom\\
-  E-mail: {\tt r.hankin@noc.soton.ac.uk}
-  URL: {\tt http://www.noc.soton.ac.uk}
-
+<<usethebib, echo=FALSE, results=tex>>=
+cat( "\\bibliography{",bib,"}\n",sep='')
+@
 
 \end{document}

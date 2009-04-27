@@ -9,6 +9,9 @@ library(approximator)
 library(emulator)
 
 
+# set seed:
+set.seed(0)
+
 # First a design matrix:
 D1.1d <- matrix(1:6)
 
@@ -51,8 +54,14 @@ a1 <- opt.1(D=D1.1d , z=z.1d , basis=basis.1d , subsets=subsets.1d , hpa=hpa.1d)
 a2 <- opt.gt.1(level=2 , D=D1.1d , z=z.1d , basis=basis.1d , subsets=subsets.1d , hpa=hpa.1d)
 
 # And use the second-level optimized hyperpareters (ie a2) to give the emulator mean:
+
 jj.ans <- mdash.fun(3,D1=D1.1d,subsets=subsets.1d,hpa=a2,z=z.1d,basis=basis.1d)
 
+# (preceding line gives a weird error, under MacOSX 10.5.6, with R-GUI
+# 1.28 but no error when running R from the command line).
 
-# And its variance:
+
+
+
+# And its variance:
 jj.var <- c_fun(x=as.matrix(4),xdash=as.matrix(5),subsets=subsets.1d,hpa=hpa.1d)

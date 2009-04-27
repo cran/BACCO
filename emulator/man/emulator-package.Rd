@@ -27,7 +27,7 @@ Package: \tab emulator\cr
 Type: \tab Package\cr
 Version: \tab 1.0\cr
 Date: \tab 2007-05-02\cr
-License: \tab What license is it under?\cr
+License: \tab GPL\cr
 }
 
 The primary function of the package is \code{interpolant()}.
@@ -37,13 +37,13 @@ The primary function of the package is \code{interpolant()}.
 \author{
 Robin K. S. Hankin
 
-Maintainer: <r.hankin@noc.soton.ac.uk>
+Maintainer: <hankin.robin@gmail.com>
 }
 \references{
   \itemize{
     \item
     J. Oakley 1999. \emph{Bayesian uncertainty analysis for complex
-      computer codes}, PhD thesis, University of Sheffield.
+      computer codes}, PhD thesis, University of Sheffield
     \item
     J. Oakley and A. O'Hagan, 2002. \emph{Bayesian Inference for the
       Uncertainty Distribution of Computer Model Outputs}, Biometrika

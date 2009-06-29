@@ -1,15 +1,17 @@
-Bundle: BACCO
-Contains: emulator calibrator approximator
-Version: 1.1-4
-Date: 27 April 2009
-Depends: R (>= 2.0.0), mvtnorm, adapt, stats
-Title: Bayesian Analysis of Computer Code Output
-BundleDescription: Bayesian analysis of computer code software.  The
-        bundle contains routines that evaluate the formulae of Kennedy,
-        O'Hagan, and Oakley.
+Package: BACCO
+Type: Package
+Title: Bayesian Analysis of Computer Code Output (BACCO)
+Version: 2.0
+Date: 2009-06-29
+Author: Robin K. S. Hankin
+Maintainer: <hankin.robin@gmail.com>
+Depends: emulator, calibrator, approximator
+Description: The BACCO bundle of packages is replaced by the BACCO
+        package, which provides a vignette that illustrates the
+        constituent packages (emulator, approximator, calibrator) in
+        use.
 License: GPL
-Author: Robin K. S. Hankin <hankin.robin@gmail.com>
-Maintainer: Robin K. S. Hankin <hankin.robin@gmail.com>
-Packaged: 2009-05-04 21:21:41 UTC; rksh
+LazyLoad: yes
+Packaged: 2009-07-18 14:53:36 UTC; hornik
 Repository: CRAN
-Date/Publication: 2009-05-05 07:28:27
+Date/Publication: 2009-07-18 15:38:21

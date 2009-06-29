@@ -1,6 +1,0 @@
-Package: approximator
-Description: Performs Bayesian prediction of complex computer codes
-  when fast approximations are available: M. C. Kennedy and A. O'Hagan
-  2000, Biometrika 87(1):1-13
-Title: Bayesian prediction of complex computer codes
-Depends: emulator

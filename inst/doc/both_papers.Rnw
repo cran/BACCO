@@ -1,0 +1,1331 @@
+% -*- mode: noweb; noweb-default-code-mode: R-mode; -*-
+%\VignetteIndexEntry{BACCO}
+%\VignetteDepends{BACCO}
+%\VignetteKeywords{emulator, calibrator, approximator, BACCO, R}
+%\VignettePackage{BACCO}
+
+\documentclass[nojss]{jss}
+\usepackage{dsfont}
+
+\newcommand{\bt}{\mathbf{t}}
+\newcommand{\bd}{\mathbf{d}}
+\newcommand{\bx}{\mathbf{x}}
+\newcommand{\bX}{\mathbf{X}}
+\newcommand{\by}{\mathbf{y}}
+\newcommand{\bz}{\mathbf{z}}
+\newcommand{\bh}{\mathbf{h}}
+\newcommand{\bm}{\mathbf{m}}
+
+\newcommand{\bth}{\mbox{\boldmath $\theta$}}
+\newcommand{\bbeta}{\mbox{\boldmath $\beta$}}
+\newcommand{\bOm}{\mbox{\boldmath $\Omega$}}
+\newcommand{\bV}{\mbox{\boldmath $V$}}
+
+\newcommand{\goldstein}{\mbox{\sc C-goldstein}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% declarations for jss.cls %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% just as usual
+\author{Robin K. S. Hankin}
+\title{Introducing \pkg{BACCO}, an \proglang{R} package for Bayesian analysis of
+  computer code output}
+
+%% for pretty printing and a nice hypersummary also set:
+%% \Plainauthor{Achim Zeileis, Second Author} %% comma-separated
+\Plaintitle{Introducing BACCO, an R package for Baysian analysis of
+  computer code output}
+\Shorttitle{Bayesian analysis of computer code output}
+
+%% an abstract and keywords
+\Abstract{
+  An earlier version of this document was published
+  as~\cite{hankin2005}. 
+  
+  This paper introduces the \pkg{BACCO} package of \proglang{R}
+  routines for carrying out Bayesian analysis of computer code output.
+  The package requires three packages of related functionality:
+  \pkg{emulator} and \pkg{calibrator}, and \pkg{approximator},
+  computerized implementations of the ideas of~\cite{oakley2002},
+  \cite{kennedy2001a}, and~\cite{kennedy2000} respectively.  The
+  package is self-contained and fully documented \proglang{R} code, and includes a
+  toy dataset that furnishes a working example of the functions.
+  
+  Package \pkg{emulator} carries out Bayesian emulation of computer
+  code output; package \pkg{calibrator} allows the incorporation of
+  observational data into model calibration using Bayesian techniques.
+
+  The package is then applied to a dataset taken from climate science.
+}
+\Keywords{Bayesian analysis, climate modelling, uncertainty in climate
+  prediction}
+
+%% publication information
+%% NOTE: This needs to filled out ONLY IF THE PAPER WAS ACCEPTED.
+%% If it was not (yet) accepted, leave them commented.
+%% \Volume{13}
+%% \Issue{9}
+%% \Month{September}
+%% \Year{2004}
+%% \Submitdate{2004-09-29}
+%% \Acceptdate{2004-09-29}
+
+%% The address of (at least) one author should be given
+%% in the following format:
+\Address{
+  Robin K. S. Hankin\\
+  Southampton Oceanography Centre\\
+  European Way\\
+  Southampton SO14 3ZH\\
+  United Kingdom\\
+  E-mail: \email{r.hankin@noc.soton.ac.uk}
+  URL: \url{http://www.noc.soton.ac.uk}
+}
+%% It is also possible to add a telephone and fax number
+%% before the e-mail in the following format:
+%% Telephone: +43/1/31336-5053
+%% Fax: +43/1/31336-734
+
+%% for those who use Sweave please include the following line (with % symbols):
+%% need no \usepackage{Sweave.sty}
+
+%% end of declarations %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\SweaveOpts{echo=FALSE}
+\begin{document}
+\section{Introduction}
+
+In this paper I introduce \pkg{BACCO}, a new \proglang{R} package comprising
+packages \pkg{emulator} and \pkg{calibrator}, that implements Bayesian
+analysis of computer code output using the methods
+of~\cite{oakley2002} and~\cite{kennedy2001a} respectively.  The
+\pkg{BACCO} package can be obtained from the Comprehensive R Archive
+Network, CRAN, at \texttt{http://cran.r-project.org/}.
+
+Many computer models, including climate prediction models such as
+\goldstein~\citep{marsh2002}, take many hours, or even weeks, to
+execute.  This type of model can have tens to hundreds of free
+(adjustable) parameters, each of which is only approximately known.
+Consider a scenario in which a particular model has been run in the
+past with different sets of input parameters.  The code output (here
+attention is confined to a single scalar value, such as global average
+temperature) is desired at a new set of parameters, at which the code
+has not been run.  Under the Bayesian view~\citep{currin1991}, the
+true value of the code output is a random variable, drawn from a
+distribution that is conditioned by our prior knowledge, and in this
+case by the previous code runs; the computer code is thus viewed as a
+random function.  Package \pkg{emulator} gives statistical inferences
+about this random function, and may be used to furnish computationally
+cheap---yet statistically rigorous---estimates of the computer code
+output.
+
+Although deterministic---in the sense that running the model twice
+with identical inputs gives identical outputs---the Bayesian paradigm
+is to treat the code output as a random variable.  Formally, the code
+output~$y$ is represented as a function $\eta(x;\bth)$ of the input
+parameter vector~$x$ and parameter vector~$\bth$; if no confusion can
+arise, $y=\eta(x)$ is written.  Although~$\eta(\cdot,\cdot)$ is known
+in principle, in practice this is not the case.  \goldstein, for
+example, comprises over~$10^4$ lines of computer code, and the fact
+that the output is knowable in principle appears to be unhelpful in
+practice.
+
+It is perhaps easier to understand output from a deterministic code as
+a random variable if one imagines oneself to be at a computer
+terminal, waiting for a run to finish.  The fact that both the code
+itself, and its input parameters, are perfectly prescribed (thus the
+output is {\em in principle} predetermined), does not reduce one's
+subjective uncertainty in the output; the Bayesian paradigm treats
+this as indistinguishable from uncertainty engendered by a
+conventional random variable.  Of course, if the code has been run
+before at slightly different point in parameter space, one may be able
+to assert with some confidence that this particular run output
+shouldn't be too different from the last run's (and of course if the
+code is run at exactly the same point in parameter space, we can be
+certain that the code output will be identical\footnote{Many computer
+  models are {\em chaotic} in the sense that running the model twice
+  with closely separated but non-identical parameter values will
+  result in very different outputs.  Such systems are generally not
+  amenable to the approach outlined here because the standard
+  parameterization for the correlation function~$c(\bx,\bx')$
+  discussed in the next section breaks down.  Such systems may be
+  modelled using a device known as a {\em nugget} which breaks
+  correlation between infinitesimally different points in parameter
+  space.  However, the climate models used here as test cases are
+  known to be non-chaotic.}).  Such considerations are formalized in
+the Gaussian process model, discussed in detail in
+section~\ref{gauss.proc.sec}.
+
+A case often encountered in practice is that the values of one or more
+components of~$x$ are uncertain, typically because of practical
+difficulties of measurement (cloud albedo is a commonly-cited
+example).  It is therefore appropriate to consider~$X$, the true input
+configuration, to be a random variable with distribution~$G(x)$.  Thus
+the output~$Y=\eta(X)$ is also a random variable and it is the
+distribution of~$Y$---the `uncertainty distribution'---that is of
+interest.
+
+In the case of \goldstein, direct Monte-Carlo simulation of~$Y$ is so
+computationally intensive as to become impractical: a single run
+typically takes~24 hours, and the parameter space is~27 dimensional.
+
+Package \pkg{emulator} allows one to {\em emulate} the code: the
+unknown function~$\eta(\cdot)$ is assumed to be a Gaussian process,
+and previous code runs constitute observations.  I will show in this
+paper that emulation can be orders of magnitude faster than running
+the code itself; and, at least in the examples considered here, the
+emulator provides an estimate that is reasonably close to the value
+that code itself would produce.
+
+In this paper, the object of inference is the random function that is
+evaluated by the computer code.  Although one may question whether
+this object is actually of interest given that the model is unlikely
+to predict reality correctly, \cite{kennedy2001a} point out that even a
+good model may be rendered ineffective by uncertainty in the input;
+and that quantification of the uncertainty distribution is the first
+step towards reducing uncertainty in the preditions.
+
+\subsection{Bayesian calibration of computer models}
+
+Notwithstanding that computer models are interesting and important
+entities in their own right, the ultimate object of inference is
+reality, not the model.  Package \pkg{calibrator} implements a
+statistically rigorous method of incorporating observational data into
+uncertainty analyses, that of \cite{kennedy2001a}
+and~\cite{kennedy2001b} (hereafter KOH2001 and KOH2001S respectively).
+
+When preparing a computer model for making predictions, workers often
+{\em calibrate} the model by using observational data.  In rough
+terms, the idea is to alter the model's parameters to make it fit the
+data.
+
+A statistically unsound~\citep{currin1991} methodology would be to
+minimize, over the allowable parameter space, some badness-of-fit
+measure over the physical domain of applicability of the code.
+
+To fix ideas, consider \goldstein\ predicting sea surface temperature
+(SST) as a function of position~$x$ (here styled ``latitude'' and
+``longitude'').  The na\"{i}ve approach discussed above would be to
+minimize, over all parameter values~$\bth$ in a set of allowable
+parameters~${\mathcal P}$, the squared discrepancies between
+observations~$z(x)$ and model predictions~$\eta(x,\bth)$ summed over
+observational space~${\mathcal X}$:
+\[
+\min_{\bth\in{\mathcal P}}\left[
+   \sum_{x\in{\mathcal X}}\left(
+       z(x) - \eta(x,\bth)
+   \right)^2
+\right]
+\]
+
+From a computational perspective, minimizing the object function above
+necessitates minimization over a large dimensional parameter space;
+optimization techniques over such spaces are notorious in requiring
+large numbers of function evaluations, which is not be feasible in the
+current context.  Also note that the method requires code evaluations
+at the same points (``$x$'') as the observations~$z(\cdot)$, which may
+not be available.
+
+Other problems with this approach include the implicit assumption that
+observation errors (and model evaluations) are independent of one
+another.  This assumption is likely to be misleading for closely
+separated observation points and for pairs of code evaluations that
+use parameter sets that differ by only a small amount.
+
+Bayesian methods are particularly suitable for cases in which the
+above problems are present, such as the climate model predictions
+considered here.  KOH2001 present a methodology by which physical
+observations of the system are used to learn about the unknown
+parameters of a computer model using the Bayesian paradigm.
+
+
+ \subsection{The Gaussian process}\label{gauss.proc.sec} 
+
+The notion of Gaussian process underlies both \pkg{emulator} and
+\pkg{calibrator} packages.  Consider a function~$f:{\mathcal
+  X}\longrightarrow\mathds{R}$ with~${\mathcal
+  X}\subseteq\mathds{R}^p$.  If~$f(\cdot)$ is regarded as an unknown
+function, in the Bayesian framework it becomes a random function.
+Formally, $f(\cdot)$ is a Gaussian process if, for
+every~$n\in\mathds{N}$, the joint distribution
+of~$f(\bx_1),\ldots,f(\bx_n)$ is multivariate normal
+provided~$\bx_i\in{\mathcal X}$.  In particular, $f(\bx)$ is normally
+distributed for all~$\bx\in{\mathcal X}$.
+
+The distribution is characterized by its mean function~$m(\cdot)$,
+where $m(\bx)=E\left\{f(\bx)\right\}$, and its covariance
+function~$c(\cdot,\cdot)$, where~$c(\bx,\bx')={\rm
+  cov}\left\{f(\bx),f(\bx')\right\}$.
+
+It is usual to require that~$f(\bx)$ and~$f(\bx')$ be closely
+correlated if~$\bx$ and~$\bx'$ are themselves close; here, it is
+assumed that~$c(\cdot,\cdot)=\sigma^2r(\bx-\bx')$
+with~$r(\bd)=\exp(-\bd^T\mathbf{\Omega}\bd)$, $\mathbf{\Omega}$ being
+a symmetric positive definite matrix (which is usually unknown and has
+to be estimated).
+
+\section{Emulation: computer output as a Gaussian process}
+
+For any random function~$\eta(\cdot)$ and set of
+points~$\{\bx_1,\ldots,\bx_n\}$ in its domain, the random
+vector~$\{\eta(\bx_1),\ldots,\eta(\bx_n)\}$ is assumed to be a
+multivariate normal distribution with mean
+\[
+E\left\{
+\eta(\bx)|\beta
+\right\}=h(\bx)^T\beta,
+\]
+conditional on the (unknown) vector of coefficients~$\beta$
+and~$h(\cdot)$, the~$q$ known regressor functions
+of~$\bx=(x_1,\ldots,x_p)^T$; a common choice
+is~$h(\bx)=(1,x_1,\ldots,x_p)^T$, but one is free to choose any
+function of~$\bx$.  The covariance is given by
+\[
+{\rm cov}
+\left\{
+\eta(\bx),\eta(\bx')|\sigma^2
+\right\}
+=\sigma^2c(\bx,\bx')
+\]
+where~$c(\bx,\bx')$ is a correlation function that measures the
+correlation between~$\bx$ and~$\bx'$; here the form
+\begin{equation}\label{correlation.pos.def.matrix}
+c(\bx,\bx')=\exp\left\{-(\bx-\bx')^TB(\bx-\bx')\right\}
+\end{equation}
+will be used, where~$B$ is a positive semidefinite matrix.  This form
+has the advantage that~$\eta(\cdot)$ has derivatives of all orders;
+other forms for the covariance function do not have this desirable
+property.  Oakley and O'Hagan use the weak conjugate prior for~$\beta$
+and~$\sigma^2$:
+
+\[
+p(\beta,\sigma^2)\propto
+\sigma^{(r+q+2)/2}\exp\left[
+   \left\{
+       (\beta-z)^TV^{-1}(\beta-z)+a
+   \right\}/\left(2\sigma^2\right)
+\right]
+\]
+and discuss methods for expert elicitation of~$a$, $r$, $z$ and~$V$.
+The random function~$\eta(\cdot)$ may be conditioned on observations
+at specific points in parameter space (ie code runs).  This set of
+points is known as the {\em experimental design}, or the {\em design
+  matrix}.  Although it is possible to tailor design matrices to a
+particular problem, here a Latin hypercube system is used.  With the
+specified prior, and an experimental design ${\mathcal
+  D}=\{\bx_1,\ldots,\bx_n\}$ on which~$\eta(\cdot)$ has been evaluated
+giving~$\bd=\eta({\mathcal D})$, it can be shown~\citep{oakley1999,
+  oakley2002} that
+\begin{equation}\label{eta.minus.m.star}
+\left.
+\frac{\eta(\bx)-m^*(\bx)}{\hat{\sigma}\sqrt{c^*(\bx,\bx)}}
+\right|
+\bd,B\sim t_{r+n}
+\end{equation}
+where
+\begin{equation}\label{mstar}
+m^*(\bx)=h(\bx)^T\hat{\beta}+t(\bx)^TA^{-1}(\bd-H\hat{\beta})
+\end{equation}
+\[
+c^*(\bx,\bx')=
+c(\bx,\bx')-t(\bx)^TA^{-1}t(\bx')+
+\left\{h(\bx)^T-t(\bx)^TA^{-1}H\right\}
+V^*\left\{
+h(\bx')^TA^{-1}H\right\}^T
+\]
+\[
+t(\bx)=\left(c(\bx,\bx_1),\ldots,c(\bx,\bx_n)
+\right)^T\qquad
+H=\left(
+h^T(\bx_1),\ldots,h^T(\bx_n)\right)^T\]
+
+\[
+A=\left(
+\begin{array}{cccc}
+1 & c(\bx_1,\bx_2) & \, \, \,\cdots\, \, \, & c(\bx_1,\bx_n)\\
+c(\bx_2,\bx_1) & 1 & {} & \vdots\\
+\vdots & {} & \ddots & {} \\
+c(\bx_n,\bx_1) & \cdots & {} & 1
+\end{array}\right)
+\]
+\[\hat{\beta}=V^*\left(V^{-1}z+H^TA^{-1}\bd\right)\qquad
+\hat{\sigma}^2=\frac{a+z^TV^{-1}z+\bd^TA^{-1}\bd-\hat{\beta}^T\left(V^*\right)^{-1}\hat{\beta}}{n+r-2}\]
+\[V^*=\left(V^{-1}+H^TA^{-1}H\right)^{-1}\qquad
+d=\left(\eta(\bx_1),\ldots,\eta(\bx_n)\right)^T.\] Thus~$m^*(\bx)$ is
+a computationally cheap approximation to~$\eta(\bx)$; uncertainties
+are given by~$\hat{\sigma}\sqrt{c^*(\bx,\bx)}$. These equations are
+consistent in that the estimated value for points actually in the
+design matrix is in fact the observations (with zero error).
+Writing~$\bX=(\bx_1,\ldots,\bx_n)^T$, we have
+\begin{equation}\label{value.in.training.set}
+m^*(\bX) = H\hat{\beta}+t(\bX)^TA^{-1}(\bd-H\hat{\beta})=\bd
+\end{equation}
+where we use the fact that~$h(\bX)=H$ and~$t(\bX)=A$, and
+expand~$\hat{\beta}$ directly.  It may similarly be shown
+that~$c^*(\bx,\bx)=0$ for~$\bx\in{\mathcal D}$, as expected: the
+emulator should return zero error when evaluated at a point where the
+code output is known.
+
+\subsection{Package emulator in use: toy problem}
+
+The central function of package \pkg{emulator} is
+\code{interpolant()}, which calculates the terms of
+equation~\ref{mstar}.  Here, I use the package to investigate a simple
+toy world in which observations are a Gaussian process on six
+parameters named \code{a} to \code{f}: the mean is \code{0*a + 1*b +
+  2*c + 3*d + 4*e + 5*e + 6*f}, corresponding
+to~$\beta=\mbox{\code{0:6}}$; the residuals are correlated
+multivariate Gaussian, with unit variance and all scales
+unity\footnote{Here, ``scales'' means the e-folding lengthscales for
+  correlations between datapoints.  The concept is a special case of
+  equation~\ref{correlation.pos.def.matrix} in which~$B$ is diagonal,
+  with elements~$B_i$, say; the relevant lengthscales~$S_i$ will
+  be~$B_i=1/S_i^2$.  Then the correlation between two points~$\bx$
+  and~$\bx'$ is given by
+\[
+c(\bx,\bx')=\exp\left(-\sum_{i=1}^r{\left(\frac{\left|x_i-x'_j\right|}{S_i}\right)^2}
+\right).
+\]
+Sometimes it is more convenient to consider the elements of
+matrix~$B$, and sometimes it is better to think in terms of the
+lengthscales~$S_i$ (they have the same dimensions as the parameters).
+}.  The overall approach is to use this scheme to generate data, then
+use the data to estimate the parameters, and finally, compare the
+estimates with the true values.
+
+I first consider a synthetic dataset consisting of observations of the
+predefined Gaussian process on a design matrix generated by
+\pkg{emulator}'s function \code{latin.hypercube(n,d)}.  This function
+takes two arguments: the first, \code{n}, is the number of
+observations to take; the second, \code{d} is the number of dimensions
+of the design space.  The output of the function
+\code{latin.hypercube()} is a matrix with each row corresponding to
+one point in parameter space at which the Gaussian process is
+observed.  Taking~20 observations in a~6 dimensional design space
+appears to give a small yet workable toy problem:
+
+
+
+<<echo=FALSE,print=FALSE>>=
+<<results=hide>>=
+set.seed(0)
+require(BACCO)
+data(toy)
+@ 
+
+<<echo=TRUE,print=FALSE>>=
+toy <- latin.hypercube(20,6)
+head(toy)
+@ 
+\SweaveOpts{echo=TRUE}
+
+It is now possible to specify the expectation of the Gaussian process
+as a linear product, with coefficients \code{0:6} acting on regression
+function \code{H1.toy()}, which prepends a~1 to its argument (viz
+\code{regressor.basis(x)=c(1,x)}).  In R idiom:
+
+<<>>=
+f <- function(x) sum( (0:6)*x)
+expectation <- apply(regressor.multi(toy), 1, f)
+@
+where \code{regressor.multi()} is a vectorized version of
+\code{regressor.basis()}.  Recall that we suppose \code{f()} to be an
+unknown function; one object of package \pkg{emulator} is to infer its
+coefficients.  Next, matrix~$A$ is calculated, with scales all equal
+to~1:
+
+<<>>=
+toy.scales <- rep(1,6)
+toy.sigma <- 0.4
+A <- toy.sigma*corr.matrix(xold=toy,scales=toy.scales)
+@ 
+
+Thus, for example, \code{A[1,2]} gives the covariance between
+observation~1 and observation~2.  We can simulate observational data
+by sampling from the appropriate Gaussian process directly, using the
+\pkg{mvtnorm} package~\citep{hothorn2001}:
+
+\SweaveOpts{echo=false}
+<<echo=FALSE,print=FALSE>>=
+<<results=hide>>=
+require(mvtnorm)
+@ 
+
+\SweaveOpts{echo=true}
+<<>>=
+d <-  as.vector(rmvnorm(n=1 , mean=expectation , sigma=A))
+@ 
+      
+Vector \code{d} is the vector of observations, with variance matrix
+\code{A}.  Now function \code{interpolant()} of package \pkg{emulator}
+can used to estimate the unknown function \code{f()}, at a point not
+in the training set:
+
+<<>>=
+x.unknown <- rep(0.5 , 6)
+jj <- interpolant(x.unknown, d, toy, scales=toy.scales, g=TRUE)
+print(drop(jj$mstar.star))
+@
+
+The estimated value (element \code{mstar.star}) is reasonably close to
+the correct value (which we know to be \code{0.5*sum(0:6)=10.5}).
+Also, the estimated value for the regression line, given by element
+\code{betahat}, is close to the correct value of \code{0:6}:
+
+<<>>=
+print(jj$betahat)
+@ 
+
+The package will also give an estimate of the error on~$\hat{\beta}$:
+<<>>=
+print(jj$beta.marginal.sd)
+@ 
+
+showing in this case that the true value of each component of~$\beta$
+lies within its marginal 95\% confidence limits.
+
+\subsubsection{Estimation of scales}
+In the above analysis, the scales were set to unity.  In real
+applications, it is often necessary to estimate them {\em ab initio}
+and a short discussion of this estimation problem is presented here.
+
+The scales are estimated by maximizing, over allowable scales, the
+posterior likelihood.  This is implemented in the package by
+\code{optimal.scales()}, which maximizes the a-postiori probability
+for a given set of scale parameters.  The likelihood is
+
+\begin{equation}
+\left(\hat{\sigma}\right)^{-(n-q)/2}
+\left|A\right|^{-1/2}\cdot\left|H^TA^{-1}H\right|^{-1/2}
+\end{equation}
+which is evaluated in the package by \code{scales.likelihood()}.  It
+is more convenient to work with the logarithms of the scales, as they
+must be strictly positive.  Function \code{optimal.scales()} is
+essentially a wrapper for multidimensional optimizing routine
+\code{optim()}, and is used as follows:
+
+<<>>=
+scales.optim <- optimal.scales(val=toy, scales.start=rep(1,6), d=d, give=FALSE)
+print(scales.optim)
+@ 
+
+ 
+The estimated scales are not particularly close to the (known) real
+values, all of which are unity; the scales are known to be ``difficult
+to estimate'' \citep{kennedy2000}.  One interpretation might be that
+there is not a large amount of information residing in the residuals
+once~$\beta$ has been estimated.
+
+However, using the estimated scales does not seem to make much
+difference in practice:
+
+<<>>=
+interpolant(x.unknown, d, toy, scales=toy.scales  , g=FALSE)
+interpolant(x.unknown, d, toy, scales=scales.optim, g=FALSE)
+@ 
+
+\subsection{Emulation applied to a dataset from climate science}
+
+The methods above are now used for a real dataset obtained from
+\goldstein~\citep{edwards2005}, an Earth systems model of
+intermediate complexity\footnote{That is, intermediate between box
+  models such as MAGICC~\citep{wigley2000} and general circulation
+  models such as HadCM3~\citep{gordon2000}, which solve the primitive
+  equations for fluid flow on a~3D grid.}.
+
+The \code{results.table} dataset is a dataframe consisting of~100
+rows, corresponding to~100 runs of \goldstein.  Columns~1-19 are input
+values and columns~20-27 are code outputs.  Here, the column
+corresponding to global average surface air temperature (SAT) is used.
+
+Figure~\ref{obs.vs.pred} shows observed versus predicted SATs.  The
+emulator was ``trained'' on the first~27 runs, so~27 of the points are
+perfect predictions, by equation~\ref{value.in.training.set}.  The
+other~77 points show a small amount of error, of about $0.1^\circ\rm
+C$.  Such an error is acceptable in many contexts.
+
+One interpretation of the accurate prediction of SAT would be that
+this output variable is well-described by the Gaussian process model.
+
+However, variables which exhibit violently nonlinear dynamics might be
+less well modelled: examples would include diagnostics of the
+thermohaline circulation (THC), which is often considered to be a
+bistable system~\citep{vellinga2002}, exhibiting catastrophic breakdown
+near some critical hypersurface in parameter space.  Such behaviour is
+not easily incorporated into the Gaussian process paradigm and one
+would expect emulator techniques to be less effective in such cases.
+
+
+\subsubsection{Computational efficiency}
+
+\goldstein\ takes~12 to~24 hours to complete a single run, depending
+on the parameters.  The emulator software presented here takes
+about~0.1 seconds to calculate the expected value and estimated
+error---a saving of over five orders of magnitude.
+
+One computational bottleneck is the inversion of matrix~$A$, but this
+only has to be done once per emulator.  
+
+\begin{figure}[htbp]
+\begin{center}
+<<fig=TRUE,echo=FALSE,print=FALSE>>= 
+
+data(results.table) 
+data(expert.estimates)
+            # Decide which column we are interested in:
+     output.col <- 26
+     wanted.cols <- c(2:9,12:19)
+            # Decide how many to keep;
+            # 30-40 is about the most we can handle:
+     wanted.row <- 1:27
+
+            # Values to use are the ones that appear in goin.test2.comments:
+     val <- results.table[wanted.row , wanted.cols]
+
+            # Now normalize val so that 0<results.table[,i]<1 for all i:
+
+     normalize <- function(x){(x-mins)/(maxes-mins)}
+     unnormalize <- function(x){mins + (maxes-mins)*x}
+
+     mins  <- expert.estimates$low 
+     maxes <- expert.estimates$high
+     jj <- t(apply(val,1,normalize))
+
+     jj <- as.data.frame(jj) 
+     names(jj) <- names(val)
+     val <- jj
+
+            ## Answer is the 19th (or 20th or ... or 26th)
+     d  <- results.table[wanted.row ,  output.col]
+
+scales.optim <- 
+  c(0.054095, 0.007055, 0.034944, 10.772536, 0.085691, 0.144568, 0.033540, 
+    0.641465, 0.235039, 0.046189, 0.949328, 0.055576, 0.058894, 0.098077,
+    0.045411, 0.167629)
+
+     A <- corr.matrix(val,scales=rep(1,ncol(val)), power=1.5)
+     Ainv <-  solve(A)
+
+            ## Now try to find the best correlation lengths:
+            ## the idea is to minimize the maximum absolute deviation
+            ## from the known points.
+
+d.observed <- results.table[, output.col]
+A <- corr.matrix(val,scales=scales.optim, power=2)
+Ainv <- solve(A)
+
+design.normalized <- as.matrix(t(apply(results.table[,wanted.cols],1,normalize)))
+jj.preds <- interpolant.quick(design.normalized, d, val, Ainv, give.Z=TRUE,
+                                 scales=scales.optim, power=2)
+d.predicted <- jj.preds$mstar.star
+d.errors <- jj.preds$Z
+
+jj <- range(c(d.observed,d.predicted))
+par(pty="s")
+plot(d.observed, d.predicted, pch=16, asp=1,
+     xlim=jj,ylim=jj,
+     xlab=expression(paste(temperature," (",{}^o,C,"), model"   )),
+     ylab=expression(paste(temperature," (",{}^o,C,"), emulator"))
+     )
+
+errorbar <- function(x,y,delta,serifwidth=7,...){
+  if(abs(delta)<1e-5){return()}
+  lines(x=c(x,x),y=c(y-delta,y+delta), ...)
+  lines(x=c(x-serifwidth/2,x+serifwidth/2),
+        y=c(y+delta,y+delta), ...
+        )
+  lines(x=c(x-serifwidth/2,x+serifwidth/2),
+        y=c(y-delta,y-delta), ...
+        )
+}
+  
+for(i in 1:length(d.observed)){
+  errorbar(x=d.observed[i],y=d.predicted[i],delta=qt(0.975,df=11)*d.errors[i],serifwidth=0.1,col="red")
+}
+
+abline(0,1)
+
+@
+\caption{Observed vs predicted surface air temperature; ``
+  observed''\label{obs.vs.pred} means actual code run; ``predicted''
+  means predicted using the emulator.  Error bars are 95\% confidence intervals}
+\end{center}
+\end{figure}
+
+\section{Bayesian calibration: package calibrator}
+
+ Computer climate models generally require two distinct groups of
+ inputs.  One group is the (unknown) parameter set about which we wish
+ to make inferences; these are the calibration inputs.  It is assumed
+ that there is a true but unknown parameter
+ set~$\bth=\left(\theta_1,\ldots,\theta_{q_2}\right)$ with the
+ property that if the model were run with these values, it would
+ reproduce the observations plus a model inadequacy term plus noise.
+ For any single model run, it is convenient to denote the calibration
+ parameters by~$\bt$ where~$\bt=(t_1,\ldots,t_{q_2})$.
+
+The other group comprises all the other model inputs whose value might
+change when the calibration set is fixed, conventionally denoted
+by~$\bx=(x_1,\ldots,x_{q_1})$.  In the current context, this group is
+the latitude and longitude at which mean surface temperature is
+desired.
+
+A model run is essentially an evaluation---or statistical
+observation---of the unknown random function~$\eta(\cdot,\cdot)$ at a
+specified point in parameter and location space~$\eta(\bx,\bt)$; a
+field observation is a statistical observation of another unknown
+random function~$\xi(\cdot)$.
+
+This system has the notational advantage of distinguishing the true
+but unknown value~\bth\ of the calibration inputs from the value~$\bt$
+that were set as inputs when running the model.
+
+The calibration data comprise the~$n$ field
+observations~$\bz=(z_1,\ldots,z_n)^T$ (ie observations
+of~$\xi(\bx_i)$, subject to error), and the
+outputs~$\by=(y_1,\ldots,y_N)^T$ from~$N$ runs of the computer code
+evaluated at points on a design matrix~$D_1$
+where~$D_1=\left\{(\bx^*_1,\bt_1),\ldots,(\bx^*_N,\bt_N)\right\}$.
+Thus~$\by=\eta(D_1)$, or $y_i=\eta(\bx^*_i,\bt_i)$; we
+write~$\bd^T=(\by^T,\bz^T)$ for the full set of calibration data.
+
+\subsubsection{Model}
+KOH2001 suggest that
+\begin{equation}
+\xi(\bx)=\rho\cdot\eta\left(\bx,\mathbf{\theta}\right)+\delta\left(\bx\right)
+\end{equation}
+is an adequate representation of the relationship between observation
+and computer model output.  Here~$\delta(\cdot)$ is a model inadequacy
+term that is independent of model output~$\eta(\cdot,\cdot)$.  It is
+then assumed that the observations~$z_i=\xi(\cdot)+N(0,\lambda)$.  The
+true value of neither~$\lambda$ nor~$\rho$ is known and has to be
+inferred from observations and the calibration dataset.
+
+This statistical model suggests a non-linear regression in which the
+computer code itself defines the regression function through the
+term~$\rho\cdot\eta(\bx_i,\bth)$ with parameters~$\rho$ and~$\bth$.
+KOH2001 consider the meaning of model fitting in this context and
+conclude that ``the true value for~$\bth$ has the same meaning and
+validity as the true values of regression parameters [in a standard
+  regression model].  The `true' $\bth$ is a best-fitting~$\bth$ in
+the sense of representing the data faithfully according to the error
+structure specified for the residuals''.
+
+\subsubsection{Prior knowledge}
+
+The Bayesian paradigm allows the incorporation of {\em a priori\/}
+knowledge (beliefs) about the parameters of any model being used.
+Consider a model in which climate sensitivity~$\lambda$ is a free
+parameter\footnote{Climate sensitivity is usually defined as the
+  equilibrium change in global mean surface temperature following a
+  doubling of the atmospheric~$\rm CO_2$
+  concentration~\citep{stainforth2005}.}.  In principle, we are free
+to `tune' $\lambda$ to give the best fit to observational data.
+However, most workers would consider~$0.4-1.2\,\rm K\cdot W^{-1}\cdot
+m^2$ to be a reasonable range for this physical constant, in the sense
+that finding an optimal value for~$\lambda$ outside this range would
+be unacceptable.
+
+It is possible to incorporate such `prior knowledge' into analysis by
+ascribing a prior distribution to~$\lambda$.  One might interpret the
+upper and lower ends of the range as 5th and 95th percentiles of a
+normal, or lognormal, distribution; if the bounds are ``hard'', then a
+uniform PDF might be used.
+
+The prior PDF for the vector of parameters~$\bth$ is
+denoted~$p(\cdot)$.  KOH2001S assume that~$\bth$ is
+multivariate Gaussian with~$\theta\sim{\mathcal
+  N}\left(m_\theta,V_\theta\right)$.
+
+\subsubsection{Hyperparameters}
+
+KOH2001S define hyperparameters~$\rho$, $\lambda$, $\psi_1$, $\psi_2$
+that specify the correlations between the observations in the dataset,
+and the relationship between the computer model and observations.
+
+The variance matrix of~$\bd$ has~$N+n$ rows and columns;
+its~$(j,j')$-th element
+is~$c_1((\bx^*_j,\bt_j),(\bx^*_{j'},\bt_{j'}))$.  KOH2001 derive
+results for the case where
+\[
+c_1((\bx,\bt),(\bx',\bt'))=\sigma_1^2\exp\left\{
+-(\bx-\bx')^T\bOm_x(\bx-\bx')-(\bt-\bt')^T\bOm_t(\bt-\bt')\right\}
+\]
+where~$\bOm_x$ and~$\bOm_t$ are arbitrary functions of
+hyperparameter~$\psi_1$.  A similar definition gives the variance
+matrix of~$\bx$ in terms of a second hyperparameter~$\psi_2$.
+
+For the purposes of implementing KOH2001, it is convenient to use a
+single R object that contains not only the hyperparameters above, but
+also other information such as~$\sigma_1^2$ and~$\rho$.  The values of
+these variables have to be inferred in any case and it is logical to
+consider them alongside the formal hyperparameters.
+
+In the R implementation presented here, the hyperparameter object
+\code{phi} also contains extra information such as the Cholesky
+decomposition of the square matrices, and the prior mean and variance
+of~$\bth$.  This device greatly simplifies many functions in the
+package; an example is given in the discussion of~\code{ht.fun()}
+below.
+
+\section{Design of package calibrator}
+
+The overarching design philosophy of package \pkg{calibrator} is to be
+a direct and transparent implementation of KOH2001 and KOH2001S.
+Each equation appearing in the papers has a corresponding R function,
+and the notation is changed as little as possible.  One reason for
+this approach is debugging: with such a structured programming style,
+it is possible to identify differences between alternative
+implementations.  Speed penalties of this approach appear to be
+slight.
+
+\subsection{Notation}
+
+In \pkg{calibrator}, most notation is an \code{ascii} version of that
+used by KOH2001S.  Function names are descriptive where possible, or
+(as in \code{p.eqn8.supp()}), named for the relevant equation number
+in the supplement KOH2001S.
+
+\subsection{Toy dataset}
+Partly to facilitate code testing, and partly as a didactic aid in the
+man pages, package \pkg{calibrator} includes a simple ``toy'' dataset.
+Toy objects have a \code{.toy} suffix, as in \code{theta.toy}.  Each
+function's documentation includes a working example in which toy data
+is processed appropriately.  
+
+For any real application (such as the climate analysis discussed
+below), each member of the toy dataset must be replaced with the
+corresponding real dataset.
+
+Toy datasets are loaded by \code{data(toys)} and \code{?toys} gives a
+complete list.  The toy dataset is designed to be simple and
+transparent, thus offering a clear test of the package's methods.  The
+dataset comprises the following objects:
+
+\begin{itemize}
+\item Design matrix.  Two elements:
+  \begin{itemize}
+  \item\code{D1.toy}, matrix of~8 rows of code run points, with five
+    columns.  The first two columns (`x' and `y') represent the input
+    space of~$\zeta$ (nonparameters styled ``latitude and
+    longitude''); the next three are parameter values.
+  \item\code{D2.toy}, matrix of~5 rows of field observations on two
+    variables `x' and `y'.
+  \end{itemize}
+\item Observational data.  Three elements:
+  \begin{itemize}
+  \item\code{y.toy}, a vector of length~8.  Each element corresponds
+    to the code output at  points  corresponding to the rows of design matrix
+    \code{D1.toy}.
+  \item\code{z.toy}, a vector of length five.  Each element corresponds to a
+    measurement at each of the rows of \code{D2.toy}.
+  \item\code{d.toy}, a data vector consisting of length~13:
+    elements~1-8 are \code{y.toy} and elements~9-13 are \code{z.toy}.
+  \end{itemize}
+\item Functions.  Ten elements:
+  \begin{itemize}
+  \item\code{create.new.toy.datasets(N,n)}, a function to create new
+    toy datasets with \code{N} observations and \code{n} code runs;
+    error distributions generated by directly simulating the
+    appropriate Gaussian Process on a design matrix that is a 
+    Latin hypercube generated by \code{latin.hypercube()}.
+  \item\code{E.theta.toy()}, a function that returns expectation of
+    \code{H(D)} with respect to theta
+  \item\code{Edash.theta.toy()} as above, but returns expectation with
+    respect to the ``dashed'' normal distribution detailed on page 4
+    of KOH2001S.
+  \item\code{extractor.toy()}, a function that extracts~$\bx^*$
+    and~$\bt$ from \code{D2}; a toy example is needed because the
+    extraction method depends on the nature of \code{D1}.
+    \item\code{H1.toy()}, a function that returns the regression basis
+      of \code{D1.toy}
+    \item\code{H2.toy()} As above but for \code{D2.toy}.
+    \item\code{hpp.fun.toy()}, a function to create
+      hyperparameter object \code{phi}  in a form suitable for passing
+      to the other functions in the library.
+    \item\code{hpp.change.toy()}, as above but modifies hyperparameter
+      object \code{phi}
+    \item\code{computer.model()}, function that represents the unknown
+      computer program.  In the toy case, it is a simple Gaussian
+      process, with mean \code{h.toy(x,t) \%*\% REAL.COEFFS} and
+      variance matrix \code{REAL.SIGMA1SQUARED * diag(REAL.SCALES)}.
+      The capitalized variable names are the true but unknown
+      parameters of the computer model.  They appear in the R source
+      code but are not modifiable in the context of package usage,
+      because they represent the ``real world'').  Estimates of these
+      quantities should be close to the actual values.
+    \item\code{reality()}, a function to simulate observational data.
+      This toy function is a simple Gaussian process, with internal
+      (unknown) parameters.  The mean is given by
+      \code{computer.model()}, plus a Gaussian process with
+      appropriate capitalized parameters.  As above, these parameters
+      are stand for unobservable properties of the system under
+      examination, whose values must be inferred from observation.
+  \end{itemize}
+\end{itemize}
+
+The objects in the toy dataset are chosen to be small enough for the
+functions of the package to operate quickly.  However, for the
+purposes of testing the optimization strategy, longer datasets are
+needed.  Such are given by function \code{create.new.toy.datasets()},
+which automagically creates a dataset of the same form as the toy
+dataset discussed above but with the number of observations supplied
+by the user.  The observations are drawn directly from the appropriate
+multivariate Gaussian distribution.
+
+\subsection{Example function}
+In order to show the design philosophy of \pkg{calibrator}, and to
+illustrate some of the programming issues that occur when implementing
+a conceptually complex methodology, I discuss in some detail a typical
+function of the package.  The function chosen is \code{ht.fun()},
+which is one of many needed when calculating the conditional
+covariance matrix of~$\bz$.  Function~\code{ht.fun()} calculates the
+matrix
+\begin{equation}\label{ht.fun}
+\int\bh_1\left(\bx_j,\bth\right)\bt\left(\bx_i,\bth\right)^Tp(\bth)\,d\bth
+\end{equation}
+where~$\bh_1(\cdot,\cdot)$ is the basis function for calculating
+expectation of~$\by$, and $\bt(\cdot,\cdot)$ is the set of distances to a point
+with~$k$-th element
+\begin{equation}
+c_1\left( ( \bx_i,\bth),(\bx^*_k,\bt_k)\right),\qquad\mbox{$j=1,\ldots,N$.}
+\end{equation}
+With these definitions, KOH2001 show that the~$k$-th column of
+equation~\ref{ht.fun}, and thus \code{ht.fun(...)[,k]},  is
+\begin{eqnarray}
+\sigma_1^2\left|{\mathbf I}+2{\mathbf V}_\theta{\mathbf\Omega}_x\right|^{-1/2}
+\exp\left\{-(\bx_i-\bx^*_k)^T{\mathbf\Omega}_x(\bx_i-\bx^*_j)\right\}
+\times\nonumber\\ 
+\exp\left\{-(\bm_\theta-\bt_k)^T\left(2{\mathbf
+  V}_\theta+{\mathbf\Omega}_t^{-1}\right)^{-1}(\bm_\theta-\bt_k)\right\}
+{E'}_\Theta\left(\bh_{1_{\vphantom {1_1}}}(\bx_j,\bth)\right)\label{ht.fun.formula}
+\end{eqnarray}
+where~${E'}_\Theta$ is discussed below.  Equation~\ref{ht.fun.formula}
+is one of several similar equations appearing in KOH2001.  In the
+implementation, function \code{ht.fun()} takes ten arguments:
+<<print=TRUE,echo=TRUE>>=
+args(ht.fun)
+@
+Apart from the arguments already discussed, this function requires
+several further arguments:
+
+\begin{itemize}
+\item \code{extractor()} is a function that splits~$D_1$ into~$\bx^*$
+  and~$\bt$.  It is necessary to pass this function explicitly if the
+  split between code input space and parameter space is to be
+  arbitrary.  In the toy example, with the code input space
+  being~$\mathds{R}^2$ and the parameter space being~$\mathds{R}^3$,
+  the working toy example \code{extractor.toy()} (supplied as part of
+  the \code{toys} dataset in the package) returns a list with elements
+  \code{x[1:2]} and \code{x[3:5]}.
+\item \code{Edash.theta()} is a function that returns expectation with
+  respect to the normal distribution~${\mathcal N}\left(
+  \left(\bV_\theta^{-1}+2\bOm_t\right)^{-1}
+  \left(\bV_\theta^{-1}\bm_\theta+2\bOm_t\bt_k\right),
+  \left(\bV_\theta^{-1}+2\bOm_t\right)^{-1}\right)$.
+\item \code{fast.but.opaque} is a Boolean variable, with default
+  \code{TRUE} meaning to take advantage of Cholesky decomposition for
+  evaluating quadratic forms (the hyperparameter object \code{phi}
+  includes the upper and lower triangular decompositions by default).
+  However, this requires the calling routine to supply~$\bx^*$
+  and~$\bt$ explicitly.
+
+  Setting \code{fast.but.opaque} to \code{FALSE} should give
+  numerically identical results in a slower, but more conceptually
+  clear, manner.  This option is used mainly for debugging purposes.
+\item \code{phi}.  The hyperparameter object.  In KOH2001S,
+  ``hyperparameters'' refers to~$\psi_1$ and~$\psi_2$, but in this
+  computer implementation is it convenient to augment~$\phi$ with
+  other objects that do not change from run to run (such as the a
+  priori PDF for~$\bth$ and Cholesky decompositions for the various
+  covariance matrices).  This way, it is possible to pass a {\em
+    single} argument to each function in the package and update it in
+  a consistent---and object-oriented---manner.
+
+  The package includes methods for setting and changing the components
+  of \code{phi} (the toy examples provided are \code{hpp.fun.toy()} to
+  create a hyperparameter object and \code{hpp.change.toy()} to change
+  elements of the hyperparameter object).
+
+\end{itemize}
+
+This example illustrates several features of the KOH2001 approach.
+Firstly, the system is algebraically complex, requiring a multi-level
+hierarchy of concepts.  The design philosophy of \pkg{emulator} is to
+code, explicitly, each function appearing in KOH2001; and to include
+working examples of these functions in the online help pages.  This
+structured approach aids debugging and code verification.
+
+\subsection{Optimization of parameters and hyperparameters}
+Kennedy and O'Hagan estimate the hyperparameters first, then the
+parameters.  In this paper, I use `hyperparameters' to mean~$\psi_1$
+and~$\psi_2$ together with~$\rho$, $\lambda$, $\sigma_1^2$,
+$\sigma_2^2$; all have to be estimated.
+
+The package provides functions \code{stage1()} and \code{stage2()}
+which use numerical optimization techniques to estimate
+hyperparameters~$\psi_1$ and~$\psi_2$ in two stages, as per KOH2001a.
+These functions maximize the posterior likelihood of observations~$\by$.
+
+Function \code{stage3()} optimizes the model parameters by maximizing
+the posterior PDF of~$\bth$; but note that KOH2001 explicitly state
+that point estimation of~$\bth$ is not generally desirable, and
+suggest that calibrated prediction is usually a better approach.
+  
+\section{Package calibrator in use}
+Two case studies of \pkg{calibrator} are now presented.  First, a
+simple ``toy'' dataset will be analysed.  The object of this is to
+show how the software behaves when the dataset has only a simple
+structure that is known in advance.
+
+The package is then applied to a real climate problem in which 
+model parameters are assessed using model output and observational data.
+
+\subsection{The toy problem}
+In this section, \pkg{calibrator} is used to estimate the
+hyperparameters of the toy dataset, in the two-stage process outlined
+above and in more detail in KOH2001a; all executable R code is taken
+directly from the \code{stage1()} help page.  The parameters of the
+model are then estimated, using the estimated hyperparameters.
+
+One advantage of considering a simple toy example is that the
+covariance structure may be specified exactly.  Thus one can generate
+observations and code runs directly from the appropriate multivariate
+Gaussian distribution using \code{rmvnorm(n=1, mean, sigma)}, where
+\code{rmvnorm()}, from package \pkg{mvtnorm} returns samples from a
+multivariate Gaussian distribution with specified mean and variance.
+
+If this is done, one knows that the conditions and assumptions
+specified by KOH2001 are met exactly, with the additional advantage
+that the basis functions, scales, regression coefficients,
+and model parameters, are all known and adjustable.
+
+KOH2001 state explicitly that exact determination of the
+hyperparameters tends to be difficult in practice, and indeed even in
+the toy example the numerically determined values for \code{phi} differ
+somewhat from the exact values, although they are correct to within
+half an order of magnitude.  Note that KOH2001 consider only the case
+of~$h_1(\bx,\bt)=h_2(\bx)=1$, corresponding to a constant prior
+with~$\bbeta_1$ and~$\bbeta_2$ being scalars; but in the toy example I
+consider the more complex case of~$h_1(\bx,\bt)=(1,\bx,\bt)^T$
+and~$h_2(\bx)=\left(H(0.5-\mbox{\tt x[1]}), H(\mbox{\tt
+  x[2]}-0.5)\right)^T$ where~$H$ is the Heaviside
+function\footnote{Thus, the model inadequacy term is the sum of two
+  parts, the first being zero if $\mbox{\tt x[1]>0.5}$ and an unknown
+  constant otherwise; and the second being zero if~$\mbox{\tt
+    x[2]<0.5}$ and a second unknown constant otherwise.  The R idiom
+  would be~$h_2(\bx)=\mbox{\tt c( x[1]<0.5, x[2]>0.5)}$}.  In the
+climatic case considered below, Legendre functions are needed to
+specify a prior for global temperatures as a function of latitude and
+longitude.
+
+\subsection{Results from toy problem}
+
+In this section, various parameters and hyperparameters of the toy
+problem are estimated using standard numerical optimization
+techniquies.  The correct values are viewable by examining the source
+code, or by using \code{computer.model()} with the \code{export}
+argument set to to \code{TRUE}.  Because these operations are not
+possible in real applications (parameters are unobservable), accessing
+them causes the package to give a warning, reminding the user that he
+is carrying out an operation that requires
+omniscience\footnote{Changing the parameters is not permitted without
+  editing the source code.  This would be equivalent to omnipotence.},
+an attribute not thought to be possessed by the typical user of
+\pkg{calibrator}.
+
+
+In the first stage, $\psi_1$ is estimated by maximizing~$p(\psi_1|y)$,
+given by equation~4 of KOH2001.  This is carried out by
+\code{stage1()} of the package.  In stage 2, the remaining
+hyperparameters~$\psi_2$ are estimated by maximizing the posterior
+probability~$p(\rho,\lambda,\psi_2|\bd,\psi_1)$ given by the
+(unnumbered) equation on page 4, evaluated by R function
+\code{p.page4()}.
+
+Taking the example given in the help page for \texttt{stage1()}, but
+with 74 code runs and 78 observation points, chosen as a compromise
+between informative dataset and reasonable execution time,
+ yields
+\begin{verbatim}
+            x             y             A             B             C 
+   6.82060592    0.09290103    6.25596840    0.77746434    0.01929785 
+sigma1squared 
+   0.83948328 
+\end{verbatim}
+
+comparing reasonably well with the true values of \code{10, 0.1, 10,
+  1, 0.1, 0.4}, as hard-coded in to \code{computer.model()}.  Better
+agreement might be obtained by taking more observations or using more
+code runs, at the expense of increased runtimes.
+
+Stage 2, in which~$\psi_2$, $\lambda$, and~$\sigma_1^2$ are estimated,
+yields 
+\begin{verbatim}
+         rho        lambda             x              y sigma2squared 
+   0.8631548    0.1051552   3.81230769    3.40685222    0.64521921 
+\end{verbatim}
+
+comparing reasonably well with the real values of~2 and~3 for the
+scales, 0.2 for lambda, and 0.3 for~$\sigma_1^2$,
+hard-coded in to \code{reality()}.  Again, the estimated values are
+close to the exact values but further improvements could be obtained
+by taking more observations or using more code runs; but too many
+observations can invite numerical problems as several large, almost
+singular, matrices have to be inverted.
+
+Stage~3 finds a maximum likelihood estimate for the model parameters,
+by maximizing the apriori PDF for~$\theta$, given by
+\code{p.eqn8.supp()} in this implementation.
+
+\begin{verbatim}
+      A         B          C 
+0.78345 0.131281 0.40222366 
+\end{verbatim}
+
+comparing resonably well with the real values of \code{c(0.9, 0.1,
+  0.3)} hard coded in to \code{reality()}.  Note that the three stages
+above operate sequentially in the sense that each one estimates
+parameters, which are subsequently held fixed.
+
+\subsubsection{Effect of inaccurate hyperparameters}
+
+As shown above, even with a system specifically tailored for use with
+KOH2001, the estimated values for the hyperparameters may differ from
+the true values by a substantial amount.
+
+To gain some insight into the effect of hyperparameter misprediction,
+table~\ref{table:thetahat} presents some predictions conditional on
+the true hyperparameters, the estimated hyperparameters, and several
+incorrect values.  Observe how the true value of the hyperparameters
+yields the most accurate values for~$\theta$, although in this case
+the difference is slight.  It is important to realize that the best
+that can possibly be expected is for the predicted value being drawn
+from the same distribution as generated the observation.  In this
+case, both observations and computer predictions are Gaussian
+processes.
+
+\begin{table}
+\centering
+\begin{tabular}{|c|ccc|}\hline
+$\phi$ & A&B&C\\ \hline
+$\hat{\theta}|\phi=\phi_{\rm true}$  & 0.88 & 0.09 & 0.24 \\ 
+$\hat{\theta}|\phi=\phi_{\rm best}$  & 0.78 & 0.13 & 0.40 \\
+$\hat{\theta}|\phi=\phi_{\rm prior}$ & 0.51 & 0.22 & 0.71 \\ \hline
+$\theta_{\rm true}$                  & 0.90 & 0.10 & 0.30 \\ \hline
+\end{tabular}
+\caption{Estimates for the parameter set using three different values
+\label{table:thetahat} for the hyperparameters~$\phi$}
+\end{table}
+
+\subsection{Conclusions from toy problem analysis}
+ 
+The toy problem analyzed above shows that the implementation is
+satisfactory in the sense that the true values of the parameters and
+hyperparameters may be estimated with reasonable accuracy if their
+true value is known and the assumptions of KOH2001 are explicitly
+satisfied. 
+
+However, certain difficulties are apparent, even in this highly simple
+system, which was specifically created in order to show the methods
+of KOH2001S in a favourable light.
+
+The primary difficulty is execution time for the optimization process
+to find the best set of hyperparameters.  Stage~1 is reasonably fast,
+but the objective function minimized in stage~2 takes about~5 minutes
+to evaluate with the setup described above: execution time goes as the
+fourth power of number of observations.  In the toy case considered
+here, any number of observations could be taken (the generating
+function is very cheap), but too many renders the methods unworkably
+slow; and too few makes the estimates unreliable.
+
+Note that the situation is ameliorated somewhat by stage~2 requiring
+only four-dimensional optimization.
+
+\section{Bayesian calibration applied to a real problem in climate science}
+
+The \pkg{calibrator} package is now applied to a problem of greater complexity,
+namely climate science output from the \goldstein\ computer model.
+The techniques presented here are complementary to the Kalman
+filtering techniques of~\cite{annan2005}.
+
+The problem considered here is slightly different from that presented
+in part 1.  Here, KOH2001 is used to calibrate temperature data
+generated by \goldstein\ using observational data taken from the SGEN
+dataset.  
+
+The procedure is as follows:
+\begin{enumerate}
+\item Pick a few representative points on the Earth's surface whose
+  temperature is of interest.  This set might include, for example,
+  the North and South Poles, and a point in Western Europe.  Seven
+  points appears to be a good compromise between coverage and
+  acceptable runtime.
+\item Choose a reasonable prior distribution for the 16 adjustable
+  \goldstein\ parameters, using expert judgement
+\item Generate an ensemble of calibration points in parameter space by
+  sampling from the prior PDF.  For each member of this ensemble, run
+  \goldstein\ at that point in parameter space and record the
+  predicted temperature at each of the seven representative points on
+  Earth's surface.  For this application, a calibration ensemble of
+  about~100 code runs appears to represent a reasonable compromise
+  between coverage and acceptable runtime.
+\item Determine the hyperparameters for the dataset exactly as for the
+  toy problem above\label{determine.hyperparameters}
+\item From the prior PDF, sample an ensemble of say~10000 points and,
+  using the hyperparameters estimated in
+  step~\ref{determine.hyperparameters} above, use the emulator package
+  to estimate the European temperature conditional on the field
+  observations~$\bz$ and code runs~$\by$.
+\item From equation~8, estimate the probability of each of the~10000
+  points in parameter space
+\item Construct a weighted CDF for the temperature predictions.
+\end{enumerate}
+
+Such a procedure will specify a CDF that incorporates observed
+temperature data from the NCEP dataset.  In essence, parameter sets
+that give predicted temperature distributions closely matching
+observed data are assigned a high probability; if the match is poor, a
+low probability is assigned.
+
+Although it might be possible to maximize the posterior PDF for
+parameter space (and thus determine a maximum likelihood estimate for
+the ``true'' parameters), such an approach would preclude techniques
+that require averaging over parameter space.
+
+\subsection{Results}
+The results section splits into two: first, numerical estimates of the
+scales and other hyperparameters, and second, results
+conditional on those hyperparameters.
+
+\subsubsection{Estimation of the hyperparameters}
+
+Optimization is always difficult in high dimensional spaces.  Here,
+location of the true global minimum is an acknowledged difficulty; the
+emphasis in this paper is on the considerably easier problem of
+locating points in hyperparameter space that are significantly better
+than the starting point of the optimization routine.  It is also the
+case that the true global minimum, even if it could be found, is a
+statistic of the observations in the sense that it is a partition of
+the sample space---and thus would be different from trial to trial (if
+repeated sampling were admitted).
+
+Use of the simulated annealing process helps to reduce the undesirable
+possibility of being ``trapped'' in a local minimum, but does not
+eliminate it.  For the present, it is suggested that the difficulties
+of multidimensional optimization are conceptually distinct from the
+main thrust of this paper (and are far better dealt with in the
+specialist optimization literature).
+
+In any case, as shown in the toy example section above, using
+incorrect scales is unlikely to lead to serious mispredictions.
+
+The values for the hyperparameters used in the remainder of this paper
+were the result of a weekend's optimization time on a dual 2GHz P5.
+
+
+\subsubsection{Modification of the prior}
+
+Results are now presented which show distributions for temperatures in
+Northern Europe, conditional on the observed values of the
+observations and optimized values of the hyperparameters.  For the
+purposes of this paper, ``temperature in Northern Europe'' means
+annual average temperatures, as predicted by \goldstein, at
+latitude~$60^\circ\rm N$, longitude~$0^\circ\rm E$.
+Figure~\ref{picture} shows how the distribution function changes on
+incorporation of observed temperatures.
+
+Note how the median temperature, for example, falls by about one
+degree centigrade when the observational dataset is included.
+
+\subsection{Conclusions from climate problem analysis}
+
+The primary conclusion from the above analysis is that it is {\em
+  possible} to apply the methods of KOH2001 to a real problem in
+climate dynamics, in a computationally efficient manner.
+
+This is, as far as I am aware, the first time that a posterior PDF has
+been rigorously derived for the parameter space of a climate model.
+
+The fact that the estimated PDF changes significantly on incorporation
+of observational data suggests that the prior is uninformative.  Such
+conclusions can be useful in climate science, by suggesting where new
+observational data can be most effective.
+
+\begin{figure}[htbp]
+\begin{center}
+<<fig=TRUE,echo=FALSE, results=hide>>=
+load.the.files <- TRUE
+#library(goldstein)
+if(load.the.files){
+  load("e10000")
+  load("temps.jj")
+  o <- order(temps.jj)
+   
+  load("probs.from.prior")
+  j0 <- j0-min(j0)
+}
+x.pp <- cumsum(exp(j0[o] ))
+plot(temps.jj[o],x.pp/max(x.pp),ylab="cumulative probability",xlab="temperature (C)",
+     type="l",lty=1,main="Prior and posterior CDF for temperature in Northern Europe")
+points(sort(temps.jj),(1:9000)/9000,type="l",lty=2)
+legend(0,0.95,legend=c("posterior","prior"),lty=1:2)
+@
+\caption{CDF for \label{picture}temperatures in Northern Europe: prior (dotted) and
+  posterior (solid)}
+\end{center}
+\end{figure}
+
+
+\section{Conclusions}
+
+Viewing a deterministic computer code as a Gaussian process with
+unknown coefficients and applying Bayesian analysis to estimate them
+appears to be a useful and powerful technique.  It furnishes a fast,
+statistically rigorous approximation to the output of any computer
+program.
+
+This paper has presented \pkg{emulator}, an R package that interprets
+computer code output as a Gaussian process, and uses the ideas of
+\cite{oakley2002} to construct an emulator: that is, a statistical
+approximation to the actual code.
+
+The package is applied successfully to a toy dataset, and a problem
+taken from climate science in which globally averaged surface air
+temperature (SAT) is predicted as a function of 16 unknown input
+parameters.
+
+Average SAT is predicted well by the emulator, as this output variable
+is well-described by the Gaussian process model.  
+
+This paper has shown how Bayesian methods may be used interpret
+climate model output in a statistically rigorous way.  The \pkg{BACCO}
+package, incorporating packages \pkg{emulator}, \pkg{approximator}, and
+\pkg{calibrator}, implements the formul\ae\ of \cite{oakley2002} and
+\cite{kennedy2001a} respectively in a transparent and maintainable
+manner.
+
+Both packages were demonstrated using the built in ``toy'' dataset,
+and a dataset taken from climate science.
+
+The \pkg{emulator} package produced an approximation to
+\goldstein\ output that ran five orders of magnitude faster, and was
+accurate to within about~$0.1^\circ\rm C$.
+
+The \pkg{calibrator} package applied formal Bayesian methods to show
+that predictions for temperature over Northern Europe were about
+$1^\circ\rm C$ cooler when observational data is taken into account.
+
+
+<<SetTheBib,  echo=FALSE, results=hide>>=
+bib <- system.file( "doc", "uncertainty.bib", package = "emulator" )
+bib <- sub('.bib$','',bib)
+@ 
+
+<<usethebib, echo=FALSE, results=tex>>=
+cat( "\\bibliography{",bib,"}\n",sep='')
+@
+
+\end{document}

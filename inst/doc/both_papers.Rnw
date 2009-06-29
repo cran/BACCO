@@ -437,7 +437,7 @@ to~1:
 <<>>=
 toy.scales <- rep(1,6)
 toy.sigma <- 0.4
-A <- toy.sigma*corr.matrix(xold=toy,scales=toy.scales)
+A <- toy.sigma*corr.matrix(xold=toy, scales=toy.scales)
 @ 
 
 Thus, for example, \code{A[1,2]} gives the covariance between
@@ -584,9 +584,8 @@ data(expert.estimates)
      maxes <- expert.estimates$high
      jj <- t(apply(val,1,normalize))
 
-     jj <- as.data.frame(jj) 
-     names(jj) <- names(val)
-     val <- jj
+     val <- as.matrix(jj)
+
 
             ## Answer is the 19th (or 20th or ... or 26th)
      d  <- results.table[wanted.row ,  output.col]

@@ -75,12 +75,11 @@
 %% in the following format:
 \Address{
   Robin K. S. Hankin\\
-  Southampton Oceanography Centre\\
-  European Way\\
-  Southampton SO14 3ZH\\
+  University of Cambridge\\
+  19 Silver Street\\
+  Cambridge CB3 9EP\\
   United Kingdom\\
-  E-mail: \email{r.hankin@noc.soton.ac.uk}
-  URL: \url{http://www.noc.soton.ac.uk}
+  E-mail: \email{hankin.robin@gmail.com}
 }
 %% It is also possible to add a telephone and fax number
 %% before the e-mail in the following format:

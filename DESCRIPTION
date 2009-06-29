@@ -1,7 +1,7 @@
 Package: BACCO
 Type: Package
 Title: Bayesian Analysis of Computer Code Output (BACCO)
-Version: 2.0-2
+Version: 2.0-4
 Date: 2009-06-29
 Author: Robin K. S. Hankin
 Maintainer: <hankin.robin@gmail.com>
@@ -12,6 +12,6 @@ Description: The BACCO bundle of packages is replaced by the BACCO
         use.
 License: GPL
 LazyLoad: yes
-Packaged: 2009-07-22 19:42:05 UTC; rksh
+Packaged: 2012-10-29 13:13:02 UTC; ripley
 Repository: CRAN
-Date/Publication: 2009-07-23 05:39:06
+Date/Publication: 2012-10-29 13:13:36

@@ -12,21 +12,20 @@ The BACCO bundle of packages is replaced by the BACCO package, which
 provides a vignette that illustrates the constituent packages in use.
 }
 \details{
-\tabular{ll}{
-Package: \tab BACCO\cr
-Type: \tab Package\cr
-Version: \tab 1.0\cr
-Date: \tab 2009-06-29\cr
-License: \tab GPL\cr
-LazyLoad: \tab yes\cr
-}
+
+This file contains no code: the bundle formerly known as BACCO is
+now a \dQuote{virtual} package which requires the constituent packages:
+\CRANpkg{emulator}, \CRANpkg{calibrator}, and \CRANpkg{approximator}.
+Package \CRANpkg{multivator} is a standalone package.
 
 }
+
 \author{
-Robin K. S. Hankin
+\packageAuthor{BACCO}
 
-Maintainer:  <hankin.robin@gmail.com>
+Maintainer: \packageMaintainer{BACCO}
 }
+
 \references{
   \itemize{
     \item
